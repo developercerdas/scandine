@@ -3,237 +3,567 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScanDine POS & Kitchen Display System</title>
+  <title>ScanDine - Kitchen Display System & POS</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
-    .channel-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    :root {
+      --kds-bg: #090d16;
+      --kds-card-bg: #111827;
+      --kds-card-border: #1f2937;
+      --kds-text: #f9fafb;
+      --kds-muted: #9ca3af;
+      --kds-accent: #38bdf8;
+      --kds-green: #10b981;
+      --kds-amber: #f59e0b;
+      --kds-red: #ef4444;
     }
-    .ch-dinein { background: #e0f2fe; color: #0284c7; }
-    .ch-gofood { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
-    .ch-grabfood { background: #d1fae5; color: #047857; border: 1px solid #6ee7b7; }
-    .ch-shopeefood { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
-    .ch-pickup { background: #f3e8ff; color: #7e22ce; }
 
-    .sub-tabs-container {
+    body {
+      background-color: var(--kds-bg);
+      color: var(--kds-text);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+
+    /* KDS Top Bar */
+    .kds-navbar {
+      background: #0f172a;
+      border-bottom: 1px solid #1e293b;
+      padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+
+    .kds-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .kds-logo {
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+    }
+
+    .kds-badge-live {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .kds-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulseDot 1.5s infinite;
+    }
+
+    @keyframes pulseDot {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+
+    /* Chef All-Day Aggregator Strip (Rekap Porsi Masak) */
+    .all-day-bar {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .all-day-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #94a3b8;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .all-day-pill {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .all-day-qty {
+      background: #38bdf8;
+      color: #0f172a;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Sub Toolbar & View Switcher */
+    .kds-toolbar {
+      padding: 16px 20px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       flex-wrap: wrap;
       gap: 12px;
     }
 
-    .view-mode-tabs {
+    .kds-tabs {
       display: flex;
-      background: #e2e8f0;
+      background: #1e293b;
       padding: 4px;
-      border-radius: 10px;
+      border-radius: 12px;
+      border: 1px solid #334155;
     }
 
-    .view-mode-btn {
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: none;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
+    .kds-tab-btn {
       background: transparent;
-      color: var(--slate);
+      border: none;
+      color: #94a3b8;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       transition: all 0.2s;
     }
 
-    .view-mode-btn.active {
-      background: #fff;
-      color: var(--dark);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    .kds-tab-btn.active {
+      background: #38bdf8;
+      color: #0f172a;
+      box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
     }
 
-    /* Table Management Grid (Floor Plan) */
-    .table-plan-grid {
+    .channel-pill-group {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .ch-btn {
+      background: #111827;
+      border: 1px solid #374151;
+      color: #d1d5db;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .ch-btn.active {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+
+    /* KDS Kanban / Ticket Cards Grid */
+    .kds-content {
+      padding: 16px 20px 40px;
+    }
+
+    .kds-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 16px;
     }
 
-    .table-plan-card {
-      background: #fff;
-      border-radius: 14px;
-      border: 2px solid var(--border);
+    /* Ultra-Modern Ticket Card */
+    .kds-card {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .kds-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(0,0,0,0.7);
+    }
+
+    /* Card Top Header */
+    .kds-card-head {
+      padding: 14px 16px;
+      background: #1a2234;
+      border-bottom: 1px solid #283548;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .kds-card-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .kds-timer-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .timer-fresh {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .timer-warning {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .timer-urgent {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      animation: pulseUrgent 1.5s infinite;
+    }
+
+    @keyframes pulseUrgent {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Channel Tag */
+    .kds-channel-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    .tag-dinein { background: #0369a1; color: #fff; }
+    .tag-gofood { background: #15803d; color: #fff; }
+    .tag-grabfood { background: #047857; color: #fff; }
+    .tag-shopeefood { background: #c2410c; color: #fff; }
+    .tag-pickup { background: #6b21a8; color: #fff; }
+
+    /* Card Items List */
+    .kds-card-items {
       padding: 16px;
-      box-shadow: var(--shadow);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .kds-item-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 8px 10px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      background: #182234;
+      border: 1px solid #222f46;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+
+    .kds-item-row:hover {
+      background: #1e2c44;
+    }
+
+    .kds-item-row.done {
+      opacity: 0.4;
+      background: #0f172a;
+      border-color: #1e293b;
+    }
+
+    .kds-item-row.done .kds-item-title {
+      text-decoration: line-through;
+      color: #64748b;
+    }
+
+    .kds-item-qty {
+      background: #38bdf8;
+      color: #0f172a;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .kds-item-info {
+      flex: 1;
+    }
+
+    .kds-item-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .kds-item-options {
+      font-size: 0.78rem;
+      color: #93c5fd;
+      margin-top: 2px;
+    }
+
+    .kds-item-notes {
+      font-size: 0.78rem;
+      color: #fbbf24;
+      font-weight: 600;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Card Footer / Bump Bar Buttons */
+    .kds-card-footer {
+      padding: 14px 16px;
+      background: #141d2d;
+      border-top: 1px solid #1f2b3e;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-bump {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-bump-cook {
+      background: #f59e0b;
+      color: #0f172a;
+    }
+    .btn-bump-cook:hover { background: #d97706; }
+
+    .btn-bump-ready {
+      background: #10b981;
+      color: #0f172a;
+    }
+    .btn-bump-ready:hover { background: #059669; }
+
+    .btn-bump-done {
+      background: #38bdf8;
+      color: #0f172a;
+    }
+    .btn-bump-done:hover { background: #0284c7; color: #fff; }
+
+    .btn-bump-print {
+      background: #334155;
+      color: #e2e8f0;
+      border: 1px solid #475569;
+    }
+    .btn-bump-print:hover { background: #475569; }
+
+    /* Floor Plan Grid in Dark Mode */
+    .kds-table-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .kds-table-card {
+      background: #111827;
+      border: 2px solid #1f2937;
+      border-radius: 16px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       min-height: 140px;
-      transition: transform 0.2s;
     }
 
-    .table-plan-card.available {
-      border-color: #86efac;
-      background: #f0fdf4;
+    .kds-table-card.available {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.05);
     }
 
-    .table-plan-card.occupied {
-      border-color: #fde047;
-      background: #fefce8;
-    }
-
-    .table-plan-card.bill-printed {
-      border-color: #93c5fd;
-      background: #eff6ff;
-    }
-
-    .table-status-pill {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      font-size: 0.72rem;
-      font-weight: 800;
+    .kds-table-card.occupied {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.07);
     }
   </style>
 </head>
-<body style="background: #f1f5f9;">
+<body>
 
-<div class="pos-layout">
-  <!-- POS Navigation -->
-  <header class="pos-navbar">
-    <div class="pos-nav-title">
-      <span>🍽️</span>
-      <span>ScanDine POS & Kitchen</span>
-      <!-- Branch Switcher -->
-      <select id="outlet-dropdown" onchange="changeOutlet(this.value)" style="background: #1e293b; color: #fff; border: 1px solid #475569; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
-        <option value="senopati">📍 Cabang Senopati (Pusat)</option>
-        <option value="kemang">📍 Cabang Kemang Raya</option>
-      </select>
-      <span style="font-size: 0.72rem; background: #059669; color: #fff; padding: 2px 8px; border-radius: 6px;">● Live Socket</span>
+<!-- KDS Top Navigation -->
+<header class="kds-navbar">
+  <div class="kds-brand">
+    <div class="kds-logo">
+      <span>🔥</span>
+      <span>SCANDINE KDS</span>
+    </div>
+    <div class="kds-badge-live">
+      <div class="kds-pulse-dot"></div>
+      <span>KITCHEN DISPLAY LIVE</span>
     </div>
 
-    <div class="pos-links">
-      <button class="sound-toggle-btn" id="btn-sound" onclick="toggleAudio()">
-        🔊 Audio: Aktif
-      </button>
-      <button onclick="openOjolModal()" style="background: #f59e0b; color: #000; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-        🛵 + Tes Order Masuk Ojol
-      </button>
-      <a id="btn-cust-preview" href="/order?outlet=senopati&table=1" target="_blank" class="pos-link">📱 Buka Menu Meja 1</a>
-      <a href="/admin" class="pos-link">⚙️ Backoffice</a>
-    </div>
-  </header>
+    <!-- Outlet Switcher -->
+    <select id="outlet-dropdown" onchange="changeOutlet(this.value)" style="background: #1e293b; color: #fff; border: 1px solid #334155; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer;">
+      <option value="senopati">📍 Cabang Senopati (Pusat)</option>
+      <option value="kemang">📍 Cabang Kemang Raya</option>
+    </select>
+  </div>
 
-  <!-- POS Main Content -->
-  <main class="pos-content">
-    <div class="sub-tabs-container">
-      <div class="view-mode-tabs">
-        <button class="view-mode-btn active" id="btn-view-orders" onclick="switchViewMode('ORDERS')">
-          📋 Antrean Dapur & Kasir (<span id="total-orders-count">0</span>)
-        </button>
-        <button class="view-mode-btn" id="btn-view-tables" onclick="switchViewMode('TABLES')">
-          🪑 Denah & Status Meja Resto
-        </button>
-      </div>
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <button class="sound-toggle-btn" id="btn-sound" onclick="toggleAudio()" style="background: #1e293b; border: 1px solid #334155; color: #e2e8f0; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;">
+      🔊 Bel Koki: Aktif
+    </button>
+    <button onclick="openOjolModal()" style="background: #f59e0b; color: #0f172a; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 900; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+      🛵 + Tes Order Ojol Masuk
+    </button>
+    <a href="/admin" target="_blank" style="text-decoration: none; background: #334155; color: #fff; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.82rem;">
+      ⚙️ Backoffice
+    </a>
+  </div>
+</header>
 
-      <!-- Channel Filters (for Orders view) -->
-      <div id="channel-filters" style="display: flex; gap: 8px; overflow-x: auto;">
-        <button class="filter-tab-btn active" onclick="setChannelFilter('ALL', this)">Semua Channel</button>
-        <button class="filter-tab-btn" onclick="setChannelFilter('DINE_IN', this)">🍽️ Dine-In</button>
-        <button class="filter-tab-btn" onclick="setChannelFilter('GOFOOD', this)">🟢 GoFood</button>
-        <button class="filter-tab-btn" onclick="setChannelFilter('GRABFOOD', this)">🟢 GrabFood</button>
-        <button class="filter-tab-btn" onclick="setChannelFilter('SHOPEEFOOD', this)">🟠 ShopeeFood</button>
-        <button class="filter-tab-btn" onclick="setChannelFilter('PICK_UP', this)">🛍️ Pick-Up</button>
-      </div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- VIEW 1: ORDERS GRID VIEW -->
-    <!-- ===================================================================== -->
-    <div id="view-orders-container">
-      <!-- Status Tabs -->
-      <div class="filter-tabs">
-        <button class="filter-tab-btn active" onclick="setStatusFilter('ALL', this)">
-          Semua Status <span class="badge-count" id="count-all">0</span>
-        </button>
-        <button class="filter-tab-btn" onclick="setStatusFilter('RECEIVED', this)">
-          📥 Baru Masuk <span class="badge-count" id="count-received">0</span>
-        </button>
-        <button class="filter-tab-btn" onclick="setStatusFilter('COOKING', this)">
-          🍳 Dimasak <span class="badge-count" id="count-cooking">0</span>
-        </button>
-        <button class="filter-tab-btn" onclick="setStatusFilter('READY', this)">
-          🔔 Siap Antar / Diambil <span class="badge-count" id="count-ready">0</span>
-        </button>
-        <button class="filter-tab-btn" onclick="setStatusFilter('COMPLETED', this)">
-          ✅ Selesai <span class="badge-count" id="count-completed">0</span>
-        </button>
-      </div>
-
-      <!-- Orders Grid -->
-      <div class="order-grid" id="orders-grid"></div>
-    </div>
-
-    <!-- ===================================================================== -->
-    <!-- VIEW 2: TABLE MANAGEMENT (FLOOR PLAN) -->
-    <!-- ===================================================================== -->
-    <div id="view-tables-container" style="display: none;">
-      <div style="background: #fff; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800;">Status Meja Real-time (<span id="plan-outlet-name">Cabang Senopati</span>)</h3>
-          <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
-            Hijau = Kosong | Kuning = Tamu Sedang Makan (Durasi Duduk) | Biru = Minta Bill
-          </p>
-        </div>
-        <button onclick="fetchTables()" style="padding: 8px 14px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; font-weight: 700; cursor: pointer;">
-          🔄 Segarkan Meja
-        </button>
-      </div>
-
-      <div class="table-plan-grid" id="tables-grid"></div>
-    </div>
-  </main>
+<!-- Chef's "All-Day" Item Aggregator (Rekap Total Masak Saat Ini) -->
+<div class="all-day-bar" id="all-day-bar">
+  <div class="all-day-label">
+    <span>👨‍🍳 TOTAL PORSI MASAK:</span>
+  </div>
+  <div id="all-day-items-list" style="display: flex; gap: 8px;">
+    <!-- Rendered by JS: e.g. [3x] Nasi Goreng Wagyu, [2x] Ayam Bakar -->
+  </div>
 </div>
 
-<!-- ========================================================================= -->
-<!-- MODAL SIMULASI ORDER ONLINE OJOL (GoFood / Grab / Shopee) -->
-<!-- ========================================================================= -->
+<!-- Toolbar & Filters -->
+<div class="kds-toolbar">
+  <div class="kds-tabs">
+    <button class="kds-tab-btn active" id="tab-btn-orders" onclick="switchView('ORDERS')">
+      📋 Tiket Pesanan (<span id="total-tickets-count">0</span>)
+    </button>
+    <button class="kds-tab-btn" id="tab-btn-tables" onclick="switchView('TABLES')">
+      🪑 Denah Meja Resto (<span id="total-tables-count">0</span>)
+    </button>
+  </div>
+
+  <!-- Channel Filters -->
+  <div class="channel-pill-group" id="channel-pill-group">
+    <button class="ch-btn active" onclick="filterChannel('ALL', this)">Semua Channel</button>
+    <button class="ch-btn" onclick="filterChannel('DINE_IN', this)">🍽️ Dine-In Meja</button>
+    <button class="ch-btn" onclick="filterChannel('GOFOOD', this)">🟢 GoFood</button>
+    <button class="ch-btn" onclick="filterChannel('GRABFOOD', this)">🟢 GrabFood</button>
+    <button class="ch-btn" onclick="filterChannel('SHOPEEFOOD', this)">🟠 ShopeeFood</button>
+    <button class="ch-btn" onclick="filterChannel('PICK_UP', this)">🛍️ Pick-Up</button>
+  </div>
+</div>
+
+<!-- Main KDS Content Area -->
+<main class="kds-content">
+  <!-- VIEW 1: ORDERS KANBAN / GRID -->
+  <div id="view-orders-section">
+    <div class="kds-grid" id="kds-tickets-grid">
+      <!-- Cards rendered by JS -->
+    </div>
+  </div>
+
+  <!-- VIEW 2: TABLES FLOOR PLAN -->
+  <div id="view-tables-section" style="display: none;">
+    <div class="kds-table-grid" id="kds-tables-grid">
+      <!-- Tables rendered by JS -->
+    </div>
+  </div>
+</main>
+
+<!-- Ojol Modal -->
 <div class="drawer-backdrop" id="ojol-backdrop" onclick="closeOjolModal()"></div>
-<div class="drawer-content" id="ojol-drawer" style="max-height: 520px;">
-  <div class="drawer-header">
-    <h3 class="drawer-title">🛵 Uji Integrasi Pesanan Online Ojol</h3>
-    <button class="drawer-close" onclick="closeOjolModal()">✕</button>
+<div class="drawer-content" id="ojol-drawer" style="max-height: 480px; background: #111827; color: #fff;">
+  <div class="drawer-header" style="border-color: #1f2937;">
+    <h3 class="drawer-title" style="color: #fff;">🛵 Simulasi Pesanan Ojol Masuk</h3>
+    <button class="drawer-close" style="background: #1f2937; color: #fff;" onclick="closeOjolModal()">✕</button>
   </div>
   <div class="drawer-body">
-    <p style="font-size: 0.85rem; color: var(--slate); margin-bottom: 14px;">
-      Simulasikan pesanan masuk dari API GoFood, GrabFood, atau ShopeeFood untuk melihat bagaimana layar kasir dan dapur menerimanya secara otomatis:
+    <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 16px;">
+      Klik salah satu tombol untuk melihat pesanan online masuk ke layar dapur secara instan:
     </p>
-
-    <div class="form-group">
-      <label class="form-label">Pilih Channel Ojol</label>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
-        <button type="button" class="btn-action ch-gofood" style="padding: 10px;" onclick="triggerDeliveryWebhook('gofood')">
-          🟢 GoFood
-        </button>
-        <button type="button" class="btn-action ch-grabfood" style="padding: 10px;" onclick="triggerDeliveryWebhook('grabfood')">
-          🟢 GrabFood
-        </button>
-        <button type="button" class="btn-action ch-shopeefood" style="padding: 10px;" onclick="triggerDeliveryWebhook('shopeefood')">
-          🟠 ShopeeFood
-        </button>
-      </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+      <button onclick="triggerDeliveryWebhook('gofood')" style="padding: 14px 10px; background: #15803d; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer;">
+        🟢 GoFood
+      </button>
+      <button onclick="triggerDeliveryWebhook('grabfood')" style="padding: 14px 10px; background: #047857; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer;">
+        🟢 GrabFood
+      </button>
+      <button onclick="triggerDeliveryWebhook('shopeefood')" style="padding: 14px 10px; background: #c2410c; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer;">
+        🟠 ShopeeFood
+      </button>
     </div>
   </div>
 </div>
 
-<!-- ========================================================================= -->
-<!-- PRINT AREA THERMAL (58mm) -->
-<!-- ========================================================================= -->
+<!-- Hidden Thermal Print Area -->
 <div id="thermal-receipt-area"></div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -242,47 +572,50 @@
 const urlParams = new URLSearchParams(window.location.search);
 let currentOutletSlug = urlParams.get('outlet') || 'senopati';
 let currentOutletId = 'outlet-senopati';
-let currentStatusFilter = 'ALL';
-let currentChannelFilter = 'ALL';
-let currentViewMode = 'ORDERS';
+let currentChannel = 'ALL';
+let currentView = 'ORDERS';
 let orders = [];
 let tables = [];
 let audioEnabled = true;
 
 const socket = io();
 
-// Join staff room for this branch
 function joinSocketBranch(slug) {
   currentOutletId = slug === 'kemang' ? 'outlet-kemang' : 'outlet-senopati';
   socket.emit('join_staff', currentOutletId);
 }
 joinSocketBranch(currentOutletSlug);
 
-// Audio Chime (Synthesizer)
+// Audio Chime
 function playOrderChime() {
   if (!audioEnabled) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
-    osc1.frequency.setValueAtTime(880.00, ctx.currentTime + 0.15);
+    osc1.type = 'triangle';
+    osc2.type = 'sine';
+    osc1.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+    osc2.frequency.setValueAtTime(659.25, ctx.currentTime + 0.12); // E5
 
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
 
     osc1.connect(gain);
+    osc2.connect(gain);
     gain.connect(ctx.destination);
     osc1.start();
-    osc1.stop(ctx.currentTime + 0.8);
+    osc2.start();
+    osc1.stop(ctx.currentTime + 0.9);
+    osc2.stop(ctx.currentTime + 0.9);
   } catch (e) {}
 }
 
 function toggleAudio() {
   audioEnabled = !audioEnabled;
-  document.getElementById('btn-sound').innerText = audioEnabled ? "🔊 Audio: Aktif" : "🔇 Audio: Mati";
+  document.getElementById('btn-sound').innerText = audioEnabled ? "🔊 Bel Koki: Aktif" : "🔇 Bel: Mati";
   if (audioEnabled) playOrderChime();
 }
 
@@ -290,31 +623,40 @@ function formatRupiah(amount) {
   return "Rp " + (amount || 0).toLocaleString('id-ID');
 }
 
-function formatTime(isoStr) {
-  if (!isoStr) return "-";
-  return new Date(isoStr).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+// Elapsed timer calculation (Minutes:Seconds)
+function getElapsedFormatted(isoCreatedAt) {
+  if (!isoCreatedAt) return "00:00";
+  const diffSec = Math.max(0, Math.floor((Date.now() - new Date(isoCreatedAt).getTime()) / 1000));
+  const m = Math.floor(diffSec / 60);
+  const s = diffSec % 60;
+  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+function getTimerClass(isoCreatedAt) {
+  if (!isoCreatedAt) return "timer-fresh";
+  const diffMin = Math.floor((Date.now() - new Date(isoCreatedAt).getTime()) / 60000);
+  if (diffMin >= 15) return "timer-urgent";
+  if (diffMin >= 8) return "timer-warning";
+  return "timer-fresh";
 }
 
 function changeOutlet(slug) {
   currentOutletSlug = slug;
-  document.getElementById('btn-cust-preview').href = `/order?outlet=${slug}&table=1`;
   joinSocketBranch(slug);
   fetchOrders();
   fetchTables();
 }
 
 // -----------------------------------------------------------------------------
-// LOAD ORDERS
+// LOAD DATA
 // -----------------------------------------------------------------------------
 async function fetchOrders() {
   try {
     const res = await fetch(`/api/staff/orders?outlet=${encodeURIComponent(currentOutletSlug)}`);
     orders = await res.json();
-    renderOrders();
-    updateCounts();
-  } catch (err) {
-    console.error(err);
-  }
+    renderKdsTickets();
+    renderAllDayCookCount();
+  } catch (e) {}
 }
 
 async function fetchTables() {
@@ -322,14 +664,12 @@ async function fetchTables() {
     const res = await fetch(`/api/staff/tables?outlet=${encodeURIComponent(currentOutletSlug)}`);
     const data = await res.json();
     tables = data.tables || [];
-    document.getElementById('plan-outlet-name').innerText = data.outlet.name;
-    renderTables();
-  } catch (err) {
-    console.error(err);
-  }
+    document.getElementById('total-tables-count').innerText = tables.length;
+    renderKdsTables();
+  } catch (e) {}
 }
 
-// Socket: Real-time
+// Socket Realtime
 socket.on('new_order', (newOrder) => {
   if (newOrder.outletId === currentOutletId) {
     const idx = orders.findIndex(o => o.id === newOrder.id);
@@ -338,8 +678,8 @@ socket.on('new_order', (newOrder) => {
       orders.unshift(newOrder);
       playOrderChime();
     }
-    renderOrders();
-    updateCounts();
+    renderKdsTickets();
+    renderAllDayCookCount();
     fetchTables();
   }
 });
@@ -348,8 +688,8 @@ socket.on('order_updated', (updatedOrder) => {
   if (updatedOrder.outletId === currentOutletId) {
     const idx = orders.findIndex(o => o.id === updatedOrder.id);
     if (idx !== -1) orders[idx] = updatedOrder;
-    renderOrders();
-    updateCounts();
+    renderKdsTickets();
+    renderAllDayCookCount();
     fetchTables();
   }
 });
@@ -359,156 +699,168 @@ socket.on('tables_updated', () => {
 });
 
 // View switcher
-function switchViewMode(mode) {
-  currentViewMode = mode;
-  document.getElementById('btn-view-orders').classList.toggle('active', mode === 'ORDERS');
-  document.getElementById('btn-view-tables').classList.toggle('active', mode === 'TABLES');
-  document.getElementById('view-orders-container').style.display = mode === 'ORDERS' ? 'block' : 'none';
-  document.getElementById('view-tables-container').style.display = mode === 'TABLES' ? 'block' : 'none';
-  document.getElementById('channel-filters').style.display = mode === 'ORDERS' ? 'flex' : 'none';
+function switchView(mode) {
+  currentView = mode;
+  document.getElementById('tab-btn-orders').classList.toggle('active', mode === 'ORDERS');
+  document.getElementById('tab-btn-tables').classList.toggle('active', mode === 'TABLES');
+  document.getElementById('view-orders-section').style.display = mode === 'ORDERS' ? 'block' : 'none';
+  document.getElementById('view-tables-section').style.display = mode === 'TABLES' ? 'block' : 'none';
+  document.getElementById('channel-pill-group').style.display = mode === 'ORDERS' ? 'flex' : 'none';
+  document.getElementById('all-day-bar').style.display = mode === 'ORDERS' ? 'flex' : 'none';
 
   if (mode === 'TABLES') fetchTables();
 }
 
-function setStatusFilter(status, el) {
-  currentStatusFilter = status;
-  document.querySelectorAll('.filter-tabs .filter-tab-btn').forEach(b => b.classList.remove('active'));
+function filterChannel(ch, el) {
+  currentChannel = ch;
+  document.querySelectorAll('.channel-pill-group .ch-btn').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
-  renderOrders();
-}
-
-function setChannelFilter(ch, el) {
-  currentChannelFilter = ch;
-  document.querySelectorAll('#channel-filters .filter-tab-btn').forEach(b => b.classList.remove('active'));
-  if (el) el.classList.add('active');
-  renderOrders();
-}
-
-function updateCounts() {
-  document.getElementById('total-orders-count').innerText = orders.length;
-  document.getElementById('count-all').innerText = orders.length;
-  document.getElementById('count-received').innerText = orders.filter(o => o.orderStatus === 'RECEIVED').length;
-  document.getElementById('count-cooking').innerText = orders.filter(o => o.orderStatus === 'COOKING').length;
-  document.getElementById('count-ready').innerText = orders.filter(o => o.orderStatus === 'READY').length;
-  document.getElementById('count-completed').innerText = orders.filter(o => o.orderStatus === 'COMPLETED').length;
+  renderKdsTickets();
 }
 
 // -----------------------------------------------------------------------------
-// RENDER ORDERS
+// CHEF'S ALL-DAY COOK COUNT AGGREGATOR
 // -----------------------------------------------------------------------------
-function renderOrders() {
-  const grid = document.getElementById('orders-grid');
+function renderAllDayCookCount() {
+  const container = document.getElementById('all-day-items-list');
+  // Aggregate items from pending tickets (RECEIVED or COOKING)
+  const activeTickets = orders.filter(o => o.orderStatus === 'RECEIVED' || o.orderStatus === 'COOKING');
+  
+  const countMap = {};
+  activeTickets.forEach(o => {
+    (o.items || []).forEach(it => {
+      countMap[it.name] = (countMap[it.name] || 0) + (it.qty || 1);
+    });
+  });
+
+  const entries = Object.entries(countMap);
+  if (entries.length === 0) {
+    container.innerHTML = `<span style="font-size: 0.8rem; color: #64748b;">Semua pesanan selesai dimasak ✨</span>`;
+    return;
+  }
+
+  container.innerHTML = entries.map(([name, qty]) => `
+    <div class="all-day-pill">
+      <span class="all-day-qty">${qty}x</span>
+      <span>${name}</span>
+    </div>
+  `).join('');
+}
+
+// -----------------------------------------------------------------------------
+// RENDER KDS TICKETS
+// -----------------------------------------------------------------------------
+function renderKdsTickets() {
+  const grid = document.getElementById('kds-tickets-grid');
   let list = orders;
 
-  if (currentStatusFilter !== 'ALL') {
-    list = list.filter(o => o.orderStatus === currentStatusFilter);
+  if (currentChannel !== 'ALL') {
+    list = list.filter(o => o.channel === currentChannel);
   }
-  if (currentChannelFilter !== 'ALL') {
-    list = list.filter(o => o.channel === currentChannelFilter);
-  }
+
+  // Active tickets first
+  list = list.filter(o => o.orderStatus !== 'COMPLETED');
+  document.getElementById('total-tickets-count').innerText = list.length;
 
   if (list.length === 0) {
     grid.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; background: #fff; border-radius: 14px; border: 1px dashed var(--border);">
-        <div style="font-size: 2.2rem; margin-bottom: 6px;">🍽️</div>
-        <h3 style="font-size: 1.1rem; color: var(--dark);">Tidak ada pesanan pada filter ini</h3>
-        <p style="font-size: 0.82rem; color: var(--muted); margin-top: 4px;">Pesanan baru dari QR Meja atau GoFood/Grab/Shopee akan otomatis muncul dengan suara bell.</p>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #111827; border-radius: 16px; border: 1px dashed #374151;">
+        <div style="font-size: 3rem; margin-bottom: 8px;">👨‍🍳</div>
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff;">Antrean Dapur Bersih</h3>
+        <p style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">Tidak ada pesanan aktif. Pesanan baru dari meja atau ojol akan otomatis muncul dengan suara bell.</p>
       </div>
     `;
     return;
   }
 
   let html = "";
-  list.forEach(order => {
-    const isPaid = order.paymentStatus === 'PAID';
-    const isCashier = order.paymentMethod === 'CASHIER';
+  list.forEach((order, index) => {
+    // Channel styling
+    let channelTagClass = "tag-dinein";
+    let channelTitle = `🍽️ MEJA ${order.tableNumber.replace(/\D/g, '') || '01'}`;
+    if (order.channel === 'GOFOOD') {
+      channelTagClass = "tag-gofood";
+      channelTitle = `🟢 GOFOOD #${order.externalOrderId || ''}`;
+    } else if (order.channel === 'GRABFOOD') {
+      channelTagClass = "tag-grabfood";
+      channelTitle = `🟢 GRABFOOD #${order.externalOrderId || ''}`;
+    } else if (order.channel === 'SHOPEEFOOD') {
+      channelTagClass = "tag-shopeefood";
+      channelTitle = `🟠 SHOPEEFOOD #${order.externalOrderId || ''}`;
+    } else if (order.channel === 'PICK_UP') {
+      channelTagClass = "tag-pickup";
+      channelTitle = `🛍️ PICK-UP (${order.pickupTime || 'Segera'})`;
+    }
 
-    // Channel Badge
-    let chBadge = "";
-    if (order.channel === 'DINE_IN') chBadge = `<span class="channel-badge ch-dinein">🍽️ Meja ${order.tableNumber.replace(/\D/g, '') || '01'}</span>`;
-    else if (order.channel === 'GOFOOD') chBadge = `<span class="channel-badge ch-gofood">🟢 GoFood #${order.externalOrderId || ''}</span>`;
-    else if (order.channel === 'GRABFOOD') chBadge = `<span class="channel-badge ch-grabfood">🟢 GrabFood #${order.externalOrderId || ''}</span>`;
-    else if (order.channel === 'SHOPEEFOOD') chBadge = `<span class="channel-badge ch-shopeefood">🟠 ShopeeFood #${order.externalOrderId || ''}</span>`;
-    else if (order.channel === 'PICK_UP') chBadge = `<span class="channel-badge ch-pickup">🛍️ Pick-Up (${order.pickupTime || 'Segera'})</span>`;
+    const timerClass = getTimerClass(order.createdAt);
+    const elapsedText = getElapsedFormatted(order.createdAt);
 
-    // Items list
+    // Items list with interactive strike-through
     let itemsHtml = "";
-    (order.items || []).forEach(it => {
+    (order.items || []).forEach((it, itIdx) => {
       const opts = (it.options || []).map(o => o.value).join(', ');
       itemsHtml += `
-        <div class="pos-item-row">
-          <div>
-            <div class="pos-item-name">${it.qty}x ${it.name}</div>
-            ${opts ? `<div style="font-size: 0.75rem; color: var(--muted);">${opts}</div>` : ''}
-            ${it.notes ? `<div class="pos-item-notes">📝 ${it.notes}</div>` : ''}
+        <div class="kds-item-row" id="item-${order.id}-${itIdx}" onclick="toggleItemStrike('item-${order.id}-${itIdx}')">
+          <span class="kds-item-qty">${it.qty}x</span>
+          <div class="kds-item-info">
+            <div class="kds-item-title">${it.name}</div>
+            ${opts ? `<div class="kds-item-options">${opts}</div>` : ''}
+            ${it.notes ? `<div class="kds-item-notes">📝 ${it.notes}</div>` : ''}
           </div>
-          <div style="font-weight: 700; font-size: 0.88rem;">${formatRupiah(it.subtotal)}</div>
         </div>
       `;
     });
 
+    // Action Bump Bar Button
+    let bumpBtnHtml = "";
+    if (order.orderStatus === 'RECEIVED') {
+      bumpBtnHtml = `
+        <button class="btn-bump btn-bump-cook" onclick="updateOrderStatus('${order.id}', 'COOKING')">
+          🍳 Mulai Masak
+        </button>
+      `;
+    } else if (order.orderStatus === 'COOKING') {
+      bumpBtnHtml = `
+        <button class="btn-bump btn-bump-ready" onclick="updateOrderStatus('${order.id}', 'READY')">
+          🔔 Makanan Siap
+        </button>
+      `;
+    } else if (order.orderStatus === 'READY') {
+      bumpBtnHtml = `
+        <button class="btn-bump btn-bump-done" onclick="updateOrderStatus('${order.id}', 'COMPLETED')">
+          ✅ Selesai Diantar
+        </button>
+      `;
+    }
+
     html += `
-      <div class="pos-order-card">
-        <div class="pos-order-header">
+      <div class="kds-card">
+        <div class="kds-card-head">
           <div>
-            ${chBadge}
-            <div style="font-size: 0.82rem; font-weight: 700; margin-top: 4px;">
-              👤 ${order.customerName}
-            </div>
-            <div style="font-size: 0.72rem; color: var(--muted);">
-              ⏰ ${formatTime(order.createdAt)} • ID: ${order.id}
-            </div>
-          </div>
-          <div style="text-align: right;">
-            <span class="badge ${isPaid ? 'badge-paid' : 'badge-pending'}">
-              ${isPaid ? 'LUNAS' : (isCashier ? 'BAYAR KASIR' : 'PENDING')}
-            </span>
+            <div class="kds-card-title">${channelTitle}</div>
+            <div class="kds-channel-tag ${channelTagClass}">#${order.id.slice(-4)} • ${order.customerName}</div>
             ${order.driverInfo ? `
-              <div style="font-size: 0.72rem; color: #166534; font-weight: 700; margin-top: 4px;">
-                PIN Driver: ${order.driverInfo.pin || '-'}
+              <div style="font-size: 0.75rem; color: #34d399; font-weight: 800; margin-top: 4px;">
+                PIN Driver: ${order.driverInfo.pin}
               </div>
             ` : ''}
           </div>
+          <div>
+            <div class="kds-timer-badge ${timerClass}">
+              ⏱️ ${elapsedText}
+            </div>
+          </div>
         </div>
 
-        <div class="pos-order-body">
+        <div class="kds-card-items">
           ${itemsHtml}
-          <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.95rem; font-weight: 800;">
-            <span>Total Tagihan</span>
-            <span style="color: var(--primary);">${formatRupiah(order.total)}</span>
-          </div>
         </div>
 
-        <div class="pos-order-footer">
-          <div class="action-btn-group">
-            ${order.orderStatus === 'RECEIVED' ? `
-              <button class="btn-action btn-cooking" onclick="updateOrderStatus('${order.id}', 'COOKING')">
-                🍳 Mulai Masak
-              </button>
-            ` : ''}
-
-            ${order.orderStatus === 'COOKING' ? `
-              <button class="btn-action btn-ready" onclick="updateOrderStatus('${order.id}', 'READY')">
-                🔔 Siap Diantar
-              </button>
-            ` : ''}
-
-            ${order.orderStatus === 'READY' ? `
-              <button class="btn-action btn-complete" onclick="updateOrderStatus('${order.id}', 'COMPLETED')">
-                ✅ Selesai
-              </button>
-            ` : ''}
-
-            ${!isPaid && isCashier ? `
-              <button class="btn-action" style="background: #10b981; color: #fff;" onclick="markOrderPaid('${order.id}')">
-                💵 Terima Kasir
-              </button>
-            ` : ''}
-
-            <button class="btn-action btn-print" onclick="printReceipt('${order.id}')">
-              🖨️ Cetak Tiket
-            </button>
-          </div>
+        <div class="kds-card-footer">
+          ${bumpBtnHtml}
+          <button class="btn-bump btn-bump-print" onclick="printReceipt('${order.id}')">
+            🖨️ Tiket
+          </button>
         </div>
       </div>
     `;
@@ -517,55 +869,56 @@ function renderOrders() {
   grid.innerHTML = html;
 }
 
+// Toggle strike-through for items (Koki check-off)
+function toggleItemStrike(elId) {
+  const el = document.getElementById(elId);
+  if (el) el.classList.toggle('done');
+}
+
 // -----------------------------------------------------------------------------
-// RENDER TABLE PLAN (FLOOR PLAN)
+// RENDER TABLES (FLOOR PLAN)
 // -----------------------------------------------------------------------------
-function renderTables() {
-  const grid = document.getElementById('tables-grid');
+function renderKdsTables() {
+  const grid = document.getElementById('kds-tables-grid');
   let html = "";
 
   tables.forEach(tbl => {
     let statusClass = "available";
     let statusLabel = "Kosong (Tersedia)";
-    let badgeColor = "#16a34a";
-    let bgBadge = "#dcfce7";
+    let badgeColor = "#34d399";
+    let bgBadge = "rgba(16, 185, 129, 0.2)";
 
     if (tbl.status === 'OCCUPIED') {
       statusClass = "occupied";
       statusLabel = `Terisi (${tbl.durationMinutes || 0} mnt)`;
-      badgeColor = "#b45309";
-      bgBadge = "#fef3c7";
-    } else if (tbl.status === 'BILL_PRINTED') {
-      statusClass = "bill-printed";
-      statusLabel = "Minta Bill";
-      badgeColor = "#1e40af";
-      bgBadge = "#dbeafe";
+      badgeColor = "#fbbf24";
+      bgBadge = "rgba(245, 158, 11, 0.2)";
     }
 
     html += `
-      <div class="table-plan-card ${statusClass}">
+      <div class="kds-table-card ${statusClass}">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 1.25rem; font-weight: 900; color: var(--dark);">
+            <span style="font-size: 1.35rem; font-weight: 900; color: #fff;">
               ${tbl.name}
             </span>
-            <span style="font-size: 0.72rem; color: var(--muted);">Kapasitas: ${tbl.capacity || 4}pax</span>
+            <span style="font-size: 0.72rem; color: #94a3b8;">${tbl.capacity || 4} Kursi</span>
           </div>
           <div>
-            <span class="table-status-pill" style="background: ${bgBadge}; color: ${badgeColor};">
+            <span style="background: ${bgBadge}; color: ${badgeColor}; padding: 3px 10px; border-radius: 9999px; font-size: 0.72rem; font-weight: 800;">
               ● ${statusLabel}
             </span>
           </div>
         </div>
 
-        <div style="margin-top: 14px; display: flex; gap: 8px;">
+        <div style="margin-top: 16px;">
           ${tbl.status === 'OCCUPIED' ? `
-            <button onclick="clearTable('${tbl.id}')" style="flex: 1; padding: 6px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
-              🧹 Bersihkan Meja
+            <button onclick="clearTable('${tbl.id}')" style="width: 100%; padding: 8px; background: #1e293b; color: #f87171; border: 1px solid #334155; border-radius: 8px; font-size: 0.78rem; font-weight: 800; cursor: pointer;">
+              🧹 Meja Selesai & Bersihkan
             </button>
           ` : `
-            <a href="/order?outlet=${currentOutletSlug}&table=${tbl.number}" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 6px; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.75rem; font-weight: 700; color: var(--dark);">
-              📱 Buka Menu
+            <a href="/order?outlet=${currentOutletSlug}&table=${tbl.number}" target="_blank" style="display: block; text-align: center; text-decoration: none; padding: 8px; background: #1e293b; color: #38bdf8; border: 1px solid #334155; border-radius: 8px; font-size: 0.78rem; font-weight: 800;">
+              📱 Buka Menu Meja Ini
             </a>
           `}
         </div>
@@ -602,27 +955,10 @@ async function updateOrderStatus(orderId, nextStatus) {
     if (data.success) {
       const idx = orders.findIndex(o => o.id === orderId);
       if (idx !== -1) orders[idx] = data.order;
-      renderOrders();
-      updateCounts();
+      renderKdsTickets();
+      renderAllDayCookCount();
     }
-  } catch (err) {}
-}
-
-async function markOrderPaid(orderId) {
-  try {
-    const res = await fetch(`/api/staff/orders/${orderId}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentStatus: 'PAID' })
-    });
-    const data = await res.json();
-    if (data.success) {
-      const idx = orders.findIndex(o => o.id === orderId);
-      if (idx !== -1) orders[idx] = data.order;
-      renderOrders();
-      updateCounts();
-    }
-  } catch (err) {}
+  } catch (e) {}
 }
 
 // -----------------------------------------------------------------------------
@@ -641,8 +977,8 @@ function closeOjolModal() {
 async function triggerDeliveryWebhook(channel) {
   closeOjolModal();
   const sampleItems = [
-    { name: "Nasi Goreng Wagyu Selera", price: 58000, qty: 1, notes: "Pedas sedang" },
-    { name: "Es Kopi Susu Gula Aren", price: 24000, qty: 2, notes: "Less sweet" }
+    { name: "Nasi Goreng Wagyu Selera", price: 58000, qty: 2, notes: "Pedas Sedang" },
+    { name: "Es Kopi Susu Gula Aren", price: 24000, qty: 1, notes: "Normal Sweet" }
   ];
 
   try {
@@ -651,21 +987,19 @@ async function triggerDeliveryWebhook(channel) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         outletId: currentOutletId,
-        customerName: "Rina Wijaya (Customer Online)",
-        driverName: "Pak Joko",
-        driverPhone: "0812-9988-7766",
+        customerName: "Siti Rahma (Online " + channel.toUpperCase() + ")",
+        driverName: "Pak Slamet",
+        driverPhone: "0813-8899-0011",
+        driverPin: Math.floor(1000 + Math.random() * 9000).toString(),
         items: sampleItems,
-        total: 106000
+        total: 140000
       })
     });
     const data = await res.json();
     if (data.success) {
-      alert(`Pesanan baru dari ${channel.toUpperCase()} berhasil disimulasikan! Langsung masuk ke antrean.`);
       fetchOrders();
     }
-  } catch (e) {
-    alert("Gagal memanggil webhook.");
-  }
+  } catch (e) {}
 }
 
 // -----------------------------------------------------------------------------
@@ -688,14 +1022,13 @@ function printReceipt(orderId) {
 
   area.innerHTML = `
     <div style="text-align: center; padding-bottom: 6px; border-bottom: 1px dashed #000; margin-bottom: 6px;">
-      <h3 style="font-size: 13px; margin: 0; font-weight: bold;">SCANDINE RESTO</h3>
+      <h3 style="font-size: 13px; margin: 0; font-weight: bold;">SCANDINE KITCHEN TICKET</h3>
       <p style="font-size: 9px; margin: 2px 0;">${order.outletName || 'Cabang Senopati'}</p>
-      <div style="font-size: 11px; font-weight: bold; margin-top: 4px;">CHANNEL: ${order.channel}</div>
+      <div style="font-size: 12px; font-weight: bold; margin-top: 4px;">CHANNEL: ${order.channel}</div>
     </div>
 
     <div style="margin-bottom: 6px; font-size: 10px;">
       <div>No: ${order.id}</div>
-      <div>Waktu: ${formatTime(order.createdAt)}</div>
       <div>Tujuan: <strong>${order.tableNumber}</strong> (${order.customerName})</div>
       ${order.driverInfo ? `<div>Driver: ${order.driverInfo.name} (PIN: ${order.driverInfo.pin})</div>` : ''}
     </div>
@@ -710,19 +1043,29 @@ function printReceipt(orderId) {
         <span>${formatRupiah(order.total)}</span>
       </div>
     </div>
-
-    <div style="text-align: center; border-top: 1px dashed #000; padding-top: 6px; font-size: 9px;">
-      <p>Terima Kasih • ScanDine POS</p>
-    </div>
   `;
 
   window.print();
 }
 
+// Live timer tick every second for kitchen cards
+setInterval(() => {
+  document.querySelectorAll('.kds-card').forEach((card, idx) => {
+    const o = orders.filter(x => x.orderStatus !== 'COMPLETED')[idx];
+    if (o) {
+      const timerBadge = card.querySelector('.kds-timer-badge');
+      if (timerBadge) {
+        timerBadge.innerText = `⏱️ ${getElapsedFormatted(o.createdAt)}`;
+        timerBadge.className = `kds-timer-badge ${getTimerClass(o.createdAt)}`;
+      }
+    }
+  });
+}, 1000);
+
 // Init
 fetchOrders();
 fetchTables();
-setInterval(fetchOrders, 10000);
+setInterval(fetchOrders, 8000);
 </script>
 </body>
 </html>

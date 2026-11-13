@@ -511,6 +511,32 @@ app.patch('/api/admin/menus/:id/toggle', (req, res) => {
   res.json({ success: true, menu });
 });
 
+// Manage Tables
+app.get('/api/admin/tables', (req, res) => {
+  const { outlet: outletQuery } = req.query;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  res.json(outlet.tables || []);
+});
+
+app.post('/api/admin/tables', (req, res) => {
+  const { number, name, capacity, outlet: outletQuery } = req.body;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  const newTable = {
+    id: `tbl-${Date.now()}`,
+    number: number || `${(outlet.tables || []).length + 1}`,
+    name: name || `Meja ${number}`,
+    capacity: parseInt(capacity) || 4,
+    status: "AVAILABLE",
+    currentOrderId: null,
+    occupiedSince: null
+  };
+  outlet.tables.push(newTable);
+  saveDb(db);
+  res.status(201).json(newTable);
+});
+
 // Generate Table QR Code with Smart Outlet URL
 app.get('/api/admin/tables/:tableNum/qr', async (req, res) => {
   try {

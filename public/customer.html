@@ -318,10 +318,6 @@ socket.on('menu_changed', () => {
       renderMenus();
     });
 });
-      storeData.menus = data.menus;
-      renderMenus();
-    });
-});
 
 // Socket: Real-time order updates from kitchen / cashier
 socket.on('order_updated', (updatedOrder) => {

@@ -110,6 +110,10 @@
   <div class="pos-nav-title">
     <span>☕</span>
     <span>ScanDine Backoffice & Admin</span>
+    <select id="admin-outlet-select" onchange="changeAdminOutlet(this.value)" style="background: #1e293b; color: #fff; border: 1px solid #475569; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-left: 10px;">
+      <option value="senopati">📍 Cabang Senopati (Pusat)</option>
+      <option value="kemang">📍 Cabang Kemang Raya</option>
+    </select>
   </div>
   <div class="pos-links">
     <a href="/pos" class="pos-link">🖥️ Buka Layar Kasir / POS</a>
@@ -232,9 +236,15 @@
 <script>
 let tables = [];
 let menus = [];
+let currentAdminOutlet = 'senopati';
 
 function formatRupiah(amount) {
   return "Rp " + (amount || 0).toLocaleString('id-ID');
+}
+
+function changeAdminOutlet(slug) {
+  currentAdminOutlet = slug;
+  initAdmin();
 }
 
 function switchTab(tabId, el) {
@@ -253,7 +263,7 @@ async function initAdmin() {
 
 async function loadStats() {
   try {
-    const res = await fetch('/api/admin/stats');
+    const res = await fetch(`/api/admin/stats?outlet=${encodeURIComponent(currentAdminOutlet)}`);
     const data = await res.json();
     document.getElementById('stat-revenue').innerText = formatRupiah(data.totalRevenue);
     document.getElementById('stat-orders').innerText = data.totalOrders;
@@ -272,7 +282,7 @@ async function loadStats() {
 
 async function loadTables() {
   try {
-    const res = await fetch('/api/admin/tables');
+    const res = await fetch(`/api/admin/tables?outlet=${encodeURIComponent(currentAdminOutlet)}`);
     tables = await res.json();
 
     const select = document.getElementById('select-table');
@@ -296,7 +306,7 @@ function onTableSelectChange() {
 
 async function loadTableQr(tableNum, tableName) {
   try {
-    const res = await fetch(`/api/admin/tables/${tableNum}/qr`);
+    const res = await fetch(`/api/admin/tables/${tableNum}/qr?outlet=${encodeURIComponent(currentAdminOutlet)}`);
     const data = await res.json();
 
     document.getElementById('preview-table-title').innerText = tableName || `MEJA ${tableNum}`;

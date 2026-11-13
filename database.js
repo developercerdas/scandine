@@ -45,12 +45,29 @@ const initialData = {
       },
       tables: [
         { id: "tbl-s-1", number: "1", name: "Meja 01 (Indoor)", capacity: 2, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
-        { id: "tbl-s-2", number: "2", name: "Meja 02 (Indoor)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-2", number: "2", name: "Meja 02 (Indoor)", capacity: 2, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
         { id: "tbl-s-3", number: "3", name: "Meja 03 (Indoor)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
-        { id: "tbl-s-4", number: "4", name: "Meja 04 (Sofa Panjang)", capacity: 6, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
-        { id: "tbl-s-5", number: "5", name: "Meja 05 (Outdoor Garden)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
-        { id: "tbl-s-6", number: "6", name: "Meja 06 (Outdoor Garden)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
-        { id: "tbl-s-vip", number: "VIP-1", name: "VIP Meeting Room", capacity: 10, status: "AVAILABLE", currentOrderId: null, occupiedSince: null }
+        { id: "tbl-s-4", number: "4", name: "Meja 04 (Indoor)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-5", number: "5", name: "Meja 05 (Indoor)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-6", number: "6", name: "Meja 06 (Indoor)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-7", number: "7", name: "Meja 07 (Indoor Window)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-8", number: "8", name: "Meja 08 (Indoor Window)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-9", number: "9", name: "Meja 09 (Indoor Central)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-10", number: "10", name: "Meja 10 (Indoor Central)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-11", number: "11", name: "Meja 11 (Family Sofa)", capacity: 6, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-12", number: "12", name: "Meja 12 (Family Sofa)", capacity: 6, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-13", number: "13", name: "Meja 13 (Family Sofa)", capacity: 8, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-14", number: "14", name: "Meja 14 (Family Sofa)", capacity: 8, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-15", number: "15", name: "Meja 15 (Outdoor Garden)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-16", number: "16", name: "Meja 16 (Outdoor Garden)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-17", number: "17", name: "Meja 17 (Outdoor Garden)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-18", number: "18", name: "Meja 18 (Outdoor Garden)", capacity: 4, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-19", number: "19", name: "Meja 19 (Outdoor Canopy)", capacity: 6, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-20", number: "20", name: "Meja 20 (Outdoor Canopy)", capacity: 6, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-vip1", number: "VIP-1", name: "VIP Executive Room", capacity: 10, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-vip2", number: "VIP-2", name: "VIP Private Lounge", capacity: 12, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-bar1", number: "BAR-1", name: "Bar Stool A1", capacity: 1, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
+        { id: "tbl-s-bar2", number: "BAR-2", name: "Bar Stool A2", capacity: 1, status: "AVAILABLE", currentOrderId: null, occupiedSince: null }
       ]
     },
     {
@@ -197,7 +214,39 @@ const initialData = {
       options: []
     }
   ],
-  orders: []
+  orders: [],
+  users: [
+    {
+      id: "usr-owner",
+      username: "owner",
+      password: "password123",
+      name: "Bpk. Djohan (Pemilik / Super Admin)",
+      role: "OWNER",
+      businessId: "biz-1",
+      allowedOutlets: ["*"],
+      avatar: "👑"
+    },
+    {
+      id: "usr-senopati",
+      username: "senopati",
+      password: "password123",
+      name: "Dimas (Manager Gerai Senopati)",
+      role: "GERAI_MANAGER",
+      businessId: "biz-1",
+      allowedOutlets: ["outlet-senopati"],
+      avatar: "👔"
+    },
+    {
+      id: "usr-kemang",
+      username: "kemang",
+      password: "password123",
+      name: "Nadia (Manager Gerai Kemang)",
+      role: "GERAI_MANAGER",
+      businessId: "biz-1",
+      allowedOutlets: ["outlet-kemang"],
+      avatar: "👔"
+    }
+  ]
 };
 
 // Ensure data folder exists

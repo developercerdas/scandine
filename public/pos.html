@@ -453,6 +453,85 @@
       border-color: #f59e0b;
       background: rgba(245, 158, 11, 0.07);
     }
+
+    /* Mobile & Tablet Responsive Design */
+    @media (max-width: 768px) {
+      .kds-navbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 14px;
+      }
+      .kds-brand {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .kds-navbar > div:last-child {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 8px;
+      }
+      .kds-navbar > div:last-child > * {
+        flex: 1;
+        min-height: 40px;
+        text-align: center;
+        justify-content: center;
+      }
+      .all-day-bar {
+        padding: 10px 14px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .kds-toolbar {
+        padding: 12px 14px 6px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+      .kds-tabs {
+        width: 100%;
+      }
+      .kds-tab-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        min-height: 40px;
+      }
+      .channel-pill-group {
+        width: 100%;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .kds-content {
+        padding: 12px 14px 30px;
+      }
+      .kds-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .kds-table-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .kds-table-card {
+        padding: 12px;
+        min-height: 110px;
+      }
+      .btn-bump {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .kds-table-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1002,8 +1081,22 @@ async function triggerDeliveryWebhook(channel) {
   } catch (e) {}
 }
 
+let storeProfile = {};
+
+async function fetchStoreProfile() {
+  try {
+    const res = await fetch(`/api/admin/store-profile?outlet=${currentOutlet}`);
+    storeProfile = await res.json();
+    if (storeProfile.businessName) {
+      document.title = `${storeProfile.businessName} - KDS & POS`;
+    }
+  } catch (err) {
+    console.error("Gagal load profile toko:", err);
+  }
+}
+
 // -----------------------------------------------------------------------------
-// PRINT RECEIPT (58mm)
+// PRINT RECEIPT / STRUK (Ukuran Standar Thermal 58mm)
 // -----------------------------------------------------------------------------
 function printReceipt(orderId) {
   const order = orders.find(o => o.id === orderId);
@@ -1013,35 +1106,75 @@ function printReceipt(orderId) {
   let itemsRows = "";
   order.items.forEach(it => {
     itemsRows += `
-      <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-        <span>${it.qty}x ${it.name}</span>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+        <span style="font-weight: 600;">${it.qty}x ${it.name}</span>
         <span>${formatRupiah(it.subtotal)}</span>
       </div>
+      ${it.options && it.options.length ? `<div style="font-size: 9px; color: #555; padding-left: 10px;">${it.options.map(o => o.value).join(', ')}</div>` : ''}
+      ${it.notes ? `<div style="font-size: 9px; font-style: italic; color: #555; padding-left: 10px;">* ${it.notes}</div>` : ''}
     `;
   });
 
+  const bizName = order.businessName || storeProfile.businessName || "KOPI & SELERA NUSANTARA";
+  const outletName = order.outletName || storeProfile.outletName || "Cabang Senopati";
+  const address = order.outletAddress || storeProfile.address || "";
+  const phone = order.outletPhone || storeProfile.phone || "";
+  const footerText = order.receiptFooter || storeProfile.receiptFooter || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.";
+  const orderDate = new Date(order.createdAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
+
   area.innerHTML = `
     <div style="text-align: center; padding-bottom: 6px; border-bottom: 1px dashed #000; margin-bottom: 6px;">
-      <h3 style="font-size: 13px; margin: 0; font-weight: bold;">SCANDINE KITCHEN TICKET</h3>
-      <p style="font-size: 9px; margin: 2px 0;">${order.outletName || 'Cabang Senopati'}</p>
-      <div style="font-size: 12px; font-weight: bold; margin-top: 4px;">CHANNEL: ${order.channel}</div>
+      <h3 style="font-size: 14px; margin: 0; font-weight: 900; letter-spacing: 0.5px;">${bizName.toUpperCase()}</h3>
+      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">${outletName}</div>
+      ${address ? `<div style="font-size: 9px; margin-top: 2px; color: #333;">${address}</div>` : ''}
+      ${phone ? `<div style="font-size: 9px; color: #333;">Telp: ${phone}</div>` : ''}
     </div>
 
-    <div style="margin-bottom: 6px; font-size: 10px;">
-      <div>No: ${order.id}</div>
-      <div>Tujuan: <strong>${order.tableNumber}</strong> (${order.customerName})</div>
-      ${order.driverInfo ? `<div>Driver: ${order.driverInfo.name} (PIN: ${order.driverInfo.pin})</div>` : ''}
+    <div style="margin-bottom: 6px; font-size: 10px; line-height: 1.4;">
+      <div style="display: flex; justify-content: space-between;">
+        <span>No: <strong>${order.id}</strong></span>
+        <span>${orderDate}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>Lokasi: <strong>${order.tableNumber}</strong></span>
+        <span>${order.customerName}</span>
+      </div>
+      <div style="font-weight: bold; margin-top: 2px;">
+        Kanal: ${order.channel} ${order.driverInfo ? `(Driver: ${order.driverInfo.name} • PIN: ${order.driverInfo.pin})` : ''}
+      </div>
     </div>
 
-    <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0; margin-bottom: 6px; font-size: 10px;">
+    <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin-bottom: 6px; font-size: 10px;">
       ${itemsRows}
     </div>
 
-    <div style="font-size: 10px; margin-bottom: 6px;">
-      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 11px;">
+    <div style="font-size: 10px; line-height: 1.4; margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span>Subtotal:</span>
+        <span>${formatRupiah(order.subtotal)}</span>
+      </div>
+      ${order.tax ? `
+      <div style="display: flex; justify-content: space-between;">
+        <span>PB1 / Resto Tax (${storeProfile.taxRate || 10}%):</span>
+        <span>${formatRupiah(order.tax)}</span>
+      </div>` : ''}
+      ${order.service ? `
+      <div style="display: flex; justify-content: space-between;">
+        <span>Service Charge (${storeProfile.serviceRate || 5}%):</span>
+        <span>${formatRupiah(order.service)}</span>
+      </div>` : ''}
+      <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; margin-top: 4px; padding-top: 4px; border-top: 1px solid #000;">
         <span>TOTAL:</span>
         <span>${formatRupiah(order.total)}</span>
       </div>
+      <div style="display: flex; justify-content: space-between; font-size: 9px; margin-top: 4px;">
+        <span>Pembayaran:</span>
+        <span><strong>${order.paymentMethod} (${order.paymentStatus === 'PAID' ? 'LUNAS' : 'MENUNGGU'})</strong></span>
+      </div>
+    </div>
+
+    <div style="text-align: center; font-size: 9px; border-top: 1px dashed #000; padding-top: 6px; white-space: pre-line; color: #333;">
+      ${footerText}
     </div>
   `;
 
@@ -1063,6 +1196,7 @@ setInterval(() => {
 }, 1000);
 
 // Init
+fetchStoreProfile();
 fetchOrders();
 fetchTables();
 setInterval(fetchOrders, 8000);

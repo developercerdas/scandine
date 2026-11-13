@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ScanDine | Login Privasi Gerai & Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 440px;
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      padding: 32px 28px;
+    }
+
+    .login-brand {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .login-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+      border-radius: 18px;
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+    }
+
+    .login-title {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .login-form-group {
+      margin-bottom: 16px;
+    }
+
+    .login-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 12px 16px;
+      min-height: 48px;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .login-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 14px;
+      min-height: 48px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-top: 20px;
+      touch-action: manipulation;
+    }
+
+    .login-btn:hover {
+      background: #0369a1;
+      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+    }
+
+    .login-btn:active {
+      transform: scale(0.98);
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .demo-accounts {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid #1e293b;
+    }
+
+    .demo-title {
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #94a3b8;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .demo-pill {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 10px 14px;
+      border-radius: 12px;
+      color: #e2e8f0;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      transition: all 0.15s;
+      touch-action: manipulation;
+      text-align: left;
+    }
+
+    .demo-pill:hover {
+      background: #27354f;
+      border-color: #38bdf8;
+      transform: translateY(-1px);
+    }
+
+    .demo-role-badge {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .role-owner {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .role-branch {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-box">
+  <div class="login-brand">
+    <div class="login-logo">☕</div>
+    <h1 class="login-title">ScanDine Merchant</h1>
+    <p class="login-subtitle">Akses Login Privasi Gerai & Backoffice</p>
+  </div>
+
+  <div class="error-msg" id="login-error"></div>
+
+  <form onsubmit="handleLogin(event)">
+    <div class="login-form-group">
+      <label class="login-label">Username</label>
+      <input type="text" id="username" class="login-input" placeholder="Masukkan username" required autofocus autocomplete="username">
+    </div>
+
+    <div class="login-form-group">
+      <label class="login-label">Password</label>
+      <input type="password" id="password" class="login-input" placeholder="Masukkan password" required autocomplete="current-password">
+    </div>
+
+    <button type="submit" class="login-btn" id="btn-login-submit">
+      <span>Masuk ke Dashboard</span>
+      <span>➔</span>
+    </button>
+  </form>
+
+  <!-- Demo 1-Click Login Quick Pills -->
+  <div class="demo-accounts">
+    <div class="demo-title">
+      <span>⚡ KLIK 1-TAP UNTUK DEMO CEPAT:</span>
+    </div>
+
+    <button type="button" class="demo-pill" onclick="quickFill('owner', 'password123')">
+      <div>
+        <div>👑 Bpk. Djohan</div>
+        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Akses Penuh Seluruh Gerai (Pusat)</div>
+      </div>
+      <span class="demo-role-badge role-owner">OWNER</span>
+    </button>
+
+    <button type="button" class="demo-pill" onclick="quickFill('senopati', 'password123')">
+      <div>
+        <div>👔 Dimas (Gerai Senopati)</div>
+        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Terkunci Khusus Cabang Senopati</div>
+      </div>
+      <span class="demo-role-badge role-branch">SENOPATI</span>
+    </button>
+
+    <button type="button" class="demo-pill" onclick="quickFill('kemang', 'password123')">
+      <div>
+        <div>👔 Nadia (Gerai Kemang)</div>
+        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Terkunci Khusus Cabang Kemang</div>
+      </div>
+      <span class="demo-role-badge role-branch">KEMANG</span>
+    </button>
+  </div>
+</div>
+
+<script>
+function quickFill(user, pass) {
+  document.getElementById('username').value = user;
+  document.getElementById('password').value = pass;
+  document.getElementById('btn-login-submit').click();
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const errBox = document.getElementById('login-error');
+  errBox.style.display = 'none';
+
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('btn-login-submit');
+
+  btn.disabled = true;
+  btn.innerText = "Memverifikasi...";
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      errBox.innerText = data.error || "Gagal masuk. Periksa username dan password.";
+      errBox.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = `<span>Masuk ke Dashboard</span><span>➔</span>`;
+      return;
+    }
+
+    // Save session
+    localStorage.setItem('scandine_user', JSON.stringify(data.user));
+
+    // Redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    let target = urlParams.get('redirect') || '/admin';
+
+    // If manager of specific gerai, append outlet param
+    if (data.user.role === 'GERAI_MANAGER' && data.user.assignedOutlet) {
+      const sep = target.includes('?') ? '&' : '?';
+      target = `${target}${sep}outlet=${data.user.assignedOutlet.slug}`;
+    }
+
+    window.location.href = target;
+  } catch (err) {
+    errBox.innerText = "Koneksi bermasalah ke server.";
+    errBox.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = `<span>Masuk ke Dashboard</span><span>➔</span>`;
+  }
+}
+</script>
+
+</body>
+</html>

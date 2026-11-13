@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>ScanDine | Menu Digital & Self-Order</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -309,12 +309,30 @@ async function initApp() {
   }
 }
 
-// Socket: Real-time menu updates
+// Socket: Real-time menu & store profile updates
 socket.on('menu_changed', () => {
   fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`)
     .then(r => r.json())
     .then(data => {
       storeData.menus = data.menus;
+      storeData.categories = data.categories;
+      renderCategories();
+      renderMenus();
+    });
+});
+
+socket.on('store_updated', () => {
+  fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`)
+    .then(r => r.json())
+    .then(data => {
+      storeData = data;
+      const tableNameText = currentOrderMode === 'PICK_UP' ? 'Ambil Sendiri (Takeaway)' : (storeData.table.name || `Meja ${tableQuery}`);
+      document.getElementById('display-table-name').innerText = `${storeData.outlet.name} • ${tableNameText}`;
+      document.getElementById('display-resto-name').innerText = storeData.business.name || "ScanDine Resto";
+      document.getElementById('display-resto-sub').innerText = storeData.business.tagline || "";
+      document.getElementById('summary-tax-label').innerText = `PB1 / Pajak (${storeData.outlet.taxRate}%)`;
+      document.getElementById('summary-service-label').innerText = `Service (${storeData.outlet.serviceRate}%)`;
+      renderCategories();
       renderMenus();
     });
 });
@@ -534,9 +552,12 @@ function openCartDrawer() {
   });
   container.innerHTML = html;
 
-  // Calculate taxes
-  const tax = Math.round((subtotal * (storeData.settings.taxRate || 10)) / 100);
-  const service = Math.round((subtotal * (storeData.settings.serviceRate || 5)) / 100);
+  // Calculate taxes using outlet rates safely
+  const outlet = storeData.outlet || {};
+  const taxRate = (outlet.taxRate !== undefined) ? Number(outlet.taxRate) : 10;
+  const serviceRate = (outlet.serviceRate !== undefined) ? Number(outlet.serviceRate) : 5;
+  const tax = Math.round((subtotal * taxRate) / 100);
+  const service = Math.round((subtotal * serviceRate) / 100);
   const grandTotal = subtotal + tax + service;
 
   document.getElementById('summary-subtotal').innerText = formatRupiah(subtotal);

@@ -209,8 +209,12 @@ app.post('/api/orders', async (req, res) => {
     const newOrder = {
       id: orderId,
       businessId: biz.id,
+      businessName: biz.name || "Kopi & Selera Nusantara",
       outletId: outlet.id,
       outletName: outlet.name,
+      outletAddress: outlet.address || "",
+      outletPhone: outlet.phone || "",
+      receiptFooter: outlet.receiptFooter || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
       channel: channel, // 'DINE_IN' | 'PICK_UP' | 'GOFOOD' | 'GRABFOOD' | 'SHOPEEFOOD'
       tableNumber: channel === 'DINE_IN' ? (tableNumber || "Meja 1") : "Pick-Up",
       pickupTime: pickupTime || null,
@@ -498,6 +502,65 @@ app.get('/api/admin/menus', (req, res) => {
   res.json(db.menus);
 });
 
+// Update Menu Details (Nama, Harga, Gambar, Deskripsi, Kategori)
+app.put('/api/admin/menus/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, price, description, image, categoryId, isAvailable } = req.body;
+  const db = getDb();
+  const menu = db.menus.find(m => m.id === id);
+  if (!menu) return res.status(404).json({ error: "Menu tidak ditemukan" });
+
+  if (name !== undefined) menu.name = name.trim();
+  if (price !== undefined) menu.price = Number(price) || 0;
+  if (description !== undefined) menu.description = description.trim();
+  if (image !== undefined) menu.image = image.trim();
+  if (categoryId !== undefined) menu.categoryId = categoryId;
+  if (isAvailable !== undefined) menu.isAvailable = Boolean(isAvailable);
+
+  saveDb(db);
+  io.emit('menu_changed');
+  res.json({ success: true, menu });
+});
+
+// Tambah Menu Baru
+app.post('/api/admin/menus', (req, res) => {
+  const { name, price, description, image, categoryId } = req.body;
+  if (!name || price === undefined) {
+    return res.status(400).json({ error: "Nama menu dan harga wajib diisi." });
+  }
+
+  const db = getDb();
+  const newMenu = {
+    id: `menu-${Date.now()}`,
+    businessId: db.businesses[0]?.id || "biz-1",
+    categoryId: categoryId || (db.categories[0]?.id || "cat-1"),
+    name: name.trim(),
+    description: description ? description.trim() : "",
+    price: Number(price) || 0,
+    image: image ? image.trim() : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
+    isAvailable: true,
+    options: []
+  };
+
+  db.menus.push(newMenu);
+  saveDb(db);
+  io.emit('menu_changed');
+  res.json({ success: true, menu: newMenu });
+});
+
+// Hapus Menu
+app.delete('/api/admin/menus/:id', (req, res) => {
+  const { id } = req.params;
+  const db = getDb();
+  const idx = db.menus.findIndex(m => m.id === id);
+  if (idx === -1) return res.status(404).json({ error: "Menu tidak ditemukan" });
+
+  db.menus.splice(idx, 1);
+  saveDb(db);
+  io.emit('menu_changed');
+  res.json({ success: true });
+});
+
 app.patch('/api/admin/menus/:id/toggle', (req, res) => {
   const { id } = req.params;
   const db = getDb();
@@ -605,6 +668,125 @@ app.get('/api/admin/stats', (req, res) => {
   });
 });
 
+// Store & Outlet Profile Settings (Nama Toko, Cabang, Struk, dll)
+app.get('/api/admin/store-profile', (req, res) => {
+  const { outlet: outletQuery } = req.query;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  const biz = db.businesses.find(b => b.id === outlet.businessId) || db.businesses[0] || {};
+
+  res.json({
+    businessId: biz.id,
+    businessName: biz.name || "ScanDine Restaurant",
+    tagline: biz.tagline || "",
+    ownerPhone: biz.ownerPhone || "",
+    outletId: outlet.id,
+    outletSlug: outlet.slug,
+    outletName: outlet.name,
+    address: outlet.address || "",
+    phone: outlet.phone || "",
+    taxRate: outlet.taxRate !== undefined ? outlet.taxRate : 10,
+    serviceRate: outlet.serviceRate !== undefined ? outlet.serviceRate : 5,
+    receiptFooter: outlet.receiptFooter || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali."
+  });
+});
+
+app.put('/api/admin/store-profile', (req, res) => {
+  const { outlet: outletQuery } = req.query;
+  const {
+    businessName,
+    tagline,
+    outletName,
+    address,
+    phone,
+    taxRate,
+    serviceRate,
+    receiptFooter
+  } = req.body;
+
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  const biz = db.businesses.find(b => b.id === outlet.businessId) || db.businesses[0];
+
+  if (businessName !== undefined) biz.name = businessName.trim();
+  if (tagline !== undefined) biz.tagline = tagline.trim();
+  if (outletName !== undefined) outlet.name = outletName.trim();
+  if (address !== undefined) outlet.address = address.trim();
+  if (phone !== undefined) outlet.phone = phone.trim();
+  if (taxRate !== undefined) outlet.taxRate = Number(taxRate) || 0;
+  if (serviceRate !== undefined) outlet.serviceRate = Number(serviceRate) || 0;
+  if (receiptFooter !== undefined) outlet.receiptFooter = receiptFooter.trim();
+
+  saveDb(db);
+  io.emit('store_updated');
+
+  res.json({
+    success: true,
+    message: "Profil toko dan format struk berhasil disimpan & disinkronkan!",
+    profile: {
+      businessName: biz.name,
+      tagline: biz.tagline,
+      outletName: outlet.name,
+      address: outlet.address,
+      phone: outlet.phone,
+      taxRate: outlet.taxRate,
+      serviceRate: outlet.serviceRate,
+      receiptFooter: outlet.receiptFooter
+    }
+  });
+});
+
+// --------------------------------------------------------------------------
+// AUTHENTICATION & MULTI-GERAI PRIVACY API
+// --------------------------------------------------------------------------
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: "Username dan password wajib diisi." });
+  }
+
+  const db = getDb();
+  const user = (db.users || []).find(u => 
+    u.username.toLowerCase() === username.trim().toLowerCase() && u.password === password
+  );
+
+  if (!user) {
+    return res.status(401).json({ error: "Username atau password salah." });
+  }
+
+  let assignedOutlet = null;
+  if (user.allowedOutlets && user.allowedOutlets[0] !== '*') {
+    const o = db.outlets.find(out => out.id === user.allowedOutlets[0] || out.slug === user.allowedOutlets[0]);
+    if (o) {
+      assignedOutlet = { id: o.id, slug: o.slug, name: o.name };
+    }
+  }
+
+  res.json({
+    success: true,
+    user: {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      role: user.role,
+      allowedOutlets: user.allowedOutlets,
+      avatar: user.avatar || "👤",
+      assignedOutlet
+    }
+  });
+});
+
+app.get('/api/auth/users', (req, res) => {
+  const db = getDb();
+  res.json((db.users || []).map(u => ({
+    username: u.username,
+    name: u.name,
+    role: u.role,
+    allowedOutlets: u.allowedOutlets,
+    avatar: u.avatar || "👤"
+  })));
+});
+
 // --------------------------------------------------------------------------
 // ROUTE ALIASES FOR UI PAGES
 // --------------------------------------------------------------------------
@@ -612,6 +794,10 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 
 app.get('/', (req, res) => {
   res.sendFile('index.html', { root: PUBLIC_DIR });
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile('login.html', { root: PUBLIC_DIR });
 });
 
 app.get('/order', (req, res) => {

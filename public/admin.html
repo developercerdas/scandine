@@ -2,15 +2,28 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ScanDine | Admin & Generator QR Meja</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ScanDine | Backoffice & Manajemen Resto</title>
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    .admin-container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px 20px;
+    body {
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      margin: 0;
+      padding: 0;
     }
+
+    .admin-container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    /* Stats Grid */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -35,27 +48,68 @@
       color: var(--muted);
       margin-top: 2px;
     }
+
+    /* Navigation Tabs */
     .nav-tabs {
       display: flex;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
+      gap: 8px;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      white-space: nowrap;
     }
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
     .tab-btn {
-      padding: 10px 18px;
+      padding: 12px 18px;
       background: none;
       border: none;
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: #64748b;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      margin-bottom: -1px;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      touch-action: manipulation;
+    }
+    .tab-btn:hover {
+      color: var(--primary);
     }
     .tab-btn.active {
       color: var(--primary);
       border-bottom-color: var(--primary);
     }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards & Containers */
+    .admin-card {
+      background: #fff;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
     .qr-card-preview {
       background: #fff;
       border: 2px dashed #cbd5e1;
@@ -65,11 +119,14 @@
       max-width: 340px;
       margin: 0 auto;
     }
+
+    /* Toggle Switch */
     .toggle-switch {
       position: relative;
       display: inline-block;
       width: 44px;
       height: 24px;
+      flex-shrink: 0;
     }
     .toggle-switch input {
       opacity: 0;
@@ -101,23 +158,118 @@
     input:checked + .slider:before {
       transform: translateX(20px);
     }
+
+    /* Menu Grid for Mobile */
+    .menu-admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .menu-admin-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .menu-admin-card:hover {
+      border-color: #cbd5e1;
+    }
+
+    /* Modal Styling */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.active {
+      display: flex;
+    }
+    .modal-card {
+      background: #fff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      padding: 24px;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .admin-container {
+        padding: 14px 12px 60px;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .stat-card {
+        padding: 14px;
+      }
+      .stat-val {
+        font-size: 1.3rem;
+      }
+      .nav-tabs {
+        gap: 4px;
+        margin-bottom: 16px;
+      }
+      .tab-btn {
+        padding: 10px 14px;
+        font-size: 0.82rem;
+      }
+      .menu-admin-grid {
+        grid-template-columns: 1fr;
+      }
+      .grid-2col {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .pos-nav-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      #admin-outlet-select {
+        margin-left: 0 !important;
+        width: 100%;
+      }
+    }
   </style>
 </head>
-<body style="background: #f8fafc;">
+<body>
 
 <!-- Navbar -->
 <header class="pos-navbar">
   <div class="pos-nav-title">
-    <span>☕</span>
-    <span>ScanDine Backoffice & Admin</span>
-    <select id="admin-outlet-select" onchange="changeAdminOutlet(this.value)" style="background: #1e293b; color: #fff; border: 1px solid #475569; padding: 4px 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-left: 10px;">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span>☕</span>
+      <span style="font-weight: 900;" id="nav-brand-title">ScanDine Backoffice</span>
+    </div>
+    <select id="admin-outlet-select" onchange="changeAdminOutlet(this.value)" style="background: #1e293b; color: #fff; border: 1px solid #475569; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-left: 10px;">
       <option value="senopati">📍 Cabang Senopati (Pusat)</option>
       <option value="kemang">📍 Cabang Kemang Raya</option>
     </select>
   </div>
-  <div class="pos-links">
-    <a href="/pos" class="pos-link">🖥️ Buka Layar Kasir / POS</a>
-    <a href="/order?table=1" target="_blank" class="pos-link">📱 Preview HP Pelanggan</a>
+  <div class="pos-links" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+    <a href="/pos" class="pos-link" id="link-kds-pos">🖥️ Kasir & KDS</a>
+    <a href="/order?table=1" target="_blank" class="pos-link" id="link-preview-menu">📱 Menu Tamu</a>
+    <!-- Logged in User Badge & Logout -->
+    <div id="user-auth-badge" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; color: #e2e8f0;">
+      <span id="user-display-name">Memuat...</span>
+      <button onclick="logoutAdmin()" style="background: #ef4444; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer; margin-left: 4px;">Keluar</button>
+    </div>
   </div>
 </header>
 
@@ -125,90 +277,170 @@
   <!-- Stats Section -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Total Omzet Lunas</div>
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase;">Total Omzet Lunas</div>
       <div class="stat-val" id="stat-revenue" style="color: var(--primary);">Rp 0</div>
       <div class="stat-sub">Dari transaksi QRIS & Kasir lunas</div>
     </div>
     <div class="stat-card">
-      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Pesanan Selesai</div>
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase;">Pesanan Selesai</div>
       <div class="stat-val" id="stat-orders">0</div>
       <div class="stat-sub">Transaksi berhasil diproses</div>
     </div>
     <div class="stat-card">
-      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Pesanan Berjalan</div>
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase;">Pesanan Berjalan</div>
       <div class="stat-val" id="stat-pending" style="color: #d97706;">0</div>
       <div class="stat-sub">Sedang dimasak / diantar</div>
     </div>
     <div class="stat-card">
-      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Menu Paling Laris</div>
-      <div class="stat-val" id="stat-top-item" style="font-size: 1.15rem; margin-top: 8px;">-</div>
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase;">Menu Terlaris</div>
+      <div class="stat-val" id="stat-top-item" style="font-size: 1.15rem; margin-top: 6px;">-</div>
       <div class="stat-sub" id="stat-top-qty">-</div>
     </div>
   </div>
 
-  <!-- Navigation Tabs -->
+  <!-- Navigation Tabs (4 Fitur Terpadu) -->
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('tab-qr', this)">📍 Generator QR Code Meja</button>
-    <button class="tab-btn" onclick="switchTab('tab-menu', this)">🍲 Kelola Menu & Stok</button>
-    <button class="tab-btn" onclick="switchTab('tab-ojol', this)">🛵 Konfigurasi Ojol (GoFood, Grab, Shopee)</button>
+    <button class="tab-btn active" onclick="switchTab('tab-profile', this)">🏢 Profil Resto & Struk</button>
+    <button class="tab-btn" onclick="switchTab('tab-menu', this)">🍲 Kelola Menu, Harga & Foto</button>
+    <button class="tab-btn" onclick="switchTab('tab-qr', this)">📍 Generator QR Meja (<span id="tab-table-count">0</span> Meja)</button>
+    <button class="tab-btn" onclick="switchTab('tab-ojol', this)">🛵 Konfigurasi Ojol</button>
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 1: QR CODE GENERATOR MEJA -->
+  <!-- TAB 1: PROFIL RESTO & FORMAT STRUK (SINKRON KE SELURUH SISTEM) -->
+  <!-- ======================================================================= -->
+  <div id="tab-profile" class="tab-content active">
+    <div class="admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+        <div>
+          <h3 style="font-size: 1.2rem; font-weight: 800;">Profil Toko & Informasi Struk Thermal</h3>
+          <p style="font-size: 0.85rem; color: var(--muted);">Data di bawah ini otomatis sinkron ke HP Pelanggan, Layar Kasir/Dapur, dan Struk Cetak 58mm.</p>
+        </div>
+        <button onclick="saveStoreProfile()" class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">
+          💾 Simpan & Sinkronkan
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
+        <div class="form-group">
+          <label class="form-label">Nama Bisnis / Resto Utama</label>
+          <input type="text" id="prof-biz-name" class="form-input" placeholder="Contoh: Kopi & Selera Nusantara">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Slogan / Tagline Resto</label>
+          <input type="text" id="prof-tagline" class="form-input" placeholder="Contoh: Authentic Indonesian Taste">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Gerai / Cabang Ini</label>
+          <input type="text" id="prof-outlet-name" class="form-input" placeholder="Contoh: Cabang Senopati (Pusat)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">No. Telepon / WhatsApp Resto</label>
+          <input type="text" id="prof-phone" class="form-input" placeholder="Contoh: 0812-8899-7766">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Alamat Lengkap Gerai (Tercetak di Kepala Struk)</label>
+        <input type="text" id="prof-address" class="form-input" placeholder="Contoh: Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
+        <div class="form-group">
+          <label class="form-label">Pajak Restoran PB1 (%)</label>
+          <input type="number" id="prof-tax" class="form-input" min="0" max="30" placeholder="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service Charge (%)</label>
+          <input type="number" id="prof-service" class="form-input" min="0" max="20" placeholder="5">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Pesan Penutup Struk (Footer Receipt)</label>
+        <textarea id="prof-footer" class="form-input" rows="2" placeholder="Terima kasih atas kunjungan Anda! Silakan datang kembali."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 2: KELOLA MENU, HARGA & FOTO -->
+  <!-- ======================================================================= -->
+  <div id="tab-menu" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h3 style="font-size: 1.2rem; font-weight: 800;">Daftar Menu & Pengaturan Harga</h3>
+        <p style="font-size: 0.85rem; color: var(--muted);">Ubah nama, harga, dan foto menu. Perubahan langsung terupdate seketika di HP pelanggan.</p>
+      </div>
+      <button onclick="openAddMenuModal()" class="btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.9rem;">
+        + Tambah Menu Baru
+      </button>
+    </div>
+
+    <div class="menu-admin-grid" id="menu-admin-list">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 3: GENERATOR QR MEJA -->
   <!-- ======================================================================= -->
   <div id="tab-qr" class="tab-content">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: flex-start;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: flex-start;" class="grid-2col">
       <!-- Table Selector & Add -->
-      <div style="background: #fff; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border);">
-        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 14px;">Pilih Meja untuk Cetak Stiker QR</h3>
+      <div class="admin-card">
+        <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 14px;">Pilih Meja untuk Cetak Stiker QR</h3>
         
         <div class="form-group">
-          <label class="form-label">Daftar Meja Tersedia</label>
+          <label class="form-label">Daftar Meja Gerai Ini</label>
           <select id="select-table" class="form-input" onchange="onTableSelectChange()">
             <!-- Populated by JS -->
           </select>
         </div>
 
         <div style="margin-top: 14px; display: flex; gap: 10px;">
-          <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 10px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 8px; font-size: 0.85rem;">
+          <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 12px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 10px; font-size: 0.88rem;">
             🔗 Buka Menu Meja Ini
           </a>
-          <button onclick="printQrSticker()" style="flex: 1; padding: 10px; background: var(--dark); color: #fff; border: none; font-weight: 700; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">
+          <button onclick="printQrSticker()" style="flex: 1; padding: 12px; background: var(--dark); color: #fff; border: none; font-weight: 700; border-radius: 10px; font-size: 0.88rem; cursor: pointer;">
             🖨️ Cetak Stiker Meja
           </button>
         </div>
 
-        <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
 
-        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px;">Tambah Meja Baru</h4>
-        <div style="display: flex; gap: 10px;">
-          <input type="text" id="new-table-num" class="form-input" placeholder="No. Meja (misal: 7)">
-          <input type="text" id="new-table-name" class="form-input" placeholder="Nama (misal: Meja 07 Lantai 2)">
-          <button onclick="addNewTable()" style="white-space: nowrap; padding: 10px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
-            + Tambah
+        <h4 style="font-size: 0.98rem; font-weight: 800; margin-bottom: 10px;">+ Tambah Meja Baru di Gerai Ini</h4>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input type="text" id="new-table-num" class="form-input" style="flex: 1; min-width: 80px;" placeholder="No. Meja (misal: 25)">
+          <input type="text" id="new-table-name" class="form-input" style="flex: 2; min-width: 140px;" placeholder="Nama (misal: Meja 25 Garden)">
+          <button onclick="addNewTable()" style="white-space: nowrap; padding: 10px 18px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 800; cursor: pointer;">
+            + Tambah Meja
           </button>
         </div>
       </div>
 
-      <!-- Live QR Sticker Preview -->
+      <!-- Live QR Sticker Preview (Sinkron dengan Nama Resto) -->
       <div>
         <div class="qr-card-preview" id="qr-sticker-area">
-          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; color: var(--primary);">
-            SCAN ME & ORDER
+          <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; color: var(--primary);" id="preview-resto-name">
+            KOPI & SELERA NUSANTARA
           </div>
-          <h2 id="preview-table-title" style="font-size: 1.5rem; font-weight: 900; margin: 4px 0 12px; color: var(--dark);">
+          <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;" id="preview-outlet-name">
+            Cabang Senopati (Pusat)
+          </div>
+          <h2 id="preview-table-title" style="font-size: 1.6rem; font-weight: 900; margin: 8px 0 12px; color: var(--dark);">
             MEJA 01
           </h2>
 
-          <div style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; border: 1px solid var(--border); box-shadow: var(--shadow);">
+          <div style="background: #fff; padding: 12px; border-radius: 16px; display: inline-block; border: 1px solid var(--border); box-shadow: var(--shadow);">
             <img id="qr-preview-image" src="" alt="QR Meja" style="width: 220px; height: 220px; display: block;">
           </div>
 
           <p style="font-size: 0.82rem; color: var(--muted); margin-top: 12px; line-height: 1.4;">
-            Pindai dengan kamera HP Anda untuk melihat menu dan memesan langsung dari meja.
+            Pindai QR ini dengan kamera HP untuk pesan & bayar langsung dari meja tanpa menunggu pelayan.
           </p>
-          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px;" id="preview-url-text">
-            http://localhost:3000/order?table=1
+          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px; word-break: break-all;" id="preview-url-text">
+            -
           </div>
         </div>
       </div>
@@ -216,315 +448,408 @@
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 2: KELOLA MENU & STOK -->
+  <!-- TAB 4: KONFIGURASI OJOL -->
   <!-- ======================================================================= -->
-  <div id="tab-menu" class="tab-content" style="display: none;">
-    <div style="background: #fff; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <div>
-          <h3 style="font-size: 1.15rem; font-weight: 800;">Daftar Menu & Ketersediaan Stok</h3>
-          <p style="font-size: 0.8rem; color: var(--muted);">Mengubah status tombol langsung memperbarui menu di seluruh HP pelanggan secara live.</p>
-        </div>
+  <div id="tab-ojol" class="tab-content">
+    <div class="admin-card">
+      <div style="margin-bottom: 18px;">
+        <h3 style="font-size: 1.2rem; font-weight: 800;">Integrasi Webhook Omnichannel Ojol</h3>
+        <p style="font-size: 0.85rem; color: var(--muted);">Salin URL webhook di bawah ini ke Merchant Portal GoBiz, GrabMerchant, atau Shopee Partner agar pesanan online langsung masuk ke POS & KDS ScanDine.</p>
       </div>
 
-      <div id="menu-table-list">
-        <!-- Rendered by JS -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ======================================================================= -->
-  <!-- TAB 3: KONFIGURASI INTEGRASI OJOL (GOFOOD, GRAB, SHOPEE) -->
-  <!-- ======================================================================= -->
-  <div id="tab-ojol" class="tab-content" style="display: none;">
-    <div style="background: #fff; padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow);">
-      <div style="margin-bottom: 20px;">
-        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--dark);">🛵 Konfigurasi Integrasi Ojol (Online Food Delivery)</h3>
-        <p style="font-size: 0.85rem; color: var(--muted); margin-top: 4px;">
-          Hubungkan akun GoBiz, GrabMerchant, dan Shopee Partner Anda agar pesanan online langsung masuk ke layar POS dan dapur ScanDine otomatis.
-        </p>
-      </div>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-        <!-- Card GoFood -->
-        <div style="border: 1px solid #86efac; border-radius: 14px; padding: 18px; background: #f0fdf4;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- GoFood -->
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.5rem;">🟢</span>
-              <strong style="font-size: 1.1rem; color: #15803d;">GoFood (GoBiz API)</strong>
+              <span style="font-size: 1.2rem;">🟢</span>
+              <strong style="font-size: 0.95rem;">GoFood (GoBiz Webhook)</strong>
             </div>
-            <span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem;">AKTIF</span>
+            <button onclick="testOjolFromAdmin('gofood')" style="background: #15803d; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+              ⚡ Uji Pesanan GoFood
+            </button>
           </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size: 0.8rem;">Merchant ID GoBiz</label>
-            <input type="text" id="gofood-mid" class="form-input" value="GF-JKT-0982" readonly style="background: #fff;">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="gofood-url" class="form-input" readonly style="background: #fff; font-family: monospace; font-size: 0.85rem;">
+            <button onclick="copyWebhook('gofood-url')" style="background: #1e293b; color: #fff; border: none; padding: 0 16px; border-radius: 10px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+              Salin
+            </button>
           </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size: 0.8rem;">Webhook Callback URL (Didaftarkan ke GoBiz)</label>
-            <div style="display: flex; gap: 6px;">
-              <input type="text" id="gofood-url" class="form-input" readonly style="font-size: 0.78rem; background: #fff;">
-              <button onclick="copyWebhook('gofood-url')" style="padding: 6px 12px; background: #15803d; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Salin</button>
-            </div>
-          </div>
-          <button onclick="testOjolFromAdmin('gofood')" style="width: 100%; padding: 10px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; margin-top: 8px;">
-            ⚡ Tes Kirim Pesanan GoFood ke Dapur
-          </button>
         </div>
 
-        <!-- Card GrabFood -->
-        <div style="border: 1px solid #6ee7b7; border-radius: 14px; padding: 18px; background: #ecfdf5;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <!-- GrabFood -->
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.5rem;">🟢</span>
-              <strong style="font-size: 1.1rem; color: #047857;">GrabFood (GrabMerchant API)</strong>
+              <span style="font-size: 1.2rem;">🟢</span>
+              <strong style="font-size: 0.95rem;">GrabFood (GrabMerchant Webhook)</strong>
             </div>
-            <span style="background: #d1fae5; color: #047857; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem;">AKTIF</span>
+            <button onclick="testOjolFromAdmin('grabfood')" style="background: #047857; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+              ⚡ Uji Pesanan GrabFood
+            </button>
           </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size: 0.8rem;">Merchant ID Grab</label>
-            <input type="text" id="grabfood-mid" class="form-input" value="GRAB-ID-4412" readonly style="background: #fff;">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="grabfood-url" class="form-input" readonly style="background: #fff; font-family: monospace; font-size: 0.85rem;">
+            <button onclick="copyWebhook('grabfood-url')" style="background: #1e293b; color: #fff; border: none; padding: 0 16px; border-radius: 10px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+              Salin
+            </button>
           </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size: 0.8rem;">Webhook Callback URL (Didaftarkan ke Grab)</label>
-            <div style="display: flex; gap: 6px;">
-              <input type="text" id="grabfood-url" class="form-input" readonly style="font-size: 0.78rem; background: #fff;">
-              <button onclick="copyWebhook('grabfood-url')" style="padding: 6px 12px; background: #047857; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Salin</button>
-            </div>
-          </div>
-          <button onclick="testOjolFromAdmin('grabfood')" style="width: 100%; padding: 10px; background: #059669; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; margin-top: 8px;">
-            ⚡ Tes Kirim Pesanan GrabFood ke Dapur
-          </button>
         </div>
 
-        <!-- Card ShopeeFood -->
-        <div style="border: 1px solid #fdba74; border-radius: 14px; padding: 18px; background: #fff7ed;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <!-- ShopeeFood -->
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 14px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.5rem;">🟠</span>
-              <strong style="font-size: 1.1rem; color: #c2410c;">ShopeeFood (Shopee Partner)</strong>
+              <span style="font-size: 1.2rem;">🟠</span>
+              <strong style="font-size: 0.95rem;">ShopeeFood (Shopee Partner Webhook)</strong>
             </div>
-            <span style="background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem;">AKTIF</span>
+            <button onclick="testOjolFromAdmin('shopeefood')" style="background: #c2410c; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+              ⚡ Uji Pesanan ShopeeFood
+            </button>
           </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size: 0.8rem;">Merchant ID Shopee</label>
-            <input type="text" id="shopeefood-mid" class="form-input" value="SHP-ID-8812" readonly style="background: #fff;">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="shopeefood-url" class="form-input" readonly style="background: #fff; font-family: monospace; font-size: 0.85rem;">
+            <button onclick="copyWebhook('shopeefood-url')" style="background: #1e293b; color: #fff; border: none; padding: 0 16px; border-radius: 10px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+              Salin
+            </button>
           </div>
-          <div class="form-group">
-            <label class="form-label" style="font-size: 0.8rem;">Webhook Callback URL (Didaftarkan ke Shopee)</label>
-            <div style="display: flex; gap: 6px;">
-              <input type="text" id="shopeefood-url" class="form-input" readonly style="font-size: 0.78rem; background: #fff;">
-              <button onclick="copyWebhook('shopeefood-url')" style="padding: 6px 12px; background: #c2410c; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Salin</button>
-            </div>
-          </div>
-          <button onclick="testOjolFromAdmin('shopeefood')" style="width: 100%; padding: 10px; background: #ea580c; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; margin-top: 8px;">
-            ⚡ Tes Kirim Pesanan ShopeeFood ke Dapur
-          </button>
         </div>
-      </div>
-
-      <!-- Panduan Pendaftaran -->
-      <div style="margin-top: 24px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border); font-size: 0.85rem; line-height: 1.6; color: var(--slate);">
-        <strong style="color: var(--dark);">💡 Cara Pendaftaran ke Gojek / Grab / Shopee:</strong>
-        <ol style="margin-left: 20px; margin-top: 6px;">
-          <li>Buka Portal Developer Mitra: GoBiz Developer, Grab Partner Portal, atau Shopee Open Platform (atau gunakan agregator seperti Hubster/Deliverect).</li>
-          <li>Masukkan <strong>Webhook Callback URL</strong> di atas ke akun cabang resto Anda.</li>
-          <li>Setiap ada pelanggan memesan makanan dari aplikasi GoFood/GrabFood/ShopeeFood, pesanan akan otomatis masuk ke tablet kasir & printer dapur ScanDine dalam hitungan detik.</li>
-        </ol>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ========================================================================= -->
+<!-- MODAL EDIT / TAMBAH MENU -->
+<!-- ========================================================================= -->
+<div class="modal-backdrop" id="modal-menu-edit">
+  <div class="modal-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="font-size: 1.2rem; font-weight: 800;" id="modal-menu-title">Edit Menu</h3>
+      <button onclick="closeMenuModal()" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.1rem;">✕</button>
+    </div>
+
+    <input type="hidden" id="edit-menu-id">
+
+    <div class="form-group">
+      <label class="form-label">Nama Menu</label>
+      <input type="text" id="edit-menu-name" class="form-input" placeholder="Contoh: Nasi Goreng Spesial">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <div class="form-group">
+        <label class="form-label">Harga (Rp)</label>
+        <input type="number" id="edit-menu-price" class="form-input" placeholder="50000" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kategori</label>
+        <select id="edit-menu-cat" class="form-input">
+          <option value="cat-1">🍛 Makanan Utama</option>
+          <option value="cat-2">☕ Kopi & Minuman</option>
+          <option value="cat-3">🍟 Cemilan & Snack</option>
+          <option value="cat-4">🍰 Dessert & Manisan</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Foto Menu (URL Gambar)</label>
+      <input type="text" id="edit-menu-image" class="form-input" placeholder="https://..." oninput="updateImagePreview(this.value)">
+      <!-- Quick Photo Presets -->
+      <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
+        <span style="font-size: 0.75rem; color: var(--muted); align-self: center;">Pilihan Cepat:</span>
+        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">🍛 Nasi Goreng</button>
+        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">🥩 Sate / Daging</button>
+        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">☕ Kopi Susu</button>
+        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">🍹 Es Segar</button>
+      </div>
+      <!-- Image Preview Thumbnail -->
+      <div style="margin-top: 10px; text-align: center;">
+        <img id="edit-img-preview" src="" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 10px; display: none; border: 1px solid var(--border);">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Deskripsi Menu</label>
+      <textarea id="edit-menu-desc" class="form-input" rows="2" placeholder="Jelaskan kelezatan menu ini..."></textarea>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button type="button" onclick="closeMenuModal()" style="flex: 1; padding: 12px; background: #f1f5f9; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
+        Batal
+      </button>
+      <button type="button" onclick="saveMenuData()" class="btn-primary" style="flex: 2; margin: 0; justify-content: center;">
+        💾 Simpan Perubahan
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
+let currentAdminOutlet = "senopati";
 let tables = [];
 let menus = [];
-let currentAdminOutlet = 'senopati';
+let currentStoreProfile = {};
+let currentUser = null;
 
-function formatRupiah(amount) {
-  return "Rp " + (amount || 0).toLocaleString('id-ID');
+// Auth Verification
+function verifyAuth() {
+  const raw = localStorage.getItem('scandine_user');
+  if (!raw) {
+    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    return false;
+  }
+  currentUser = JSON.parse(raw);
+  document.getElementById('user-display-name').innerText = `${currentUser.avatar || '👤'} ${currentUser.name}`;
+
+  // If GERAI_MANAGER, lock outlet dropdown to their assigned outlet
+  if (currentUser.role === 'GERAI_MANAGER' && currentUser.assignedOutlet) {
+    currentAdminOutlet = currentUser.assignedOutlet.slug;
+    const sel = document.getElementById('admin-outlet-select');
+    sel.innerHTML = `<option value="${currentUser.assignedOutlet.slug}">🔒 Gerai: ${currentUser.assignedOutlet.name}</option>`;
+    sel.disabled = true;
+  } else {
+    // Owner can use query param
+    const urlParams = new URLSearchParams(window.location.search);
+    const qOutlet = urlParams.get('outlet');
+    if (qOutlet) currentAdminOutlet = qOutlet;
+    document.getElementById('admin-outlet-select').value = currentAdminOutlet;
+  }
+
+  // Update quick nav links
+  document.getElementById('link-kds-pos').href = `/pos?outlet=${currentAdminOutlet}`;
+  document.getElementById('link-preview-menu').href = `/order?outlet=${currentAdminOutlet}&table=1`;
+
+  return true;
+}
+
+function logoutAdmin() {
+  if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
+    localStorage.removeItem('scandine_user');
+    window.location.href = '/login.html';
+  }
+}
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
 }
 
 function changeAdminOutlet(slug) {
   currentAdminOutlet = slug;
+  window.history.replaceState({}, '', `/admin?outlet=${slug}`);
+  document.getElementById('link-kds-pos').href = `/pos?outlet=${slug}`;
+  document.getElementById('link-preview-menu').href = `/order?outlet=${slug}&table=1`;
   initAdmin();
 }
 
-function switchTab(tabId, el) {
-  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(tabId).style.display = 'block';
-  el.classList.add('active');
+function formatRupiah(num) {
+  return "Rp " + (num || 0).toLocaleString('id-ID');
 }
 
 // -----------------------------------------------------------------------------
-// LOAD DATA
+// TAB 1: PROFIL RESTO & FORMAT STRUK
 // -----------------------------------------------------------------------------
-async function initAdmin() {
-  await Promise.all([loadStats(), loadTables(), loadMenus()]);
-}
-
-async function loadStats() {
+async function loadStoreProfile() {
   try {
-    const res = await fetch(`/api/admin/stats?outlet=${encodeURIComponent(currentAdminOutlet)}`);
+    const res = await fetch(`/api/admin/store-profile?outlet=${currentAdminOutlet}`);
     const data = await res.json();
-    document.getElementById('stat-revenue').innerText = formatRupiah(data.totalRevenue);
-    document.getElementById('stat-orders').innerText = data.totalOrders;
-    document.getElementById('stat-pending').innerText = data.pendingOrders;
+    currentStoreProfile = data;
 
-    if (data.topItems && data.topItems.length > 0) {
-      document.getElementById('stat-top-item').innerText = data.topItems[0].name;
-      document.getElementById('stat-top-qty').innerText = `Terjual ${data.topItems[0].qty} porsi`;
-    } else {
-      document.getElementById('stat-top-item').innerText = "Belum ada transaksi";
-    }
+    document.getElementById('prof-biz-name').value = data.businessName || "";
+    document.getElementById('prof-tagline').value = data.tagline || "";
+    document.getElementById('prof-outlet-name').value = data.outletName || "";
+    document.getElementById('prof-phone').value = data.phone || "";
+    document.getElementById('prof-address').value = data.address || "";
+    document.getElementById('prof-tax').value = data.taxRate !== undefined ? data.taxRate : 10;
+    document.getElementById('prof-service').value = data.serviceRate !== undefined ? data.serviceRate : 5;
+    document.getElementById('prof-footer').value = data.receiptFooter || "";
+
+    // Sync QR preview header
+    document.getElementById('preview-resto-name').innerText = (data.businessName || "SCAN DINE").toUpperCase();
+    document.getElementById('preview-outlet-name').innerText = data.outletName || "";
+    document.getElementById('nav-brand-title').innerText = `${data.businessName || 'ScanDine'} • Backoffice`;
   } catch (err) {
-    console.error(err);
+    console.error("Gagal memuat profil toko:", err);
   }
 }
 
-async function loadTables() {
-  try {
-    const res = await fetch(`/api/admin/tables?outlet=${encodeURIComponent(currentAdminOutlet)}`);
-    tables = await res.json();
-
-    const select = document.getElementById('select-table');
-    select.innerHTML = tables.map(t => `<option value="${t.number}">${t.name} (Nomor: ${t.number})</option>`).join('');
-
-    if (tables.length > 0) {
-      loadTableQr(tables[0].number, tables[0].name);
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function onTableSelectChange() {
-  const select = document.getElementById('select-table');
-  const selTable = tables.find(t => t.number === select.value);
-  if (selTable) {
-    loadTableQr(selTable.number, selTable.name);
-  }
-}
-
-async function loadTableQr(tableNum, tableName) {
-  try {
-    const res = await fetch(`/api/admin/tables/${tableNum}/qr?outlet=${encodeURIComponent(currentAdminOutlet)}`);
-    const data = await res.json();
-
-    document.getElementById('preview-table-title').innerText = tableName || `MEJA ${tableNum}`;
-    document.getElementById('qr-preview-image').src = data.qrDataUrl;
-    document.getElementById('preview-url-text').innerText = data.targetUrl;
-    document.getElementById('btn-preview-link').href = data.targetUrl;
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function addNewTable() {
-  const num = document.getElementById('new-table-num').value.trim();
-  const name = document.getElementById('new-table-name').value.trim();
-  if (!num) return alert("Masukkan nomor meja");
+async function saveStoreProfile() {
+  const payload = {
+    businessName: document.getElementById('prof-biz-name').value.trim(),
+    tagline: document.getElementById('prof-tagline').value.trim(),
+    outletName: document.getElementById('prof-outlet-name').value.trim(),
+    phone: document.getElementById('prof-phone').value.trim(),
+    address: document.getElementById('prof-address').value.trim(),
+    taxRate: document.getElementById('prof-tax').value,
+    serviceRate: document.getElementById('prof-service').value,
+    receiptFooter: document.getElementById('prof-footer').value.trim()
+  };
 
   try {
-    const res = await fetch('/api/admin/tables', {
-      method: 'POST',
+    const res = await fetch(`/api/admin/store-profile?outlet=${currentAdminOutlet}`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ number: num, name: name || `Meja ${num}` })
+      body: JSON.stringify(payload)
     });
-    if (res.ok) {
-      document.getElementById('new-table-num').value = '';
-      document.getElementById('new-table-name').value = '';
-      await loadTables();
+    const result = await res.json();
+    if (result.success) {
+      alert("✅ Profil Restoran & Format Struk BERHASIL Disimpan dan Disinkronkan ke Seluruh Sistem!");
+      loadStoreProfile();
+    } else {
+      alert("Gagal menyimpan profil: " + (result.error || ""));
     }
   } catch (err) {
-    alert("Gagal menambah meja.");
+    alert("Terjadi kesalahan jaringan.");
   }
 }
 
-function printQrSticker() {
-  const sticker = document.getElementById('qr-sticker-area');
-  const printWindow = window.open('', '', 'width=600,height=700');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Cetak Stiker Meja</title>
-        <style>
-          body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-          .card { text-align: center; border: 2px solid #000; border-radius: 16px; padding: 24px; width: 300px; }
-          h2 { margin: 8px 0; font-size: 24px; }
-          img { width: 220px; height: 220px; }
-          p { font-size: 13px; color: #555; }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <div style="font-size: 12px; font-weight: bold; letter-spacing: 1px;">KOPI & SELERA NUSANTARA</div>
-          <h2>${document.getElementById('preview-table-title').innerText}</h2>
-          <img src="${document.getElementById('qr-preview-image').src}">
-          <p>Scan dengan kamera HP untuk pesan makanan langsung dari meja</p>
-        </div>
-        <script>window.onload = function() { window.print(); }<\/script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-}
-
 // -----------------------------------------------------------------------------
-// MENUS MANAGEMENT
+// TAB 2: KELOLA MENU, HARGA & FOTO
 // -----------------------------------------------------------------------------
-async function loadMenus() {
+async function fetchAdminMenus() {
   try {
     const res = await fetch('/api/admin/menus');
     menus = await res.json();
     renderMenuList();
   } catch (err) {
-    console.error(err);
+    console.error("Gagal memuat menu:", err);
   }
 }
 
 function renderMenuList() {
-  const container = document.getElementById('menu-table-list');
-  let html = `
-    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-      <thead>
-        <tr style="border-bottom: 2px solid var(--border); text-align: left; color: var(--muted); font-size: 0.8rem; text-transform: uppercase;">
-          <th style="padding: 10px;">Menu</th>
-          <th style="padding: 10px;">Harga</th>
-          <th style="padding: 10px;">Status Ketersediaan</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+  const container = document.getElementById('menu-admin-list');
+  let html = "";
 
   menus.forEach(menu => {
     html += `
-      <tr style="border-bottom: 1px solid var(--border);">
-        <td style="padding: 12px 10px; display: flex; align-items: center; gap: 12px;">
-          <img src="${menu.image || ''}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover;">
-          <div>
-            <div style="font-weight: 700; color: var(--dark);">${menu.name}</div>
-            <div style="font-size: 0.75rem; color: var(--muted);">${menu.description ? menu.description.slice(0, 50) + '...' : ''}</div>
+      <div class="menu-admin-card">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <img src="${menu.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300'}" style="width: 76px; height: 76px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #f1f5f9;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 800; font-size: 0.95rem; color: var(--dark); line-height: 1.3;">${menu.name}</div>
+            <div style="font-weight: 800; font-size: 1rem; color: var(--primary); margin: 4px 0;">${formatRupiah(menu.price)}</div>
+            <div style="font-size: 0.78rem; color: var(--muted); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+              ${menu.description || '-'}
+            </div>
           </div>
-        </td>
-        <td style="padding: 12px 10px; font-weight: 700; color: var(--primary);">
-          ${formatRupiah(menu.price)}
-        </td>
-        <td style="padding: 12px 10px;">
-          <label class="toggle-switch">
-            <input type="checkbox" ${menu.isAvailable ? 'checked' : ''} onchange="toggleMenuStatus('${menu.id}')">
-            <span class="slider"></span>
-          </label>
-          <span style="font-size: 0.8rem; font-weight: 600; margin-left: 8px; color: ${menu.isAvailable ? 'var(--success)' : 'var(--danger)'};">
-            ${menu.isAvailable ? 'Tersedia' : 'Habis (Sold Out)'}
-          </span>
-        </td>
-      </tr>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px dashed var(--border);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label class="toggle-switch">
+              <input type="checkbox" ${menu.isAvailable ? 'checked' : ''} onchange="toggleMenuStatus('${menu.id}')">
+              <span class="slider"></span>
+            </label>
+            <span style="font-size: 0.78rem; font-weight: 700; color: ${menu.isAvailable ? 'var(--success)' : 'var(--danger)'};">
+              ${menu.isAvailable ? 'Tersedia' : 'Habis'}
+            </span>
+          </div>
+
+          <button onclick="openEditMenuModal('${menu.id}')" style="background: #0f172a; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            ✏️ Edit Menu
+          </button>
+        </div>
+      </div>
     `;
   });
 
-  html += `</tbody></table>`;
   container.innerHTML = html;
+}
+
+function openAddMenuModal() {
+  document.getElementById('modal-menu-title').innerText = "Tambah Menu Baru";
+  document.getElementById('edit-menu-id').value = "";
+  document.getElementById('edit-menu-name').value = "";
+  document.getElementById('edit-menu-price').value = "";
+  document.getElementById('edit-menu-cat').value = "cat-1";
+  document.getElementById('edit-menu-image').value = "";
+  document.getElementById('edit-menu-desc').value = "";
+  document.getElementById('edit-img-preview').style.display = 'none';
+  document.getElementById('modal-menu-edit').classList.add('active');
+}
+
+function openEditMenuModal(menuId) {
+  const menu = menus.find(m => m.id === menuId);
+  if (!menu) return;
+
+  document.getElementById('modal-menu-title').innerText = "Edit Menu & Harga";
+  document.getElementById('edit-menu-id').value = menu.id;
+  document.getElementById('edit-menu-name').value = menu.name || "";
+  document.getElementById('edit-menu-price').value = menu.price || 0;
+  document.getElementById('edit-menu-cat').value = menu.categoryId || "cat-1";
+  document.getElementById('edit-menu-image').value = menu.image || "";
+  document.getElementById('edit-menu-desc').value = menu.description || "";
+
+  updateImagePreview(menu.image);
+  document.getElementById('modal-menu-edit').classList.add('active');
+}
+
+function closeMenuModal() {
+  document.getElementById('modal-menu-edit').classList.remove('active');
+}
+
+function setPresetImg(url) {
+  document.getElementById('edit-menu-image').value = url;
+  updateImagePreview(url);
+}
+
+function updateImagePreview(url) {
+  const img = document.getElementById('edit-img-preview');
+  if (url && url.startsWith('http')) {
+    img.src = url;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+}
+
+async function saveMenuData() {
+  const menuId = document.getElementById('edit-menu-id').value;
+  const name = document.getElementById('edit-menu-name').value.trim();
+  const price = document.getElementById('edit-menu-price').value;
+  const categoryId = document.getElementById('edit-menu-cat').value;
+  const image = document.getElementById('edit-menu-image').value.trim();
+  const description = document.getElementById('edit-menu-desc').value.trim();
+
+  if (!name || price === "") {
+    alert("Mohon isi nama menu dan harga dengan benar.");
+    return;
+  }
+
+  const payload = { name, price: Number(price), categoryId, image, description };
+
+  try {
+    let res;
+    if (menuId) {
+      // Edit existing
+      res = await fetch(`/api/admin/menus/${menuId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      // Create new
+      res = await fetch('/api/admin/menus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    const data = await res.json();
+    if (data.success) {
+      alert("✅ Menu berhasil disimpan!");
+      closeMenuModal();
+      fetchAdminMenus();
+    } else {
+      alert("Gagal: " + (data.error || ""));
+    }
+  } catch (err) {
+    alert("Terjadi kesalahan jaringan.");
+  }
 }
 
 async function toggleMenuStatus(menuId) {
@@ -542,7 +867,87 @@ async function toggleMenuStatus(menuId) {
 }
 
 // -----------------------------------------------------------------------------
-// OJOL INTEGRATION HELPERS
+// TAB 3: GENERATOR QR MEJA
+// -----------------------------------------------------------------------------
+async function fetchTables() {
+  try {
+    const res = await fetch(`/api/admin/tables?outlet=${currentAdminOutlet}`);
+    tables = await res.json();
+    document.getElementById('tab-table-count').innerText = tables.length;
+    renderTableSelect();
+  } catch (err) {
+    console.error("Gagal memuat meja:", err);
+  }
+}
+
+function renderTableSelect() {
+  const sel = document.getElementById('select-table');
+  sel.innerHTML = "";
+  tables.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.number;
+    opt.innerText = `${t.name} (Kapasitas: ${t.capacity} orang)`;
+    sel.appendChild(opt);
+  });
+  if (tables.length > 0) {
+    onTableSelectChange();
+  }
+}
+
+async function onTableSelectChange() {
+  const tableNum = document.getElementById('select-table').value;
+  if (!tableNum) return;
+  const currentTable = tables.find(t => t.number.toString() === tableNum.toString());
+
+  document.getElementById('preview-table-title').innerText = currentTable ? currentTable.name.toUpperCase() : `MEJA ${tableNum}`;
+
+  try {
+    const res = await fetch(`/api/admin/tables/${encodeURIComponent(tableNum)}/qr?outlet=${currentAdminOutlet}`);
+    const data = await res.json();
+    document.getElementById('qr-preview-image').src = data.qrCodeDataUrl;
+    document.getElementById('preview-url-text').innerText = data.orderUrl;
+    document.getElementById('btn-preview-link').href = data.orderUrl;
+  } catch (err) {
+    console.error("Gagal generate QR meja:", err);
+  }
+}
+
+async function addNewTable() {
+  const num = document.getElementById('new-table-num').value.trim();
+  const name = document.getElementById('new-table-name').value.trim();
+  if (!num) {
+    alert("Masukkan nomor meja.");
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/admin/tables', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        outlet: currentAdminOutlet,
+        number: num,
+        name: name || `Meja ${num}`,
+        capacity: 4
+      })
+    });
+    if (res.ok) {
+      document.getElementById('new-table-num').value = "";
+      document.getElementById('new-table-name').value = "";
+      alert("✅ Meja baru berhasil ditambahkan!");
+      fetchTables();
+    }
+  } catch (err) {
+    alert("Gagal menambahkan meja.");
+  }
+}
+
+function printQrSticker() {
+  window.print();
+}
+
+// -----------------------------------------------------------------------------
+// TAB 4: OJOL INTEGRATION
 // -----------------------------------------------------------------------------
 function populateWebhookUrls() {
   const base = window.location.origin;
@@ -589,9 +994,44 @@ async function testOjolFromAdmin(channel) {
   }
 }
 
-// Start
-initAdmin();
-populateWebhookUrls();
+// -----------------------------------------------------------------------------
+// STATS
+// -----------------------------------------------------------------------------
+async function fetchStats() {
+  try {
+    const res = await fetch(`/api/admin/stats?outlet=${currentAdminOutlet}`);
+    const data = await res.json();
+    document.getElementById('stat-revenue').innerText = formatRupiah(data.totalRevenue);
+    document.getElementById('stat-orders').innerText = data.totalOrders;
+    document.getElementById('stat-pending').innerText = data.pendingOrders;
+
+    if (data.recentOrders && data.recentOrders.length > 0) {
+      const topItem = data.recentOrders[0].items[0];
+      if (topItem) {
+        document.getElementById('stat-top-item').innerText = topItem.name;
+        document.getElementById('stat-top-qty').innerText = `${topItem.qty} porsi terjual`;
+      }
+    }
+  } catch (err) {
+    console.error("Gagal memuat stats:", err);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// INITIALIZATION
+// -----------------------------------------------------------------------------
+function initAdmin() {
+  if (!verifyAuth()) return;
+  loadStoreProfile();
+  fetchAdminMenus();
+  fetchTables();
+  fetchStats();
+  populateWebhookUrls();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  initAdmin();
+});
 </script>
 </body>
 </html>

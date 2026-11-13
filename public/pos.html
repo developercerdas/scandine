@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScanDine POS & Kitchen Display System</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .filter-tab-btn {
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--slate);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-tab-btn.active {
+      background: var(--dark);
+      color: #fff;
+      border-color: var(--dark);
+    }
+    .badge-count {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 7px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+    .filter-tab-btn:not(.active) .badge-count {
+      background: #e2e8f0;
+      color: var(--slate);
+    }
+    .sound-toggle-btn {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body style="background: #f1f5f9;">
+
+<div class="pos-layout">
+  <!-- POS Navigation -->
+  <header class="pos-navbar">
+    <div class="pos-nav-title">
+      <span>🍽️</span>
+      <span>ScanDine POS & Kitchen</span>
+      <span style="font-size: 0.72rem; background: #059669; color: #fff; padding: 2px 8px; border-radius: 6px;">● Live Real-Time</span>
+    </div>
+    <div class="pos-links">
+      <button class="sound-toggle-btn" id="btn-sound" onclick="toggleAudio()">
+        🔊 Audio Notifikasi: Aktif
+      </button>
+      <a href="/order?table=1" target="_blank" class="pos-link">📱 Tes Menu Pelanggan (Meja 1)</a>
+      <a href="/admin" class="pos-link">⚙️ Admin & QR Generator</a>
+    </div>
+  </header>
+
+  <!-- POS Main Content -->
+  <main class="pos-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--dark);">Antrean Pesanan Masuk</h2>
+      <div style="font-size: 0.85rem; color: var(--muted);">
+        Total Pesanan Hari Ini: <strong id="total-orders-count">0</strong>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab-btn active" onclick="setFilter('ALL', this)">
+        Semua Pesanan <span class="badge-count" id="count-all">0</span>
+      </button>
+      <button class="filter-tab-btn" onclick="setFilter('RECEIVED', this)">
+        📥 Perlu Diproses <span class="badge-count" id="count-received">0</span>
+      </button>
+      <button class="filter-tab-btn" onclick="setFilter('COOKING', this)">
+        🍳 Sedang Dimasak <span class="badge-count" id="count-cooking">0</span>
+      </button>
+      <button class="filter-tab-btn" onclick="setFilter('READY', this)">
+        🛵 Siap Antar <span class="badge-count" id="count-ready">0</span>
+      </button>
+      <button class="filter-tab-btn" onclick="setFilter('COMPLETED', this)">
+        ✅ Selesai <span class="badge-count" id="count-completed">0</span>
+      </button>
+    </div>
+
+    <!-- Orders Grid Container -->
+    <div class="order-grid" id="orders-grid">
+      <!-- Cards rendered by JS -->
+    </div>
+  </main>
+</div>
+
+<!-- ========================================================================= -->
+<!-- HIDDEN THERMAL RECEIPT PRINT AREA (58mm / 80mm) -->
+<!-- ========================================================================= -->
+<div id="thermal-receipt-area"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+let orders = [];
+let currentFilter = 'ALL';
+let audioEnabled = true;
+
+const socket = io();
+
+// Join Staff Room for Live Updates
+socket.emit('join_staff');
+
+// Synthesized Audio Chime (No external mp3 download needed, works offline)
+function playOrderChime() {
+  if (!audioEnabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Play two-tone bell chime
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    osc1.frequency.setValueAtTime(880.00, ctx.currentTime + 0.15); // A5
+
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+
+    osc1.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start();
+    osc1.stop(ctx.currentTime + 0.8);
+  } catch (err) {
+    console.log("Audio play blocked by browser autoplay policy until user interacts.");
+  }
+}
+
+function toggleAudio() {
+  audioEnabled = !audioEnabled;
+  document.getElementById('btn-sound').innerText = audioEnabled ? "🔊 Audio Notifikasi: Aktif" : "🔇 Audio: Mati";
+  if (audioEnabled) playOrderChime();
+}
+
+// Format Rupiah
+function formatRupiah(amount) {
+  return "Rp " + (amount || 0).toLocaleString('id-ID');
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return "-";
+  const d = new Date(isoStr);
+  return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
+// -----------------------------------------------------------------------------
+// LOAD ORDERS
+// -----------------------------------------------------------------------------
+async function fetchOrders() {
+  try {
+    const res = await fetch('/api/staff/orders');
+    orders = await res.json();
+    renderOrders();
+    updateCounts();
+  } catch (err) {
+    console.error("Gagal mengambil data pesanan:", err);
+  }
+}
+
+// Socket: Real-time new order
+socket.on('new_order', (newOrder) => {
+  // Check if exists
+  const idx = orders.findIndex(o => o.id === newOrder.id);
+  if (idx !== -1) {
+    orders[idx] = newOrder;
+  } else {
+    orders.unshift(newOrder);
+    playOrderChime();
+  }
+  renderOrders();
+  updateCounts();
+});
+
+// Socket: Real-time update
+socket.on('order_updated', (updatedOrder) => {
+  const idx = orders.findIndex(o => o.id === updatedOrder.id);
+  if (idx !== -1) {
+    orders[idx] = updatedOrder;
+    renderOrders();
+    updateCounts();
+  }
+});
+
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderOrders();
+}
+
+function updateCounts() {
+  document.getElementById('total-orders-count').innerText = orders.length;
+  document.getElementById('count-all').innerText = orders.length;
+  document.getElementById('count-received').innerText = orders.filter(o => o.orderStatus === 'RECEIVED').length;
+  document.getElementById('count-cooking').innerText = orders.filter(o => o.orderStatus === 'COOKING').length;
+  document.getElementById('count-ready').innerText = orders.filter(o => o.orderStatus === 'READY').length;
+  document.getElementById('count-completed').innerText = orders.filter(o => o.orderStatus === 'COMPLETED').length;
+}
+
+// -----------------------------------------------------------------------------
+// RENDER ORDERS GRID
+// -----------------------------------------------------------------------------
+function renderOrders() {
+  const grid = document.getElementById('orders-grid');
+  let list = orders;
+
+  if (currentFilter !== 'ALL') {
+    list = list.filter(o => o.orderStatus === currentFilter);
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #fff; border-radius: 12px; border: 1px dashed var(--border);">
+        <div style="font-size: 2.5rem; margin-bottom: 8px;">☕</div>
+        <h3 style="font-size: 1.1rem; color: var(--dark);">Tidak ada pesanan di kategori ini</h3>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-top: 4px;">Pesanan baru dari scan QR meja akan otomatis muncul di sini secara real-time.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = "";
+  list.forEach(order => {
+    const isPaid = order.paymentStatus === 'PAID';
+    const isCashier = order.paymentMethod === 'CASHIER';
+
+    // Status label
+    let statusBadge = "";
+    if (order.orderStatus === 'AWAITING_PAYMENT') statusBadge = '<span class="badge" style="background: #fef3c7; color: #b45309;">Menunggu QRIS</span>';
+    else if (order.orderStatus === 'RECEIVED') statusBadge = '<span class="badge" style="background: #e0f2fe; color: #0284c7;">Baru Masuk</span>';
+    else if (order.orderStatus === 'COOKING') statusBadge = '<span class="badge" style="background: #ffedd5; color: #c2410c;">Sedang Dimasak</span>';
+    else if (order.orderStatus === 'READY') statusBadge = '<span class="badge" style="background: #dbeafe; color: #1e40af;">Siap Diantar</span>';
+    else if (order.orderStatus === 'COMPLETED') statusBadge = '<span class="badge" style="background: #d1fae5; color: #065f46;">Selesai</span>';
+
+    // Items list
+    let itemsHtml = "";
+    (order.items || []).forEach(it => {
+      const opts = (it.options || []).map(o => o.value).join(', ');
+      itemsHtml += `
+        <div class="pos-item-row">
+          <div>
+            <div class="pos-item-name">${it.qty}x ${it.name}</div>
+            ${opts ? `<div style="font-size: 0.75rem; color: var(--muted);">${opts}</div>` : ''}
+            ${it.notes ? `<div class="pos-item-notes">📝 ${it.notes}</div>` : ''}
+          </div>
+          <div style="font-weight: 700; font-size: 0.88rem;">${formatRupiah(it.subtotal)}</div>
+        </div>
+      `;
+    });
+
+    html += `
+      <div class="pos-order-card">
+        <div class="pos-order-header">
+          <div>
+            <div class="pos-table-title">📍 ${order.tableNumber}</div>
+            <div style="font-size: 0.78rem; color: var(--muted); margin-top: 2px;">
+              ${order.customerName} • ⏰ ${formatTime(order.createdAt)}
+            </div>
+          </div>
+          <div style="text-align: right;">
+            ${statusBadge}
+            <div style="margin-top: 4px;">
+              <span class="badge ${isPaid ? 'badge-paid' : 'badge-pending'}">
+                ${isPaid ? 'LUNAS' : (isCashier ? 'BAYAR DI KASIR' : 'BELUM LUNAS')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pos-order-body">
+          <div style="font-size: 0.75rem; color: var(--muted); margin-bottom: 8px; font-weight: 700;">ID: ${order.id}</div>
+          ${itemsHtml}
+          
+          <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.95rem; font-weight: 800;">
+            <span>Total Tagihan</span>
+            <span style="color: var(--primary);">${formatRupiah(order.total)}</span>
+          </div>
+        </div>
+
+        <div class="pos-order-footer">
+          <!-- Flow Actions -->
+          <div class="action-btn-group">
+            ${order.orderStatus === 'RECEIVED' ? `
+              <button class="btn-action btn-cooking" onclick="updateOrderStatus('${order.id}', 'COOKING')">
+                🍳 Mulai Masak
+              </button>
+            ` : ''}
+
+            ${order.orderStatus === 'COOKING' ? `
+              <button class="btn-action btn-ready" onclick="updateOrderStatus('${order.id}', 'READY')">
+                🔔 Makanan Siap
+              </button>
+            ` : ''}
+
+            ${order.orderStatus === 'READY' ? `
+              <button class="btn-action btn-complete" onclick="updateOrderStatus('${order.id}', 'COMPLETED')">
+                ✅ Selesai & Antar
+              </button>
+            ` : ''}
+
+            ${!isPaid && isCashier ? `
+              <button class="btn-action" style="background: #10b981; color: #fff;" onclick="markOrderPaid('${order.id}')">
+                💵 Terima Kasir (Lunas)
+              </button>
+            ` : ''}
+
+            <button class="btn-action btn-print" onclick="printReceipt('${order.id}')">
+              🖨️ Cetak Struk
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  grid.innerHTML = html;
+}
+
+// -----------------------------------------------------------------------------
+// STATUS UPDATES
+// -----------------------------------------------------------------------------
+async function updateOrderStatus(orderId, nextStatus) {
+  try {
+    const res = await fetch(`/api/staff/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderStatus: nextStatus })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const idx = orders.findIndex(o => o.id === orderId);
+      if (idx !== -1) orders[idx] = data.order;
+      renderOrders();
+      updateCounts();
+    }
+  } catch (err) {
+    alert("Gagal memperbarui status pesanan.");
+  }
+}
+
+async function markOrderPaid(orderId) {
+  if (!confirm("Tandai pesanan ini sudah LUNAS dibayar di kasir?")) return;
+  try {
+    const res = await fetch(`/api/staff/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentStatus: 'PAID' })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const idx = orders.findIndex(o => o.id === orderId);
+      if (idx !== -1) orders[idx] = data.order;
+      renderOrders();
+      updateCounts();
+    }
+  } catch (err) {
+    alert("Gagal memperbarui status pembayaran.");
+  }
+}
+
+// -----------------------------------------------------------------------------
+// THERMAL RECEIPT PRINTING (58mm)
+// -----------------------------------------------------------------------------
+function printReceipt(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+
+  const area = document.getElementById('thermal-receipt-area');
+  
+  let itemsRows = "";
+  order.items.forEach(it => {
+    itemsRows += `
+      <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+        <span>${it.qty}x ${it.name}</span>
+        <span>${formatRupiah(it.subtotal)}</span>
+      </div>
+    `;
+  });
+
+  area.innerHTML = `
+    <div style="text-align: center; padding-bottom: 8px; border-bottom: 1px dashed #000; margin-bottom: 8px;">
+      <h3 style="font-size: 13px; font-weight: bold; margin: 0;">KOPI & SELERA NUSANTARA</h3>
+      <p style="font-size: 9px; margin: 2px 0;">Jl. Senopati No. 88, Jaksel</p>
+      <p style="font-size: 9px; margin: 2px 0;">Telp: 0812-8899-7766</p>
+    </div>
+
+    <div style="margin-bottom: 8px; font-size: 10px;">
+      <div>No: ${order.id}</div>
+      <div>Waktu: ${formatTime(order.createdAt)}</div>
+      <div>Meja: <strong>${order.tableNumber}</strong> (${order.customerName})</div>
+      <div>Bayar: ${order.paymentMethod} (${order.paymentStatus === 'PAID' ? 'LUNAS' : 'PENDING'})</div>
+    </div>
+
+    <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin-bottom: 8px; font-size: 10px;">
+      ${itemsRows}
+    </div>
+
+    <div style="font-size: 10px; margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between;">
+        <span>Subtotal:</span>
+        <span>${formatRupiah(order.subtotal)}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>PPN (10%):</span>
+        <span>${formatRupiah(order.tax)}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>Service (5%):</span>
+        <span>${formatRupiah(order.service)}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 4px; font-size: 12px;">
+        <span>TOTAL:</span>
+        <span>${formatRupiah(order.total)}</span>
+      </div>
+    </div>
+
+    <div style="text-align: center; border-top: 1px dashed #000; padding-top: 8px; font-size: 9px;">
+      <p>Terima Kasih Atas Kunjungan Anda!</p>
+      <p style="margin-top: 2px;">WiFi: SeleraNusantara / Pass: kopiindonesia</p>
+    </div>
+  `;
+
+  window.print();
+}
+
+// Start
+fetchOrders();
+setInterval(fetchOrders, 10000); // Polling backup
+</script>
+</body>
+</html>

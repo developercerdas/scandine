@@ -1,0 +1,282 @@
+{
+  "settings": {
+    "restoName": "Kopi & Selera Nusantara",
+    "tagline": "Authentic Taste & Modern Coffee",
+    "address": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
+    "phone": "0812-8899-7766",
+    "taxRate": 10,
+    "serviceRate": 5,
+    "currency": "Rp"
+  },
+  "tables": [
+    {
+      "id": "1",
+      "number": "1",
+      "name": "Meja 01 (Indoor)",
+      "status": "AVAILABLE"
+    },
+    {
+      "id": "2",
+      "number": "2",
+      "name": "Meja 02 (Indoor)",
+      "status": "AVAILABLE"
+    },
+    {
+      "id": "3",
+      "number": "3",
+      "name": "Meja 03 (Indoor)",
+      "status": "AVAILABLE"
+    },
+    {
+      "id": "4",
+      "number": "4",
+      "name": "Meja 04 (Sofa)",
+      "status": "AVAILABLE"
+    },
+    {
+      "id": "5",
+      "number": "5",
+      "name": "Meja 05 (Outdoor)",
+      "status": "AVAILABLE"
+    },
+    {
+      "id": "6",
+      "number": "6",
+      "name": "Meja 06 (Outdoor)",
+      "status": "AVAILABLE"
+    },
+    {
+      "id": "vip1",
+      "number": "VIP-1",
+      "name": "Meja VIP Room 1",
+      "status": "AVAILABLE"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Makanan Utama",
+      "icon": "🍛"
+    },
+    {
+      "id": "cat-2",
+      "name": "Kopi & Minuman",
+      "icon": "☕"
+    },
+    {
+      "id": "cat-3",
+      "name": "Cemilan & Snack",
+      "icon": "🍟"
+    },
+    {
+      "id": "cat-4",
+      "name": "Dessert & Manisan",
+      "icon": "🍰"
+    }
+  ],
+  "menus": [
+    {
+      "id": "menu-1",
+      "categoryId": "cat-1",
+      "name": "Nasi Goreng Wagyu Selera",
+      "description": "Nasi goreng aromatik dengan potongan daging wagyu lembut, telur mata sapi, kerupuk udang, dan acar segar.",
+      "price": 58000,
+      "image": "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": [
+        {
+          "name": "Tingkat Kepedasan",
+          "choices": [
+            "Tidak Pedas",
+            "Sedang",
+            "Pedas Gurih",
+            "Extra Pedas"
+          ]
+        },
+        {
+          "name": "Pilihan Telur",
+          "choices": [
+            "Mata Sapi Setengah Matang",
+            "Mata Sapi Matang",
+            "Dadar"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "menu-2",
+      "categoryId": "cat-1",
+      "name": "Ayam Bakar Madu Rempah",
+      "description": "1/4 ekor ayam ungkep bumbu rempah bakar madu legit, disajikan dengan nasi putih hangat dan sambal terasi.",
+      "price": 45000,
+      "image": "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": [
+        {
+          "name": "Pilihan Bagian",
+          "choices": [
+            "Paha Atas & Bawah",
+            "Dada"
+          ]
+        },
+        {
+          "name": "Jenis Sambal",
+          "choices": [
+            "Sambal Terasi Bakar",
+            "Sambal Matah Bali",
+            "Sambal Ijo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "menu-3",
+      "categoryId": "cat-1",
+      "name": "Mie Nyemek Khas Jawa",
+      "description": "Mie kuah kental gurih dengan suwiran ayam kampung, bakso sapi, sawi hijau, dan taburan bawang goreng renyah.",
+      "price": 36000,
+      "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": [
+        {
+          "name": "Tingkat Kepedasan",
+          "choices": [
+            "Level 0 (Gurih)",
+            "Level 1 (Sedang)",
+            "Level 2 (Pedas Nampol)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "menu-4",
+      "categoryId": "cat-2",
+      "name": "Es Kopi Susu Gula Aren",
+      "description": "Espresso double shot arabika blend dengan fresh milk creamy dan sirup gula aren murni organik.",
+      "price": 24000,
+      "image": "https://images.unsplash.com/photo-1517256064527-09c73fc73e38?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": [
+        {
+          "name": "Manis",
+          "choices": [
+            "Normal Sweet",
+            "Less Sweet (50%)",
+            "No Sugar"
+          ]
+        },
+        {
+          "name": "Es Batu",
+          "choices": [
+            "Normal Ice",
+            "Less Ice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "menu-5",
+      "categoryId": "cat-2",
+      "name": "Matcha Latte Oat Milk",
+      "description": "Pure Uji Matcha import dari Kyoto dipadu dengan creamy oat milk yang lembut dan harum.",
+      "price": 35000,
+      "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": [
+        {
+          "name": "Suhu",
+          "choices": [
+            "Dingin (Iced)",
+            "Hangat (Hot)"
+          ]
+        },
+        {
+          "name": "Tingkat Manis",
+          "choices": [
+            "Normal Sweet",
+            "Less Sweet"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "menu-6",
+      "categoryId": "cat-2",
+      "name": "Artisan Iced Lychee Tea",
+      "description": "Black tea premium dengan sirup leci segar dan 2 buah leci utuh manis menyegarkan.",
+      "price": 26000,
+      "image": "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": []
+    },
+    {
+      "id": "menu-7",
+      "categoryId": "cat-3",
+      "name": "Truffle Fries with Parmesan",
+      "description": "Kentang goreng renyah beraroma minyak truffle asli dengan taburan keju parmesan dan dipping saus tar-tar.",
+      "price": 32000,
+      "image": "https://images.unsplash.com/photo-1576107232684-1279f3908594?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": []
+    },
+    {
+      "id": "menu-8",
+      "categoryId": "cat-3",
+      "name": "Cireng Krispi Sambal Rujak",
+      "description": "Cireng khas Bandung kenyal gurih di dalam, garing di luar, dengan cocolan bumbu rujak pedas manis asam segar.",
+      "price": 22000,
+      "image": "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": []
+    },
+    {
+      "id": "menu-9",
+      "categoryId": "cat-4",
+      "name": "Pisang Goreng Madu Wijen",
+      "description": "Pisang raja manis karamelisasi madu murni dengan taburan biji wijen panggang renyah.",
+      "price": 25000,
+      "image": "https://images.unsplash.com/photo-1528975604071-b4dc52a2d18c?w=600&auto=format&fit=crop&q=80",
+      "isAvailable": true,
+      "options": []
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-20261113-6000",
+      "tableNumber": "Meja 1",
+      "customerName": "Budi Santoso",
+      "customerPhone": "-",
+      "notes": "",
+      "items": [
+        {
+          "menuId": "menu-1",
+          "name": "Nasi Goreng Wagyu Selera",
+          "price": 58000,
+          "qty": 2,
+          "options": [],
+          "notes": "",
+          "subtotal": 116000
+        },
+        {
+          "menuId": "menu-4",
+          "name": "Es Kopi Susu Gula Aren",
+          "price": 24000,
+          "qty": 2,
+          "options": [],
+          "notes": "",
+          "subtotal": 48000
+        }
+      ],
+      "subtotal": 164000,
+      "tax": 16400,
+      "service": 8200,
+      "total": 188600,
+      "paymentMethod": "QRIS",
+      "paymentStatus": "PAID",
+      "orderStatus": "RECEIVED",
+      "qrisDataUrl": "data:image/png;base64,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",
+      "createdAt": "2026-11-13T04:06:01.663Z",
+      "paidAt": "2026-11-13T04:06:16.185Z"
+    }
+  ]
+}

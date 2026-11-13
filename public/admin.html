@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScanDine | Admin & Generator QR Meja</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .stat-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--dark);
+      margin-top: 4px;
+    }
+    .stat-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      background: none;
+      border: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    .qr-card-preview {
+      background: #fff;
+      border: 2px dashed #cbd5e1;
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: var(--success);
+    }
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+  </style>
+</head>
+<body style="background: #f8fafc;">
+
+<!-- Navbar -->
+<header class="pos-navbar">
+  <div class="pos-nav-title">
+    <span>☕</span>
+    <span>ScanDine Backoffice & Admin</span>
+  </div>
+  <div class="pos-links">
+    <a href="/pos" class="pos-link">🖥️ Buka Layar Kasir / POS</a>
+    <a href="/order?table=1" target="_blank" class="pos-link">📱 Preview HP Pelanggan</a>
+  </div>
+</header>
+
+<div class="admin-container">
+  <!-- Stats Section -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Total Omzet Lunas</div>
+      <div class="stat-val" id="stat-revenue" style="color: var(--primary);">Rp 0</div>
+      <div class="stat-sub">Dari transaksi QRIS & Kasir lunas</div>
+    </div>
+    <div class="stat-card">
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Pesanan Selesai</div>
+      <div class="stat-val" id="stat-orders">0</div>
+      <div class="stat-sub">Transaksi berhasil diproses</div>
+    </div>
+    <div class="stat-card">
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Pesanan Berjalan</div>
+      <div class="stat-val" id="stat-pending" style="color: #d97706;">0</div>
+      <div class="stat-sub">Sedang dimasak / diantar</div>
+    </div>
+    <div class="stat-card">
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase;">Menu Paling Laris</div>
+      <div class="stat-val" id="stat-top-item" style="font-size: 1.15rem; margin-top: 8px;">-</div>
+      <div class="stat-sub" id="stat-top-qty">-</div>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-qr', this)">📍 Generator QR Code Meja</button>
+    <button class="tab-btn" onclick="switchTab('tab-menu', this)">🍲 Kelola Menu & Stok</button>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 1: QR CODE GENERATOR MEJA -->
+  <!-- ======================================================================= -->
+  <div id="tab-qr" class="tab-content">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: flex-start;">
+      <!-- Table Selector & Add -->
+      <div style="background: #fff; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border);">
+        <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 14px;">Pilih Meja untuk Cetak Stiker QR</h3>
+        
+        <div class="form-group">
+          <label class="form-label">Daftar Meja Tersedia</label>
+          <select id="select-table" class="form-input" onchange="onTableSelectChange()">
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 10px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 8px; font-size: 0.85rem;">
+            🔗 Buka Menu Meja Ini
+          </a>
+          <button onclick="printQrSticker()" style="flex: 1; padding: 10px; background: var(--dark); color: #fff; border: none; font-weight: 700; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">
+            🖨️ Cetak Stiker Meja
+          </button>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;">
+
+        <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 10px;">Tambah Meja Baru</h4>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="new-table-num" class="form-input" placeholder="No. Meja (misal: 7)">
+          <input type="text" id="new-table-name" class="form-input" placeholder="Nama (misal: Meja 07 Lantai 2)">
+          <button onclick="addNewTable()" style="white-space: nowrap; padding: 10px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+            + Tambah
+          </button>
+        </div>
+      </div>
+
+      <!-- Live QR Sticker Preview -->
+      <div>
+        <div class="qr-card-preview" id="qr-sticker-area">
+          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; color: var(--primary);">
+            SCAN ME & ORDER
+          </div>
+          <h2 id="preview-table-title" style="font-size: 1.5rem; font-weight: 900; margin: 4px 0 12px; color: var(--dark);">
+            MEJA 01
+          </h2>
+
+          <div style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; border: 1px solid var(--border); box-shadow: var(--shadow);">
+            <img id="qr-preview-image" src="" alt="QR Meja" style="width: 220px; height: 220px; display: block;">
+          </div>
+
+          <p style="font-size: 0.82rem; color: var(--muted); margin-top: 12px; line-height: 1.4;">
+            Pindai dengan kamera HP Anda untuk melihat menu dan memesan langsung dari meja.
+          </p>
+          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px;" id="preview-url-text">
+            http://localhost:3000/order?table=1
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 2: KELOLA MENU & STOK -->
+  <!-- ======================================================================= -->
+  <div id="tab-menu" class="tab-content" style="display: none;">
+    <div style="background: #fff; padding: 20px; border-radius: var(--radius); border: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h3 style="font-size: 1.15rem; font-weight: 800;">Daftar Menu & Ketersediaan Stok</h3>
+          <p style="font-size: 0.8rem; color: var(--muted);">Mengubah status tombol langsung memperbarui menu di seluruh HP pelanggan secara live.</p>
+        </div>
+      </div>
+
+      <div id="menu-table-list">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let tables = [];
+let menus = [];
+
+function formatRupiah(amount) {
+  return "Rp " + (amount || 0).toLocaleString('id-ID');
+}
+
+function switchTab(tabId, el) {
+  document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).style.display = 'block';
+  el.classList.add('active');
+}
+
+// -----------------------------------------------------------------------------
+// LOAD DATA
+// -----------------------------------------------------------------------------
+async function initAdmin() {
+  await Promise.all([loadStats(), loadTables(), loadMenus()]);
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/admin/stats');
+    const data = await res.json();
+    document.getElementById('stat-revenue').innerText = formatRupiah(data.totalRevenue);
+    document.getElementById('stat-orders').innerText = data.totalOrders;
+    document.getElementById('stat-pending').innerText = data.pendingOrders;
+
+    if (data.topItems && data.topItems.length > 0) {
+      document.getElementById('stat-top-item').innerText = data.topItems[0].name;
+      document.getElementById('stat-top-qty').innerText = `Terjual ${data.topItems[0].qty} porsi`;
+    } else {
+      document.getElementById('stat-top-item').innerText = "Belum ada transaksi";
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function loadTables() {
+  try {
+    const res = await fetch('/api/admin/tables');
+    tables = await res.json();
+
+    const select = document.getElementById('select-table');
+    select.innerHTML = tables.map(t => `<option value="${t.number}">${t.name} (Nomor: ${t.number})</option>`).join('');
+
+    if (tables.length > 0) {
+      loadTableQr(tables[0].number, tables[0].name);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function onTableSelectChange() {
+  const select = document.getElementById('select-table');
+  const selTable = tables.find(t => t.number === select.value);
+  if (selTable) {
+    loadTableQr(selTable.number, selTable.name);
+  }
+}
+
+async function loadTableQr(tableNum, tableName) {
+  try {
+    const res = await fetch(`/api/admin/tables/${tableNum}/qr`);
+    const data = await res.json();
+
+    document.getElementById('preview-table-title').innerText = tableName || `MEJA ${tableNum}`;
+    document.getElementById('qr-preview-image').src = data.qrDataUrl;
+    document.getElementById('preview-url-text').innerText = data.targetUrl;
+    document.getElementById('btn-preview-link').href = data.targetUrl;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function addNewTable() {
+  const num = document.getElementById('new-table-num').value.trim();
+  const name = document.getElementById('new-table-name').value.trim();
+  if (!num) return alert("Masukkan nomor meja");
+
+  try {
+    const res = await fetch('/api/admin/tables', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ number: num, name: name || `Meja ${num}` })
+    });
+    if (res.ok) {
+      document.getElementById('new-table-num').value = '';
+      document.getElementById('new-table-name').value = '';
+      await loadTables();
+    }
+  } catch (err) {
+    alert("Gagal menambah meja.");
+  }
+}
+
+function printQrSticker() {
+  const sticker = document.getElementById('qr-sticker-area');
+  const printWindow = window.open('', '', 'width=600,height=700');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Cetak Stiker Meja</title>
+        <style>
+          body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .card { text-align: center; border: 2px solid #000; border-radius: 16px; padding: 24px; width: 300px; }
+          h2 { margin: 8px 0; font-size: 24px; }
+          img { width: 220px; height: 220px; }
+          p { font-size: 13px; color: #555; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div style="font-size: 12px; font-weight: bold; letter-spacing: 1px;">KOPI & SELERA NUSANTARA</div>
+          <h2>${document.getElementById('preview-table-title').innerText}</h2>
+          <img src="${document.getElementById('qr-preview-image').src}">
+          <p>Scan dengan kamera HP untuk pesan makanan langsung dari meja</p>
+        </div>
+        <script>window.onload = function() { window.print(); }<\/script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// -----------------------------------------------------------------------------
+// MENUS MANAGEMENT
+// -----------------------------------------------------------------------------
+async function loadMenus() {
+  try {
+    const res = await fetch('/api/admin/menus');
+    menus = await res.json();
+    renderMenuList();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderMenuList() {
+  const container = document.getElementById('menu-table-list');
+  let html = `
+    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+      <thead>
+        <tr style="border-bottom: 2px solid var(--border); text-align: left; color: var(--muted); font-size: 0.8rem; text-transform: uppercase;">
+          <th style="padding: 10px;">Menu</th>
+          <th style="padding: 10px;">Harga</th>
+          <th style="padding: 10px;">Status Ketersediaan</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  menus.forEach(menu => {
+    html += `
+      <tr style="border-bottom: 1px solid var(--border);">
+        <td style="padding: 12px 10px; display: flex; align-items: center; gap: 12px;">
+          <img src="${menu.image || ''}" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover;">
+          <div>
+            <div style="font-weight: 700; color: var(--dark);">${menu.name}</div>
+            <div style="font-size: 0.75rem; color: var(--muted);">${menu.description ? menu.description.slice(0, 50) + '...' : ''}</div>
+          </div>
+        </td>
+        <td style="padding: 12px 10px; font-weight: 700; color: var(--primary);">
+          ${formatRupiah(menu.price)}
+        </td>
+        <td style="padding: 12px 10px;">
+          <label class="toggle-switch">
+            <input type="checkbox" ${menu.isAvailable ? 'checked' : ''} onchange="toggleMenuStatus('${menu.id}')">
+            <span class="slider"></span>
+          </label>
+          <span style="font-size: 0.8rem; font-weight: 600; margin-left: 8px; color: ${menu.isAvailable ? 'var(--success)' : 'var(--danger)'};">
+            ${menu.isAvailable ? 'Tersedia' : 'Habis (Sold Out)'}
+          </span>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+async function toggleMenuStatus(menuId) {
+  try {
+    const res = await fetch(`/api/admin/menus/${menuId}/toggle`, { method: 'PATCH' });
+    const data = await res.json();
+    if (data.success) {
+      const idx = menus.findIndex(m => m.id === menuId);
+      if (idx !== -1) menus[idx] = data.menu;
+      renderMenuList();
+    }
+  } catch (err) {
+    alert("Gagal mengubah status menu.");
+  }
+}
+
+// Start
+initAdmin();
+</script>
+</body>
+</html>

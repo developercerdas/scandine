@@ -271,9 +271,11 @@ let currentActiveOrder = null;
 
 const socket = io();
 
-// Parse Table from URL parameter (e.g. ?table=3)
+// Parse Outlet and Table from URL parameter
 const urlParams = new URLSearchParams(window.location.search);
+const outletQuery = urlParams.get('outlet') || 'senopati';
 const tableQuery = urlParams.get('table') || '1';
+let currentOrderMode = 'DINE_IN'; // 'DINE_IN' | 'PICK_UP'
 
 // Format Currency
 function formatRupiah(amount) {
@@ -285,19 +287,19 @@ function formatRupiah(amount) {
 // -----------------------------------------------------------------------------
 async function initApp() {
   try {
-    const res = await fetch(`/api/bootstrap?table=${encodeURIComponent(tableQuery)}`);
+    const res = await fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`);
     storeData = await res.json();
 
-    document.getElementById('display-table-name').innerText = storeData.table.name || `Meja ${tableQuery}`;
-    document.getElementById('display-resto-name').innerText = storeData.settings.restoName || "Restoran";
-    document.getElementById('display-resto-sub').innerText = storeData.settings.tagline || "";
-    document.getElementById('summary-tax-label').innerText = `PPN (${storeData.settings.taxRate}%)`;
-    document.getElementById('summary-service-label').innerText = `Service (${storeData.settings.serviceRate}%)`;
+    const tableNameText = currentOrderMode === 'PICK_UP' ? 'Ambil Sendiri (Takeaway)' : (storeData.table.name || `Meja ${tableQuery}`);
+    document.getElementById('display-table-name').innerText = `${storeData.outlet.name} • ${tableNameText}`;
+    document.getElementById('display-resto-name').innerText = storeData.business.name || "ScanDine Resto";
+    document.getElementById('display-resto-sub').innerText = storeData.business.tagline || "";
+    document.getElementById('summary-tax-label').innerText = `PB1 / Pajak (${storeData.outlet.taxRate}%)`;
+    document.getElementById('summary-service-label').innerText = `Service (${storeData.outlet.serviceRate}%)`;
 
     renderCategories();
     renderMenus();
 
-    // Check if there's an ongoing saved order in sessionStorage
     const savedOrderId = sessionStorage.getItem('activeOrderId');
     if (savedOrderId) {
       loadExistingOrder(savedOrderId);
@@ -307,11 +309,15 @@ async function initApp() {
   }
 }
 
-// Socket: Real-time menu updates (e.g. if an item gets marked Sold Out)
+// Socket: Real-time menu updates
 socket.on('menu_changed', () => {
-  fetch(`/api/bootstrap?table=${encodeURIComponent(tableQuery)}`)
+  fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`)
     .then(r => r.json())
     .then(data => {
+      storeData.menus = data.menus;
+      renderMenus();
+    });
+});
       storeData.menus = data.menus;
       renderMenus();
     });
@@ -588,7 +594,9 @@ async function submitOrder() {
 
   try {
     const payload = {
-      tableNumber: storeData.table.name || `Meja ${tableQuery}`,
+      outletId: storeData.outlet.id,
+      channel: currentOrderMode,
+      tableNumber: currentOrderMode === 'PICK_UP' ? 'Ambil di Toko' : (storeData.table.name || `Meja ${tableQuery}`),
       customerName: custName,
       items: cart,
       paymentMethod: selectedPayment,

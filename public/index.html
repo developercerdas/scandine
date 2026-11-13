@@ -150,40 +150,58 @@
   <!-- Portals Grid -->
   <div class="portal-grid">
     <!-- Card 1: Customer Menu -->
-    <a href="/order?table=1" class="portal-card">
+    <a href="/order?outlet=senopati&table=1" class="portal-card">
       <div>
         <div class="p-card-icon">📱</div>
-        <div class="p-card-title">1. Menu Pelanggan (Meja 1)</div>
+        <div class="p-card-title">1. Menu Pelanggan (Self-Order)</div>
         <div class="p-card-desc">
-          Tampilan layar pemesanan mandiri yang muncul saat tamu scan barcode meja. Mendukung pemilihan varian, catatan koki, kalkulasi pajak, dan bayar QRIS / Kasir.
+          Scan QR meja untuk cabang Senopati. Mendukung Dine-In & Pick-Up, pilihan varian, catatan koki, dan bayar QRIS otomatis atau kasir.
         </div>
       </div>
       <div class="p-card-btn">Buka Menu Meja 1 ➔</div>
     </a>
 
     <!-- Card 2: Cashier & Kitchen -->
-    <a href="/pos" class="portal-card">
+    <a href="/pos?outlet=senopati" class="portal-card">
       <div>
         <div class="p-card-icon">🖥️</div>
-        <div class="p-card-title">2. Layar Kasir & Dapur (POS)</div>
+        <div class="p-card-title">2. Layar POS, Dapur & Meja</div>
         <div class="p-card-desc">
-          Layar real-time untuk kasir dan dapur. Dilengkapi bel notifikasi audio instan saat ada pesanan masuk, alur status masak, dan tombol cetak struk thermal 58mm.
+          Layar kasir & dapur real-time. Dilengkapi bel notifikasi audio, denah status meja (floor plan), dan integrasi pesanan GoFood/GrabFood/ShopeeFood.
         </div>
       </div>
-      <div class="p-card-btn">Buka POS Kasir & Dapur ➔</div>
+      <div class="p-card-btn">Buka POS & Floor Plan ➔</div>
     </a>
 
     <!-- Card 3: Admin & Backoffice -->
     <a href="/admin" class="portal-card">
       <div>
         <div class="p-card-icon">⚙️</div>
-        <div class="p-card-title">3. Admin & Generator QR</div>
+        <div class="p-card-title">3. Admin Multi-Cabang & QR</div>
         <div class="p-card-desc">
-          Dashboard manajemen: cetak stiker QR untuk setiap meja (Meja 1 s/d VIP), saklar ketersediaan menu (stok habis/ada), dan laporan omzet penjualan.
+          Dashboard pusat: cetak stiker QR meja per cabang (Senopati, Kemang), saklar stok menu, dan analitik penjualan gabungan per channel.
         </div>
       </div>
-      <div class="p-card-btn">Buka Admin Resto ➔</div>
+      <div class="p-card-btn">Buka Backoffice Pusat ➔</div>
     </a>
+  </div>
+
+  <!-- Omnichannel OFD Highlight -->
+  <div style="background: #fff; border-radius: 16px; padding: 24px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 28px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <div style="font-size: 0.78rem; font-weight: 800; color: #059669; text-transform: uppercase;">● Omnichannel Connected</div>
+        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--dark);">Integrasi Pesan-Antar Ojol Terpadu</h3>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <span style="background: #dcfce7; color: #15803d; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">🟢 GoFood</span>
+        <span style="background: #d1fae5; color: #047857; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">🟢 GrabFood</span>
+        <span style="background: #ffedd5; color: #c2410c; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 0.8rem;">🟠 ShopeeFood</span>
+      </div>
+    </div>
+    <p style="font-size: 0.88rem; color: var(--slate); line-height: 1.5;">
+      Semua pesanan online langsung masuk ke layar POS dan printer dapur ScanDine tanpa staf perlu mengetik ulang di 3 HP berbeda. Tiket pesanan otomatis memuat nomor order dan PIN penjemputan driver ojol.
+    </p>
   </div>
 
   <!-- How It Works / Commercialization Highlights -->

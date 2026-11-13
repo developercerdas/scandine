@@ -14,7 +14,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
+    methods: ["GET", "POST", "PATCH"]
   }
 });
 
@@ -24,7 +24,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper to get local network IP address (e.g. 192.168.x.x)
+// Helper to get local network IP address
 function getLocalIp() {
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
@@ -38,10 +38,20 @@ function getLocalIp() {
 }
 
 // Helper for generating order ID
-function generateOrderId() {
+function generateOrderId(prefix = 'ORD') {
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  return `ORD-${dateStr}-${randomSuffix}`;
+  return `${prefix}-${dateStr}-${randomSuffix}`;
+}
+
+// Helper to resolve Outlet
+function resolveOutlet(db, outletParam) {
+  if (!outletParam) {
+    return db.outlets[0]; // Default to first outlet
+  }
+  const clean = outletParam.toString().toLowerCase();
+  const found = db.outlets.find(o => o.id.toLowerCase() === clean || o.slug.toLowerCase() === clean);
+  return found || db.outlets[0];
 }
 
 // --------------------------------------------------------------------------
@@ -49,8 +59,12 @@ function generateOrderId() {
 // --------------------------------------------------------------------------
 app.get('/api/network-info', async (req, res) => {
   try {
+    const { outlet, table } = req.query;
     const localIp = getLocalIp();
-    const mobileUrl = `http://${localIp}:${PORT}/order?table=1`;
+    const outletSlug = outlet || 'senopati';
+    const tableNum = table || '1';
+    const mobileUrl = `http://${localIp}:${PORT}/order?outlet=${encodeURIComponent(outletSlug)}&table=${encodeURIComponent(tableNum)}`;
+    
     const qrCodeDataUrl = await QRCode.toDataURL(mobileUrl, {
       width: 320,
       margin: 2,
@@ -69,38 +83,90 @@ app.get('/api/network-info', async (req, res) => {
 });
 
 // --------------------------------------------------------------------------
-// CUSTOMER & BOOTSTRAP API
+// BUSINESSES & OUTLETS API
 // --------------------------------------------------------------------------
-
-// Get initial store data for customer scanning a table QR
-app.get('/api/bootstrap', (req, res) => {
-  const { table } = req.query;
+app.get('/api/outlets', (req, res) => {
   const db = getDb();
-  
-  let currentTable = null;
-  if (table) {
-    currentTable = db.tables.find(t => t.number.toString().toLowerCase() === table.toString().toLowerCase() || t.id === table);
-  }
-
   res.json({
-    settings: db.settings,
-    categories: db.categories,
-    menus: db.menus,
-    table: currentTable || { number: table || "1", name: `Meja ${table || 1}` }
+    businesses: db.businesses,
+    outlets: db.outlets.map(o => ({
+      id: o.id,
+      slug: o.slug,
+      name: o.name,
+      address: o.address,
+      phone: o.phone,
+      businessId: o.businessId,
+      tableCount: o.tables.length
+    }))
   });
 });
 
-// Create new customer order (Self-Order)
+// --------------------------------------------------------------------------
+// CUSTOMER & BOOTSTRAP API (MULTI-OUTLET AWARE)
+// --------------------------------------------------------------------------
+app.get('/api/bootstrap', (req, res) => {
+  const { outlet: outletQuery, table: tableQuery } = req.query;
+  const db = getDb();
+  
+  const currentOutlet = resolveOutlet(db, outletQuery);
+  const currentBiz = db.businesses.find(b => b.id === currentOutlet.businessId) || db.businesses[0];
+
+  let currentTable = null;
+  if (tableQuery) {
+    currentTable = currentOutlet.tables.find(t => 
+      t.number.toString().toLowerCase() === tableQuery.toString().toLowerCase() || t.id === tableQuery
+    );
+  }
+
+  // Mark menus that are out of stock specifically at this outlet
+  const outletOutOfStock = currentOutlet.outOfStockMenus || [];
+  const menusForOutlet = db.menus
+    .filter(m => m.businessId === currentBiz.id)
+    .map(m => ({
+      ...m,
+      isAvailable: m.isAvailable && !outletOutOfStock.includes(m.id)
+    }));
+
+  res.json({
+    business: currentBiz,
+    outlet: {
+      id: currentOutlet.id,
+      slug: currentOutlet.slug,
+      name: currentOutlet.name,
+      address: currentOutlet.address,
+      phone: currentOutlet.phone,
+      taxRate: currentOutlet.taxRate,
+      serviceRate: currentOutlet.serviceRate,
+      deliverySettings: currentOutlet.deliverySettings
+    },
+    categories: db.categories.filter(c => c.businessId === currentBiz.id),
+    menus: menusForOutlet,
+    table: currentTable || { number: tableQuery || "1", name: `Meja ${tableQuery || 1}` }
+  });
+});
+
+// Create new customer order (Supports Dine-In & Pick-Up)
 app.post('/api/orders', async (req, res) => {
   try {
-    const { tableNumber, customerName, customerPhone, items, paymentMethod, notes } = req.body;
+    const { 
+      outletId, 
+      tableNumber, 
+      customerName, 
+      customerPhone, 
+      items, 
+      paymentMethod, 
+      channel = 'DINE_IN',
+      pickupTime,
+      notes 
+    } = req.body;
     
     if (!items || !items.length) {
       return res.status(400).json({ error: "Item pesanan tidak boleh kosong." });
     }
 
     const db = getDb();
-    const settings = db.settings;
+    const outlet = resolveOutlet(db, outletId);
+    const biz = db.businesses.find(b => b.id === outlet.businessId) || db.businesses[0];
 
     // Validate and compute totals
     let subtotal = 0;
@@ -120,31 +186,34 @@ app.post('/api/orders', async (req, res) => {
       };
     });
 
-    const taxAmount = Math.round((subtotal * settings.taxRate) / 100);
-    const serviceAmount = Math.round((subtotal * settings.serviceRate) / 100);
+    const taxAmount = Math.round((subtotal * outlet.taxRate) / 100);
+    const serviceAmount = Math.round((subtotal * outlet.serviceRate) / 100);
     const total = subtotal + taxAmount + serviceAmount;
 
-    const orderId = generateOrderId();
+    const prefix = channel === 'PICK_UP' ? 'PICK' : 'ORD';
+    const orderId = generateOrderId(prefix);
     const isQris = paymentMethod === 'QRIS';
 
-    // Generate mock QRIS string and QR code image
+    // Mock QRIS Generation
     let qrisDataUrl = null;
     if (isQris) {
-      const mockQrisPayload = `00020101021226${settings.restoName.toUpperCase()}520458125303360540${total}5802ID5911SCANDINE_ORD_ID${orderId}6304`;
+      const mockQrisPayload = `00020101021226${biz.name.toUpperCase()}520458125303360540${total}5802ID5911SCANDINE_ORD_ID${orderId}6304`;
       qrisDataUrl = await QRCode.toDataURL(mockQrisPayload, {
         errorCorrectionLevel: 'H',
         margin: 2,
         width: 320,
-        color: {
-          dark: '#0f172a',
-          light: '#ffffff'
-        }
+        color: { dark: '#0f172a', light: '#ffffff' }
       });
     }
 
     const newOrder = {
       id: orderId,
-      tableNumber: tableNumber || "Meja 1",
+      businessId: biz.id,
+      outletId: outlet.id,
+      outletName: outlet.name,
+      channel: channel, // 'DINE_IN' | 'PICK_UP' | 'GOFOOD' | 'GRABFOOD' | 'SHOPEEFOOD'
+      tableNumber: channel === 'DINE_IN' ? (tableNumber || "Meja 1") : "Pick-Up",
+      pickupTime: pickupTime || null,
       customerName: customerName || "Tamu",
       customerPhone: customerPhone || "-",
       notes: notes || "",
@@ -160,12 +229,23 @@ app.post('/api/orders', async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
+    // If Dine-In, update table status to OCCUPIED
+    if (channel === 'DINE_IN') {
+      const tbl = outlet.tables.find(t => t.number.toString() === (tableNumber || "1").replace(/\D/g, ''));
+      if (tbl) {
+        tbl.status = 'OCCUPIED';
+        tbl.currentOrderId = orderId;
+        if (!tbl.occupiedSince) tbl.occupiedSince = new Date().toISOString();
+      }
+    }
+
     db.orders.unshift(newOrder);
     saveDb(db);
 
-    // If customer chooses Pay at Cashier, order immediately arrives at POS/Kitchen
+    // Notify staff for this specific outlet
     if (!isQris) {
-      io.to('staff').emit('new_order', newOrder);
+      io.to(`staff_${outlet.id}`).emit('new_order', newOrder);
+      io.to('staff_global').emit('new_order', newOrder);
     }
 
     res.status(201).json({
@@ -189,7 +269,7 @@ app.get('/api/orders/:id', (req, res) => {
   res.json(order);
 });
 
-// Mock Payment Success (simulating webhook from Midtrans / Xendit / QRIS scan)
+// Mock Payment Success
 app.post('/api/orders/:id/pay', (req, res) => {
   const { id } = req.params;
   const db = getDb();
@@ -207,23 +287,160 @@ app.post('/api/orders/:id/pay', (req, res) => {
 
   saveDb(db);
 
-  // Notify customer's room & staff POS/Kitchen in real-time
+  // Notify customer's room & outlet staff
   io.to(`order_${id}`).emit('order_updated', order);
-  io.to('staff').emit('order_updated', order);
-  io.to('staff').emit('new_order', order); // Trigger audible chime on POS
+  io.to(`staff_${order.outletId}`).emit('order_updated', order);
+  io.to(`staff_${order.outletId}`).emit('new_order', order); // Audible chime on POS
+  io.to('staff_global').emit('order_updated', order);
 
   res.json({ success: true, message: "Pembayaran berhasil diverifikasi.", order });
 });
 
 // --------------------------------------------------------------------------
-// STAFF POS & KITCHEN APIS
+// OMNICHANNEL ONLINE FOOD DELIVERY WEBHOOKS (GoFood, GrabFood, ShopeeFood)
 // --------------------------------------------------------------------------
 
-// Get all orders
-app.get('/api/staff/orders', (req, res) => {
-  const { status } = req.query;
+// Universal Delivery Ingest Handler
+function ingestDeliveryOrder(channelName, channelTag, req, res) {
+  try {
+    const { outletId, externalOrderId, driverName, driverPhone, driverPin, customerName, items, total, notes } = req.body;
+    const db = getDb();
+    const outlet = resolveOutlet(db, outletId);
+    const biz = db.businesses.find(b => b.id === outlet.businessId) || db.businesses[0];
+
+    const orderId = generateOrderId(channelTag);
+    const orderItems = (items || []).map(it => ({
+      name: it.name,
+      price: it.price || 0,
+      qty: it.qty || 1,
+      options: it.options || [],
+      notes: it.notes || "",
+      subtotal: (it.price || 0) * (it.qty || 1)
+    }));
+
+    const computedTotal = total || orderItems.reduce((s, i) => s + i.subtotal, 0);
+
+    const newDeliveryOrder = {
+      id: orderId,
+      businessId: biz.id,
+      outletId: outlet.id,
+      outletName: outlet.name,
+      channel: channelName, // 'GOFOOD' | 'GRABFOOD' | 'SHOPEEFOOD'
+      externalOrderId: externalOrderId || `${channelTag}-${Math.floor(1000 + Math.random() * 9000)}`,
+      tableNumber: channelName,
+      customerName: customerName || "Pelanggan Online",
+      customerPhone: "-",
+      driverInfo: {
+        name: driverName || "Driver Menuju Resto",
+        phone: driverPhone || "-",
+        pin: driverPin || Math.floor(1000 + Math.random() * 9000).toString()
+      },
+      notes: notes || "",
+      items: orderItems,
+      subtotal: computedTotal,
+      tax: 0,
+      service: 0,
+      total: computedTotal,
+      paymentMethod: channelName,
+      paymentStatus: 'PAID', // Aggregator orders are pre-paid
+      orderStatus: 'RECEIVED',
+      createdAt: new Date().toISOString()
+    };
+
+    db.orders.unshift(newDeliveryOrder);
+    saveDb(db);
+
+    // Real-time broadcast to outlet kitchen & kasir with audio alert
+    io.to(`staff_${outlet.id}`).emit('new_order', newDeliveryOrder);
+    io.to('staff_global').emit('new_order', newDeliveryOrder);
+
+    res.status(201).json({
+      success: true,
+      message: `Pesanan ${channelName} berhasil diterima di kasir & dapur ScanDine.`,
+      order: newDeliveryOrder
+    });
+  } catch (err) {
+    console.error(`Error ingesting ${channelName} order:`, err);
+    res.status(500).json({ error: `Gagal memproses pesanan ${channelName}.` });
+  }
+}
+
+// 1. GoFood Webhook
+app.post('/api/webhooks/gofood', (req, res) => {
+  ingestDeliveryOrder('GOFOOD', 'GF', req, res);
+});
+
+// 2. GrabFood Webhook
+app.post('/api/webhooks/grabfood', (req, res) => {
+  ingestDeliveryOrder('GRABFOOD', 'GRAB', req, res);
+});
+
+// 3. ShopeeFood Webhook
+app.post('/api/webhooks/shopeefood', (req, res) => {
+  ingestDeliveryOrder('SHOPEEFOOD', 'SHP', req, res);
+});
+
+// --------------------------------------------------------------------------
+// TABLE MANAGEMENT APIS (FLOOR PLAN & STATUS)
+// --------------------------------------------------------------------------
+app.get('/api/staff/tables', (req, res) => {
+  const { outlet: outletQuery } = req.query;
   const db = getDb();
-  let list = db.orders;
+  const outlet = resolveOutlet(db, outletQuery);
+
+  // Compute live duration for occupied tables
+  const tablesWithLiveInfo = outlet.tables.map(tbl => {
+    let durationMinutes = 0;
+    if (tbl.status === 'OCCUPIED' && tbl.occupiedSince) {
+      const diffMs = Date.now() - new Date(tbl.occupiedSince).getTime();
+      durationMinutes = Math.floor(diffMs / 60000);
+    }
+    return {
+      ...tbl,
+      durationMinutes
+    };
+  });
+
+  res.json({
+    outlet: { id: outlet.id, name: outlet.name, slug: outlet.slug },
+    tables: tablesWithLiveInfo
+  });
+});
+
+// Update table status (e.g. Clear table after guest leaves)
+app.patch('/api/staff/tables/:tableId/status', (req, res) => {
+  const { tableId } = req.params;
+  const { status, outletId } = req.body;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletId);
+  const tbl = outlet.tables.find(t => t.id === tableId || t.number.toString() === tableId.toString());
+
+  if (!tbl) return res.status(404).json({ error: "Meja tidak ditemukan." });
+
+  tbl.status = status; // 'AVAILABLE' | 'OCCUPIED' | 'BILL_PRINTED'
+  if (status === 'AVAILABLE') {
+    tbl.currentOrderId = null;
+    tbl.occupiedSince = null;
+  }
+
+  saveDb(db);
+  io.to(`staff_${outlet.id}`).emit('tables_updated');
+  res.json({ success: true, table: tbl });
+});
+
+// --------------------------------------------------------------------------
+// STAFF POS & KITCHEN APIS
+// --------------------------------------------------------------------------
+app.get('/api/staff/orders', (req, res) => {
+  const { outlet: outletQuery, channel, status } = req.query;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  
+  let list = db.orders.filter(o => o.outletId === outlet.id);
+
+  if (channel && channel !== 'ALL') {
+    list = list.filter(o => o.channel === channel);
+  }
 
   if (status && status !== 'ALL') {
     list = list.filter(o => o.orderStatus === status);
@@ -251,11 +468,24 @@ app.patch('/api/staff/orders/:id/status', (req, res) => {
     }
   }
 
+  // If completed, update table to available
+  if (orderStatus === 'COMPLETED' && order.channel === 'DINE_IN') {
+    const outlet = db.outlets.find(o => o.id === order.outletId);
+    if (outlet) {
+      const tbl = outlet.tables.find(t => t.number.toString() === (order.tableNumber || "").replace(/\D/g, ''));
+      if (tbl) {
+        tbl.status = 'AVAILABLE';
+        tbl.currentOrderId = null;
+        tbl.occupiedSince = null;
+      }
+    }
+  }
+
   saveDb(db);
 
-  // Real-time broadcast
   io.to(`order_${id}`).emit('order_updated', order);
-  io.to('staff').emit('order_updated', order);
+  io.to(`staff_${order.outletId}`).emit('order_updated', order);
+  io.to('staff_global').emit('order_updated', order);
 
   res.json({ success: true, order });
 });
@@ -263,23 +493,9 @@ app.patch('/api/staff/orders/:id/status', (req, res) => {
 // --------------------------------------------------------------------------
 // ADMIN / MERCHANT APIS
 // --------------------------------------------------------------------------
-
 app.get('/api/admin/menus', (req, res) => {
   const db = getDb();
   res.json(db.menus);
-});
-
-app.post('/api/admin/menus', (req, res) => {
-  const db = getDb();
-  const newMenu = {
-    id: `menu-${Date.now()}`,
-    ...req.body,
-    isAvailable: req.body.isAvailable !== undefined ? req.body.isAvailable : true
-  };
-  db.menus.push(newMenu);
-  saveDb(db);
-  io.emit('menu_changed');
-  res.status(201).json(newMenu);
 });
 
 app.patch('/api/admin/menus/:id/toggle', (req, res) => {
@@ -295,50 +511,32 @@ app.patch('/api/admin/menus/:id/toggle', (req, res) => {
   res.json({ success: true, menu });
 });
 
-app.get('/api/admin/tables', (req, res) => {
-  const db = getDb();
-  res.json(db.tables);
-});
-
-app.post('/api/admin/tables', (req, res) => {
-  const { number, name } = req.body;
-  const db = getDb();
-  const newTable = {
-    id: `table-${Date.now()}`,
-    number: number || `${db.tables.length + 1}`,
-    name: name || `Meja ${number}`,
-    status: "AVAILABLE"
-  };
-  db.tables.push(newTable);
-  saveDb(db);
-  res.status(201).json(newTable);
-});
-
-// Generate QR Code for a table (Smart IP detection for phone camera scan)
+// Generate Table QR Code with Smart Outlet URL
 app.get('/api/admin/tables/:tableNum/qr', async (req, res) => {
   try {
     const { tableNum } = req.params;
+    const { outlet: outletQuery } = req.query;
+    const db = getDb();
+    const outlet = resolveOutlet(db, outletQuery);
     const localIp = getLocalIp();
     
-    // Use the LAN IP so phones scanning the QR code reach this machine
     const host = req.get('host');
     let effectiveHost = host;
     if (host.includes('localhost') || host.includes('127.0.0.1')) {
       effectiveHost = `${localIp}:${PORT}`;
     }
 
-    const orderUrl = `${req.protocol}://${effectiveHost}/order?table=${encodeURIComponent(tableNum)}`;
+    const orderUrl = `${req.protocol}://${effectiveHost}/order?outlet=${encodeURIComponent(outlet.slug)}&table=${encodeURIComponent(tableNum)}`;
     
     const qrImage = await QRCode.toDataURL(orderUrl, {
       width: 400,
       margin: 2,
-      color: {
-        dark: '#09090b',
-        light: '#ffffff'
-      }
+      color: { dark: '#09090b', light: '#ffffff' }
     });
 
     res.json({
+      outletName: outlet.name,
+      outletSlug: outlet.slug,
       tableNumber: tableNum,
       targetUrl: orderUrl,
       qrDataUrl: qrImage
@@ -349,33 +547,35 @@ app.get('/api/admin/tables/:tableNum/qr', async (req, res) => {
   }
 });
 
-// Sales Reports & Stats
+// Omnichannel Sales Reports & Stats
 app.get('/api/admin/stats', (req, res) => {
+  const { outlet: outletQuery } = req.query;
   const db = getDb();
-  const completedOrders = db.orders.filter(o => o.paymentStatus === 'PAID');
+  const outlet = resolveOutlet(db, outletQuery);
+
+  const outletOrders = db.orders.filter(o => o.outletId === outlet.id);
+  const completedOrders = outletOrders.filter(o => o.paymentStatus === 'PAID');
   
   const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total || 0), 0);
   const totalOrders = completedOrders.length;
-  const pendingOrders = db.orders.filter(o => o.orderStatus !== 'COMPLETED' && o.orderStatus !== 'CANCELLED').length;
+  const pendingOrders = outletOrders.filter(o => o.orderStatus !== 'COMPLETED' && o.orderStatus !== 'CANCELLED').length;
 
-  const itemCounts = {};
-  completedOrders.forEach(order => {
-    (order.items || []).forEach(it => {
-      itemCounts[it.name] = (itemCounts[it.name] || 0) + it.qty;
-    });
-  });
-
-  const topItems = Object.entries(itemCounts)
-    .map(([name, qty]) => ({ name, qty }))
-    .sort((a, b) => b.qty - a.qty)
-    .slice(0, 5);
+  // Breakdown by Channel
+  const channelBreakdown = {
+    DINE_IN: completedOrders.filter(o => o.channel === 'DINE_IN').reduce((s, o) => s + (o.total || 0), 0),
+    PICK_UP: completedOrders.filter(o => o.channel === 'PICK_UP').reduce((s, o) => s + (o.total || 0), 0),
+    GOFOOD: completedOrders.filter(o => o.channel === 'GOFOOD').reduce((s, o) => s + (o.total || 0), 0),
+    GRABFOOD: completedOrders.filter(o => o.channel === 'GRABFOOD').reduce((s, o) => s + (o.total || 0), 0),
+    SHOPEEFOOD: completedOrders.filter(o => o.channel === 'SHOPEEFOOD').reduce((s, o) => s + (o.total || 0), 0)
+  };
 
   res.json({
+    outletName: outlet.name,
     totalRevenue,
     totalOrders,
     pendingOrders,
-    topItems,
-    recentOrders: db.orders.slice(0, 10)
+    channelBreakdown,
+    recentOrders: outletOrders.slice(0, 10)
   });
 });
 
@@ -405,13 +605,16 @@ app.get('/admin', (req, res) => {
 });
 
 // --------------------------------------------------------------------------
-// SOCKET.IO REAL-TIME CHANNELS
+// SOCKET.IO REAL-TIME CHANNELS (PER OUTLET)
 // --------------------------------------------------------------------------
 io.on('connection', (socket) => {
-  socket.on('join_staff', () => {
-    socket.join('staff');
+  // Staff joins specific outlet room
+  socket.on('join_staff', (outletId = 'outlet-senopati') => {
+    socket.join(`staff_${outletId}`);
+    socket.join('staff_global');
   });
 
+  // Customer joins room for their specific order
   socket.on('watch_order', (orderId) => {
     socket.join(`order_${orderId}`);
   });
@@ -421,13 +624,13 @@ io.on('connection', (socket) => {
 server.listen(PORT, '0.0.0.0', () => {
   const localIp = getLocalIp();
   console.log(`=======================================================`);
-  console.log(`  SCANDINE - SMART QR DINE-IN & POS SYSTEM (READY)`);
+  console.log(`  SCANDINE - SMART MULTI-OUTLET POS & OFD READY`);
   console.log(`=======================================================`);
   console.log(`  * Portal Utama:     http://localhost:${PORT}`);
-  console.log(`  * Customer QR Menu: http://localhost:${PORT}/order?table=1`);
-  console.log(`  * Kasir & Kitchen:  http://localhost:${PORT}/pos`);
-  console.log(`  * Admin Dashboard:  http://localhost:${PORT}/admin`);
+  console.log(`  * Customer Meja 1:  http://localhost:${PORT}/order?outlet=senopati&table=1`);
+  console.log(`  * Kasir & Kitchen:  http://localhost:${PORT}/pos?outlet=senopati`);
+  console.log(`  * Admin Dashboard:  http://localhost:${PORT}/admin?outlet=senopati`);
   console.log(`-------------------------------------------------------`);
-  console.log(`  * Akses dari HP:    http://${localIp}:${PORT}/order?table=1`);
+  console.log(`  * Akses dari HP:    http://${localIp}:${PORT}/order?outlet=senopati&table=1`);
   console.log(`=======================================================`);
 });

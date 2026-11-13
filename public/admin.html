@@ -150,6 +150,7 @@
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('tab-qr', this)">📍 Generator QR Code Meja</button>
     <button class="tab-btn" onclick="switchTab('tab-menu', this)">🍲 Kelola Menu & Stok</button>
+    <button class="tab-btn" onclick="switchTab('tab-ojol', this)">🛵 Konfigurasi Ojol (GoFood, Grab, Shopee)</button>
   </div>
 
   <!-- ======================================================================= -->
@@ -228,6 +229,107 @@
 
       <div id="menu-table-list">
         <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 3: KONFIGURASI INTEGRASI OJOL (GOFOOD, GRAB, SHOPEE) -->
+  <!-- ======================================================================= -->
+  <div id="tab-ojol" class="tab-content" style="display: none;">
+    <div style="background: #fff; padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow);">
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--dark);">🛵 Konfigurasi Integrasi Ojol (Online Food Delivery)</h3>
+        <p style="font-size: 0.85rem; color: var(--muted); margin-top: 4px;">
+          Hubungkan akun GoBiz, GrabMerchant, dan Shopee Partner Anda agar pesanan online langsung masuk ke layar POS dan dapur ScanDine otomatis.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <!-- Card GoFood -->
+        <div style="border: 1px solid #86efac; border-radius: 14px; padding: 18px; background: #f0fdf4;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.5rem;">🟢</span>
+              <strong style="font-size: 1.1rem; color: #15803d;">GoFood (GoBiz API)</strong>
+            </div>
+            <span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem;">AKTIF</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8rem;">Merchant ID GoBiz</label>
+            <input type="text" id="gofood-mid" class="form-input" value="GF-JKT-0982" readonly style="background: #fff;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8rem;">Webhook Callback URL (Didaftarkan ke GoBiz)</label>
+            <div style="display: flex; gap: 6px;">
+              <input type="text" id="gofood-url" class="form-input" readonly style="font-size: 0.78rem; background: #fff;">
+              <button onclick="copyWebhook('gofood-url')" style="padding: 6px 12px; background: #15803d; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Salin</button>
+            </div>
+          </div>
+          <button onclick="testOjolFromAdmin('gofood')" style="width: 100%; padding: 10px; background: #16a34a; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; margin-top: 8px;">
+            ⚡ Tes Kirim Pesanan GoFood ke Dapur
+          </button>
+        </div>
+
+        <!-- Card GrabFood -->
+        <div style="border: 1px solid #6ee7b7; border-radius: 14px; padding: 18px; background: #ecfdf5;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.5rem;">🟢</span>
+              <strong style="font-size: 1.1rem; color: #047857;">GrabFood (GrabMerchant API)</strong>
+            </div>
+            <span style="background: #d1fae5; color: #047857; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem;">AKTIF</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8rem;">Merchant ID Grab</label>
+            <input type="text" id="grabfood-mid" class="form-input" value="GRAB-ID-4412" readonly style="background: #fff;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8rem;">Webhook Callback URL (Didaftarkan ke Grab)</label>
+            <div style="display: flex; gap: 6px;">
+              <input type="text" id="grabfood-url" class="form-input" readonly style="font-size: 0.78rem; background: #fff;">
+              <button onclick="copyWebhook('grabfood-url')" style="padding: 6px 12px; background: #047857; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Salin</button>
+            </div>
+          </div>
+          <button onclick="testOjolFromAdmin('grabfood')" style="width: 100%; padding: 10px; background: #059669; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; margin-top: 8px;">
+            ⚡ Tes Kirim Pesanan GrabFood ke Dapur
+          </button>
+        </div>
+
+        <!-- Card ShopeeFood -->
+        <div style="border: 1px solid #fdba74; border-radius: 14px; padding: 18px; background: #fff7ed;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.5rem;">🟠</span>
+              <strong style="font-size: 1.1rem; color: #c2410c;">ShopeeFood (Shopee Partner)</strong>
+            </div>
+            <span style="background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.75rem;">AKTIF</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8rem;">Merchant ID Shopee</label>
+            <input type="text" id="shopeefood-mid" class="form-input" value="SHP-ID-8812" readonly style="background: #fff;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.8rem;">Webhook Callback URL (Didaftarkan ke Shopee)</label>
+            <div style="display: flex; gap: 6px;">
+              <input type="text" id="shopeefood-url" class="form-input" readonly style="font-size: 0.78rem; background: #fff;">
+              <button onclick="copyWebhook('shopeefood-url')" style="padding: 6px 12px; background: #c2410c; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Salin</button>
+            </div>
+          </div>
+          <button onclick="testOjolFromAdmin('shopeefood')" style="width: 100%; padding: 10px; background: #ea580c; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; margin-top: 8px;">
+            ⚡ Tes Kirim Pesanan ShopeeFood ke Dapur
+          </button>
+        </div>
+      </div>
+
+      <!-- Panduan Pendaftaran -->
+      <div style="margin-top: 24px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border); font-size: 0.85rem; line-height: 1.6; color: var(--slate);">
+        <strong style="color: var(--dark);">💡 Cara Pendaftaran ke Gojek / Grab / Shopee:</strong>
+        <ol style="margin-left: 20px; margin-top: 6px;">
+          <li>Buka Portal Developer Mitra: GoBiz Developer, Grab Partner Portal, atau Shopee Open Platform (atau gunakan agregator seperti Hubster/Deliverect).</li>
+          <li>Masukkan <strong>Webhook Callback URL</strong> di atas ke akun cabang resto Anda.</li>
+          <li>Setiap ada pelanggan memesan makanan dari aplikasi GoFood/GrabFood/ShopeeFood, pesanan akan otomatis masuk ke tablet kasir & printer dapur ScanDine dalam hitungan detik.</li>
+        </ol>
       </div>
     </div>
   </div>
@@ -439,8 +541,57 @@ async function toggleMenuStatus(menuId) {
   }
 }
 
+// -----------------------------------------------------------------------------
+// OJOL INTEGRATION HELPERS
+// -----------------------------------------------------------------------------
+function populateWebhookUrls() {
+  const base = window.location.origin;
+  const gofoodEl = document.getElementById('gofood-url');
+  const grabEl = document.getElementById('grabfood-url');
+  const shopeeEl = document.getElementById('shopeefood-url');
+
+  if (gofoodEl) gofoodEl.value = `${base}/api/webhooks/gofood`;
+  if (grabEl) grabEl.value = `${base}/api/webhooks/grabfood`;
+  if (shopeeEl) shopeeEl.value = `${base}/api/webhooks/shopeefood`;
+}
+
+function copyWebhook(inputId) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  navigator.clipboard.writeText(input.value);
+  alert("Tautan Webhook berhasil disalin: " + input.value);
+}
+
+async function testOjolFromAdmin(channel) {
+  const outletId = currentAdminOutlet === 'kemang' ? 'outlet-kemang' : 'outlet-senopati';
+  try {
+    const res = await fetch(`/api/webhooks/${channel}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        outletId: outletId,
+        customerName: "Budi Santoso (Via " + channel.toUpperCase() + ")",
+        driverName: "Driver Ojol",
+        driverPhone: "0812-3344-5566",
+        items: [
+          { name: "Nasi Goreng Wagyu Selera", price: 58000, qty: 1, notes: "Pedas Sedang" },
+          { name: "Es Kopi Susu Gula Aren", price: 24000, qty: 1, notes: "Less Sweet" }
+        ],
+        total: 82000
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`Pesanan uji coba dari ${channel.toUpperCase()} BERHASIL dikirim! Cek di layar kasir & dapur (/pos).`);
+    }
+  } catch (e) {
+    alert("Gagal mengirim simulasi ojol.");
+  }
+}
+
 // Start
 initAdmin();
+populateWebhookUrls();
 </script>
 </body>
 </html>

@@ -383,5 +383,49 @@
       "options": []
     }
   ],
-  "orders": []
+  "orders": [
+    {
+      "id": "GF-20261113-6259",
+      "businessId": "biz-1",
+      "outletId": "outlet-senopati",
+      "outletName": "Cabang Senopati (Pusat)",
+      "channel": "GOFOOD",
+      "externalOrderId": "GF-6005",
+      "tableNumber": "GOFOOD",
+      "customerName": "Rina Wijaya (Customer Online)",
+      "customerPhone": "-",
+      "driverInfo": {
+        "name": "Pak Joko",
+        "phone": "0812-9988-7766",
+        "pin": "2071"
+      },
+      "notes": "",
+      "items": [
+        {
+          "name": "Nasi Goreng Wagyu Selera",
+          "price": 58000,
+          "qty": 1,
+          "options": [],
+          "notes": "Pedas sedang",
+          "subtotal": 58000
+        },
+        {
+          "name": "Es Kopi Susu Gula Aren",
+          "price": 24000,
+          "qty": 2,
+          "options": [],
+          "notes": "Less sweet",
+          "subtotal": 48000
+        }
+      ],
+      "subtotal": 106000,
+      "tax": 0,
+      "service": 0,
+      "total": 106000,
+      "paymentMethod": "GOFOOD",
+      "paymentStatus": "PAID",
+      "orderStatus": "RECEIVED",
+      "createdAt": "2026-11-13T10:04:33.869Z"
+    }
+  ]
 }

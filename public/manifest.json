@@ -1,0 +1,20 @@
+{
+  "name": "ScanDine - Smart Restaurant POS & QR",
+  "short_name": "ScanDine",
+  "description": "Sistem Kasir POS, Floor Plan, KDS Dapur & Self-Order Meja Restoran Multi-Cabang",
+  "start_url": "/login",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0284c7",
+  "categories": ["business", "food", "productivity"],
+  "icons": [
+    {
+      "src": "/img/logo-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

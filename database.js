@@ -43,6 +43,16 @@ const initialData = {
         grabfood: { enabled: true, merchantId: "GRAB-ID-4412", status: "ACTIVE" },
         shopeefood: { enabled: true, merchantId: "SHP-ID-8812", status: "ACTIVE" }
       },
+      qrisSettings: {
+        mode: "DYNAMIC_MOCK",
+        merchantName: "Kopi & Selera Nusantara Senopati",
+        nmid: "ID1020030040050",
+        staticQrImage: "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=00020101021126580014ID.GO-JEK.WWW01189360091430000000000208123456780303UME5204581253033605802ID5911SCANDINE6007JAKARTA6304",
+        gatewayProvider: "MIDTRANS",
+        serverKey: "",
+        clientKey: "",
+        instructions: "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
+      },
       tables: [
         { id: "tbl-s-1", number: "1", name: "Meja 01 (Indoor)", capacity: 2, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },
         { id: "tbl-s-2", number: "2", name: "Meja 02 (Indoor)", capacity: 2, status: "AVAILABLE", currentOrderId: null, occupiedSince: null },

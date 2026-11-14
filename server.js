@@ -96,9 +96,139 @@ app.get('/api/outlets', (req, res) => {
       address: o.address,
       phone: o.phone,
       businessId: o.businessId,
-      tableCount: o.tables.length
+      tableCount: (o.tables || []).length
     }))
   });
+});
+
+// Get all outlets with full details for admin management
+app.get('/api/admin/outlets', (req, res) => {
+  const db = getDb();
+  const outletsWithUsers = db.outlets.map(o => {
+    const manager = (db.users || []).find(u => u.allowedOutlets && u.allowedOutlets.includes(o.id));
+    return {
+      id: o.id,
+      slug: o.slug,
+      name: o.name,
+      address: o.address,
+      phone: o.phone,
+      taxRate: o.taxRate,
+      serviceRate: o.serviceRate,
+      receiptFooter: o.receiptFooter,
+      tableCount: (o.tables || []).length,
+      managerUsername: manager ? manager.username : "-",
+      managerName: manager ? manager.name : "-"
+    };
+  });
+  res.json(outletsWithUsers);
+});
+
+// Tambah Cabang / Gerai Baru
+app.post('/api/admin/outlets', (req, res) => {
+  const { name, address, phone, taxRate, serviceRate, receiptFooter, managerUsername, managerPassword, managerName } = req.body;
+  if (!name) return res.status(400).json({ error: "Nama cabang wajib diisi." });
+
+  const db = getDb();
+  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') || `cabang-${Date.now()}`;
+  const outletId = `outlet-${slug}`;
+
+  if (db.outlets.some(o => o.id === outletId || o.slug === slug)) {
+    return res.status(400).json({ error: "Nama cabang sudah ada. Gunakan nama yang berbeda." });
+  }
+
+  // Otomatis siapkan 10 meja awal untuk cabang baru
+  const initialTables = [];
+  for (let i = 1; i <= 10; i++) {
+    const numStr = i < 10 ? `0${i}` : `${i}`;
+    initialTables.push({
+      id: `tbl-${slug}-${i}`,
+      number: `${i}`,
+      name: `Meja ${numStr}`,
+      capacity: 4,
+      status: "AVAILABLE",
+      currentOrderId: null,
+      occupiedSince: null
+    });
+  }
+
+  const newOutlet = {
+    id: outletId,
+    businessId: db.businesses[0]?.id || "biz-1",
+    slug,
+    name: name.trim(),
+    address: address ? address.trim() : "",
+    phone: phone ? phone.trim() : "",
+    taxRate: taxRate !== undefined ? Number(taxRate) : 10,
+    serviceRate: serviceRate !== undefined ? Number(serviceRate) : 5,
+    receiptFooter: receiptFooter ? receiptFooter.trim() : "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+    outOfStockMenus: [],
+    deliverySettings: {
+      gofood: { enabled: true, merchantId: `GF-${slug.toUpperCase()}`, status: "ACTIVE" },
+      grabfood: { enabled: true, merchantId: `GRAB-${slug.toUpperCase()}`, status: "ACTIVE" },
+      shopeefood: { enabled: true, merchantId: `SHP-${slug.toUpperCase()}`, status: "ACTIVE" }
+    },
+    qrisSettings: {
+      mode: "DYNAMIC_MOCK",
+      merchantName: name.trim(),
+      nmid: `ID${Math.floor(1000000000000 + Math.random() * 9000000000000)}`,
+      staticQrImage: "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=00020101021126580014ID.GO-JEK.WWW01189360091430000000000208123456780303UME5204581253033605802ID5911SCANDINE6304",
+      gatewayProvider: "MIDTRANS",
+      serverKey: "",
+      clientKey: "",
+      instructions: "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
+    },
+    tables: initialTables
+  };
+
+  db.outlets.push(newOutlet);
+
+  // Buat akun login khusus untuk Manager Cabang Baru ini jika diisi
+  if (managerUsername && managerPassword) {
+    if (!db.users) db.users = [];
+    const exists = db.users.some(u => u.username.toLowerCase() === managerUsername.trim().toLowerCase());
+    if (!exists) {
+      db.users.push({
+        id: `usr-${slug}`,
+        username: managerUsername.trim().toLowerCase(),
+        password: managerPassword,
+        name: managerName ? managerName.trim() : `Manager ${name.trim()}`,
+        role: "GERAI_MANAGER",
+        businessId: db.businesses[0]?.id || "biz-1",
+        allowedOutlets: [outletId],
+        avatar: "👔"
+      });
+    }
+  }
+
+  saveDb(db);
+  io.emit('store_updated');
+
+  res.status(201).json({
+    success: true,
+    message: `Cabang baru "${name}" berhasil dibuat lengkap dengan 10 meja dan akun manager!`,
+    outlet: newOutlet
+  });
+});
+
+// Update data cabang
+app.put('/api/admin/outlets/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, address, phone, taxRate, serviceRate, receiptFooter } = req.body;
+  const db = getDb();
+  const outlet = db.outlets.find(o => o.id === id || o.slug === id);
+  if (!outlet) return res.status(404).json({ error: "Cabang tidak ditemukan." });
+
+  if (name !== undefined) outlet.name = name.trim();
+  if (address !== undefined) outlet.address = address.trim();
+  if (phone !== undefined) outlet.phone = phone.trim();
+  if (taxRate !== undefined) outlet.taxRate = Number(taxRate) || 0;
+  if (serviceRate !== undefined) outlet.serviceRate = Number(serviceRate) || 0;
+  if (receiptFooter !== undefined) outlet.receiptFooter = receiptFooter.trim();
+
+  saveDb(db);
+  io.emit('store_updated');
+
+  res.json({ success: true, message: "Data cabang berhasil diperbarui!", outlet });
 });
 
 // --------------------------------------------------------------------------
@@ -194,16 +324,22 @@ app.post('/api/orders', async (req, res) => {
     const orderId = generateOrderId(prefix);
     const isQris = paymentMethod === 'QRIS';
 
-    // Mock QRIS Generation
+    // QRIS Generation according to Outlet's QRIS Settings
     let qrisDataUrl = null;
+    const qrisConf = outlet.qrisSettings || {};
     if (isQris) {
-      const mockQrisPayload = `00020101021226${biz.name.toUpperCase()}520458125303360540${total}5802ID5911SCANDINE_ORD_ID${orderId}6304`;
-      qrisDataUrl = await QRCode.toDataURL(mockQrisPayload, {
-        errorCorrectionLevel: 'H',
-        margin: 2,
-        width: 320,
-        color: { dark: '#0f172a', light: '#ffffff' }
-      });
+      if (qrisConf.mode === 'STATIC_IMAGE' && qrisConf.staticQrImage) {
+        qrisDataUrl = qrisConf.staticQrImage;
+      } else {
+        const merchantTag = (qrisConf.merchantName || biz.name).toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const mockQrisPayload = `00020101021226${merchantTag}520458125303360540${total}5802ID5911${qrisConf.nmid || 'ID1020030040050'}6007JAKARTA6304`;
+        qrisDataUrl = await QRCode.toDataURL(mockQrisPayload, {
+          errorCorrectionLevel: 'H',
+          margin: 2,
+          width: 320,
+          color: { dark: '#0f172a', light: '#ffffff' }
+        });
+      }
     }
 
     const newOrder = {
@@ -230,6 +366,12 @@ app.post('/api/orders', async (req, res) => {
       paymentStatus: 'PENDING',
       orderStatus: isQris ? 'AWAITING_PAYMENT' : 'RECEIVED',
       qrisDataUrl,
+      qrisInfo: {
+        mode: qrisConf.mode || 'DYNAMIC_MOCK',
+        merchantName: qrisConf.merchantName || biz.name,
+        nmid: qrisConf.nmid || 'ID1020030040050',
+        instructions: qrisConf.instructions || 'Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana).'
+      },
       createdAt: new Date().toISOString()
     };
 
@@ -502,6 +644,11 @@ app.get('/api/admin/menus', (req, res) => {
   res.json(db.menus);
 });
 
+app.get('/api/menus', (req, res) => {
+  const db = getDb();
+  res.json(db.menus);
+});
+
 // Update Menu Details (Nama, Harga, Gambar, Deskripsi, Kategori)
 app.put('/api/admin/menus/:id', (req, res) => {
   const { id } = req.params;
@@ -597,7 +744,115 @@ app.post('/api/admin/tables', (req, res) => {
   };
   outlet.tables.push(newTable);
   saveDb(db);
+  io.emit('store_updated');
   res.status(201).json(newTable);
+});
+
+// Bulk Generate Tables (e.g. 10 Meja)
+app.post('/api/admin/tables/generate', (req, res) => {
+  const { count = 10, prefix = "Meja ", capacity = 4, mode = "replace", outlet: outletQuery } = req.body;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  const n = Math.max(1, Math.min(100, parseInt(count) || 10));
+
+  if (!outlet.tables) outlet.tables = [];
+
+  if (mode === 'replace') {
+    outlet.tables = [];
+    for (let i = 1; i <= n; i++) {
+      const numStr = i < 10 ? `0${i}` : `${i}`;
+      outlet.tables.push({
+        id: `tbl-${Date.now()}-${i}`,
+        number: `${i}`,
+        name: `${prefix}${numStr}`,
+        capacity: parseInt(capacity) || 4,
+        status: "AVAILABLE",
+        currentOrderId: null,
+        occupiedSince: null
+      });
+    }
+  } else {
+    // Append
+    const currentMax = outlet.tables.reduce((max, t) => Math.max(max, parseInt(t.number) || 0), 0);
+    for (let i = 1; i <= n; i++) {
+      const nextNum = currentMax + i;
+      const numStr = nextNum < 10 ? `0${nextNum}` : `${nextNum}`;
+      outlet.tables.push({
+        id: `tbl-${Date.now()}-${i}`,
+        number: `${nextNum}`,
+        name: `${prefix}${numStr}`,
+        capacity: parseInt(capacity) || 4,
+        status: "AVAILABLE",
+        currentOrderId: null,
+        occupiedSince: null
+      });
+    }
+  }
+
+  saveDb(db);
+  io.emit('store_updated');
+  res.json({ success: true, count: outlet.tables.length, tables: outlet.tables });
+});
+
+// Delete a Table
+app.delete('/api/admin/tables/:id', (req, res) => {
+  const { id } = req.params;
+  const { outlet: outletQuery } = req.query;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  outlet.tables = (outlet.tables || []).filter(t => t.id !== id && t.number !== id);
+  saveDb(db);
+  io.emit('store_updated');
+  res.json({ success: true });
+});
+
+// Batch QR Code Generation for All Tables
+app.get('/api/admin/tables/batch-qr', async (req, res) => {
+  try {
+    const { outlet: outletQuery } = req.query;
+    const db = getDb();
+    const outlet = resolveOutlet(db, outletQuery);
+    const localIp = getLocalIp();
+    const host = req.get('host');
+    let effectiveHost = host;
+    if (host.includes('localhost') || host.includes('127.0.0.1')) {
+      effectiveHost = `${localIp}:${PORT}`;
+    }
+
+    const biz = (db.businesses && db.businesses[0]) || { name: "ScanDine Resto" };
+    const results = [];
+    for (const table of (outlet.tables || [])) {
+      const orderUrl = `${req.protocol}://${effectiveHost}/order?outlet=${encodeURIComponent(outlet.slug)}&table=${encodeURIComponent(table.number)}`;
+      const qrDataUrl = await QRCode.toDataURL(orderUrl, {
+        width: 320,
+        margin: 2,
+        color: { dark: '#09090b', light: '#ffffff' }
+      });
+      results.push({
+        id: table.id,
+        number: table.number,
+        name: table.name,
+        capacity: table.capacity,
+        orderUrl,
+        targetUrl: orderUrl,
+        qrDataUrl,
+        qrCodeDataUrl: qrDataUrl,
+        outletName: outlet.name,
+        outletSlug: outlet.slug,
+        businessName: biz.name || "ScanDine Resto"
+      });
+    }
+
+    res.json({
+      outletName: outlet.name,
+      outletSlug: outlet.slug,
+      businessName: biz.name || "ScanDine Resto",
+      tables: results
+    });
+  } catch (err) {
+    console.error("Error generating batch QR:", err);
+    res.status(500).json({ error: "Gagal membuat batch QR." });
+  }
 });
 
 // Generate Table QR Code with Smart Outlet URL
@@ -628,7 +883,9 @@ app.get('/api/admin/tables/:tableNum/qr', async (req, res) => {
       outletSlug: outlet.slug,
       tableNumber: tableNum,
       targetUrl: orderUrl,
-      qrDataUrl: qrImage
+      orderUrl: orderUrl,
+      qrDataUrl: qrImage,
+      qrCodeDataUrl: qrImage
     });
   } catch (err) {
     console.error("Error generating QR:", err);
@@ -734,6 +991,82 @@ app.put('/api/admin/store-profile', (req, res) => {
       receiptFooter: outlet.receiptFooter
     }
   });
+});
+
+// --------------------------------------------------------------------------
+// QRIS CONFIGURATION & PAYMENT GATEWAY APIS
+// --------------------------------------------------------------------------
+app.get('/api/admin/qris-settings', (req, res) => {
+  const { outlet: outletQuery } = req.query;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  res.json(outlet.qrisSettings || {});
+});
+
+app.put('/api/admin/qris-settings', (req, res) => {
+  const { outlet: outletQuery } = req.query;
+  const {
+    mode,
+    merchantName,
+    nmid,
+    staticQrImage,
+    gatewayProvider,
+    serverKey,
+    clientKey,
+    instructions
+  } = req.body;
+
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+
+  if (!outlet.qrisSettings) outlet.qrisSettings = {};
+
+  if (mode !== undefined) outlet.qrisSettings.mode = mode;
+  if (merchantName !== undefined) outlet.qrisSettings.merchantName = merchantName.trim();
+  if (nmid !== undefined) outlet.qrisSettings.nmid = nmid.trim();
+  if (staticQrImage !== undefined) outlet.qrisSettings.staticQrImage = staticQrImage.trim();
+  if (gatewayProvider !== undefined) outlet.qrisSettings.gatewayProvider = gatewayProvider;
+  if (serverKey !== undefined) outlet.qrisSettings.serverKey = serverKey.trim();
+  if (clientKey !== undefined) outlet.qrisSettings.clientKey = clientKey.trim();
+  if (instructions !== undefined) outlet.qrisSettings.instructions = instructions.trim();
+
+  saveDb(db);
+  io.emit('store_updated');
+
+  res.json({
+    success: true,
+    message: "Konfigurasi QRIS Toko berhasil disimpan & disinkronkan!",
+    qrisSettings: outlet.qrisSettings
+  });
+});
+
+// Universal Webhook for QRIS Payment Gateways (Midtrans / Xendit)
+app.post('/api/webhooks/qris', (req, res) => {
+  try {
+    const { order_id, transaction_status, external_id, status } = req.body;
+    const targetOrderId = order_id || external_id;
+    if (!targetOrderId) return res.status(400).json({ error: "Missing order_id" });
+
+    const db = getDb();
+    const order = db.orders.find(o => o.id === targetOrderId);
+    if (!order) return res.status(404).json({ error: "Order not found" });
+
+    const isSuccess = transaction_status === 'settlement' || transaction_status === 'capture' || status === 'COMPLETED' || status === 'PAID';
+    if (isSuccess) {
+      order.paymentStatus = 'PAID';
+      order.orderStatus = 'COOKING';
+      saveDb(db);
+
+      // Notify customer and kitchen
+      io.to(`order_${order.id}`).emit('order_updated', order);
+      io.to(`staff_${order.outletId}`).emit('new_order', order);
+      io.to('staff_global').emit('new_order', order);
+    }
+
+    res.json({ success: true, orderId: targetOrderId, paymentStatus: order.paymentStatus });
+  } catch (err) {
+    res.status(500).json({ error: "Webhook processing error" });
+  }
 });
 
 // --------------------------------------------------------------------------

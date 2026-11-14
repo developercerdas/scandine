@@ -1,0 +1,28 @@
+{
+  "packageId": "com.scandine.pos",
+  "host": "scandine-production-b6a8a689.up.railway.app",
+  "name": "ScanDine POS Restoran",
+  "launcherName": "ScanDine",
+  "themeColor": "#0284C7",
+  "navigationColor": "#0284C7",
+  "backgroundColor": "#FFFFFF",
+  "enableNotifications": true,
+  "startUrl": "/login",
+  "iconUrl": "https://scandine-production-b6a8a689.up.railway.app/img/logo-icon.svg",
+  "maskableIconUrl": "https://scandine-production-b6a8a689.up.railway.app/img/logo-icon.svg",
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "Kasir POS",
+      "short_name": "Kasir",
+      "url": "/pos?outlet=senopati"
+    },
+    {
+      "name": "Backoffice Admin",
+      "short_name": "Admin",
+      "url": "/admin?outlet=senopati"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli"
+}

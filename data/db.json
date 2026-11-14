@@ -266,7 +266,17 @@
           "currentOrderId": null,
           "occupiedSince": null
         }
-      ]
+      ],
+      "qrisSettings": {
+        "mode": "DYNAMIC_MOCK",
+        "merchantName": "Cabang Senopati (Pusat)",
+        "nmid": "ID1020030040050",
+        "staticQrImage": "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=00020101021126580014ID.GO-JEK.WWW01189360091430000000000208123456780303UME5204581253033605802ID5911SCANDINE6007JAKARTA6304",
+        "gatewayProvider": "MIDTRANS",
+        "serverKey": "",
+        "clientKey": "",
+        "instructions": "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
+      }
     },
     {
       "id": "outlet-kemang",
@@ -297,123 +307,106 @@
       },
       "tables": [
         {
-          "id": "tbl-k-1",
+          "id": "tbl-1794615294583-1",
           "number": "1",
-          "name": "Meja 01 (Indoor AC)",
-          "capacity": 2,
+          "name": "Meja 01",
+          "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-2",
+          "id": "tbl-1794615294583-2",
           "number": "2",
-          "name": "Meja 02 (Indoor AC)",
-          "capacity": 2,
+          "name": "Meja 02",
+          "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-3",
+          "id": "tbl-1794615294583-3",
           "number": "3",
-          "name": "Meja 03 (Indoor AC)",
+          "name": "Meja 03",
           "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-4",
+          "id": "tbl-1794615294583-4",
           "number": "4",
-          "name": "Meja 04 (Indoor AC)",
+          "name": "Meja 04",
           "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-5",
+          "id": "tbl-1794615294583-5",
           "number": "5",
-          "name": "Meja 05 (Indoor AC)",
+          "name": "Meja 05",
           "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-6",
+          "id": "tbl-1794615294583-6",
           "number": "6",
-          "name": "Meja 06 (Indoor AC)",
+          "name": "Meja 06",
           "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-7",
+          "id": "tbl-1794615294583-7",
           "number": "7",
-          "name": "Meja 07 (Sofa Corner)",
-          "capacity": 6,
+          "name": "Meja 07",
+          "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-8",
+          "id": "tbl-1794615294583-8",
           "number": "8",
-          "name": "Meja 08 (Sofa Corner)",
-          "capacity": 6,
+          "name": "Meja 08",
+          "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-9",
+          "id": "tbl-1794615294583-9",
           "number": "9",
-          "name": "Meja 09 (Terrace Outdoor)",
+          "name": "Meja 09",
           "capacity": 4,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         },
         {
-          "id": "tbl-k-10",
+          "id": "tbl-1794615294583-10",
           "number": "10",
-          "name": "Meja 10 (Terrace Outdoor)",
+          "name": "Meja 10",
           "capacity": 4,
-          "status": "AVAILABLE",
-          "currentOrderId": null,
-          "occupiedSince": null
-        },
-        {
-          "id": "tbl-k-11",
-          "number": "11",
-          "name": "Meja 11 (Terrace Outdoor)",
-          "capacity": 4,
-          "status": "AVAILABLE",
-          "currentOrderId": null,
-          "occupiedSince": null
-        },
-        {
-          "id": "tbl-k-12",
-          "number": "12",
-          "name": "Meja 12 (Terrace Outdoor)",
-          "capacity": 4,
-          "status": "AVAILABLE",
-          "currentOrderId": null,
-          "occupiedSince": null
-        },
-        {
-          "id": "tbl-k-vip",
-          "number": "VIP-K",
-          "name": "VIP Kemang Lounge",
-          "capacity": 10,
           "status": "AVAILABLE",
           "currentOrderId": null,
           "occupiedSince": null
         }
-      ]
+      ],
+      "qrisSettings": {
+        "mode": "DYNAMIC_MOCK",
+        "merchantName": "Cabang Kemang Raya",
+        "nmid": "ID1020030040050",
+        "staticQrImage": "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=00020101021126580014ID.GO-JEK.WWW01189360091430000000000208123456780303UME5204581253033605802ID5911SCANDINE6007JAKARTA6304",
+        "gatewayProvider": "MIDTRANS",
+        "serverKey": "",
+        "clientKey": "",
+        "instructions": "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
+      }
     }
   ],
   "categories": [
@@ -618,6 +611,188 @@
     }
   ],
   "orders": [
+    {
+      "id": "ORD-20261113-7457",
+      "businessId": "biz-1",
+      "businessName": "Kopi & Selera Nusantara",
+      "outletId": "outlet-senopati",
+      "outletName": "Cabang Senopati (Pusat)",
+      "outletAddress": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
+      "outletPhone": "0812-8899-7766",
+      "receiptFooter": "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+      "channel": "DINE_IN",
+      "tableNumber": "Meja M-01",
+      "pickupTime": null,
+      "customerName": "ds",
+      "customerPhone": "-",
+      "notes": "",
+      "items": [
+        {
+          "menuId": "menu-1",
+          "name": "Nasi Goreng Wagyu Selera",
+          "price": 58000,
+          "qty": 1,
+          "options": [
+            {
+              "name": "Tingkat Kepedasan",
+              "value": "Sedang"
+            },
+            {
+              "name": "Pilihan Telur",
+              "value": "Mata Sapi Matang"
+            }
+          ],
+          "notes": "",
+          "subtotal": 58000
+        }
+      ],
+      "subtotal": 58000,
+      "tax": 5800,
+      "service": 2900,
+      "total": 66700,
+      "paymentMethod": "QRIS",
+      "paymentStatus": "PAID",
+      "orderStatus": "RECEIVED",
+      "qrisDataUrl": "data:image/png;base64,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",
+      "createdAt": "2026-11-13T12:42:27.133Z",
+      "paidAt": "2026-11-13T12:42:35.390Z"
+    },
+    {
+      "id": "ORD-20261113-6960",
+      "businessId": "biz-1",
+      "businessName": "Kopi & Selera Nusantara",
+      "outletId": "outlet-senopati",
+      "outletName": "Cabang Senopati (Pusat)",
+      "outletAddress": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
+      "outletPhone": "0812-8899-7766",
+      "receiptFooter": "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+      "channel": "DINE_IN",
+      "tableNumber": "Meja M-01",
+      "pickupTime": null,
+      "customerName": "Kur",
+      "customerPhone": "-",
+      "notes": "",
+      "items": [
+        {
+          "menuId": "menu-2",
+          "name": "Ayam Bakar Madu Rempah",
+          "price": 45000,
+          "qty": 31,
+          "options": [
+            {
+              "name": "Pilihan Bagian",
+              "value": "Paha Atas & Bawah"
+            },
+            {
+              "name": "Jenis Sambal",
+              "value": "Sambal Matah Bali"
+            }
+          ],
+          "notes": "Kalau bisa ayam kampus",
+          "subtotal": 1395000
+        },
+        {
+          "menuId": "menu-6",
+          "name": "Artisan Iced Lychee Tea",
+          "price": 26000,
+          "qty": 35,
+          "options": [],
+          "notes": "",
+          "subtotal": 910000
+        }
+      ],
+      "subtotal": 2305000,
+      "tax": 230500,
+      "service": 115250,
+      "total": 2650750,
+      "paymentMethod": "QRIS",
+      "paymentStatus": "PAID",
+      "orderStatus": "RECEIVED",
+      "qrisDataUrl": "data:image/png;base64,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",
+      "createdAt": "2026-11-13T12:15:30.950Z",
+      "paidAt": "2026-11-13T12:15:37.912Z"
+    },
+    {
+      "id": "ORD-20261113-1629",
+      "businessId": "biz-1",
+      "businessName": "Kopi & Selera Nusantara",
+      "outletId": "outlet-senopati",
+      "outletName": "Cabang Senopati (Pusat)",
+      "outletAddress": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
+      "outletPhone": "0812-8899-7766",
+      "receiptFooter": "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+      "channel": "DINE_IN",
+      "tableNumber": "Meja M-01",
+      "pickupTime": null,
+      "customerName": "FED",
+      "customerPhone": "-",
+      "notes": "",
+      "items": [
+        {
+          "menuId": "menu-1",
+          "name": "Nasi Goreng Wagyu Selera",
+          "price": 58000,
+          "qty": 20,
+          "options": [
+            {
+              "name": "Tingkat Kepedasan",
+              "value": "Sedang"
+            },
+            {
+              "name": "Pilihan Telur",
+              "value": "Dadar"
+            }
+          ],
+          "notes": "nasinya jangan digoreng",
+          "subtotal": 1160000
+        }
+      ],
+      "subtotal": 1160000,
+      "tax": 116000,
+      "service": 58000,
+      "total": 1334000,
+      "paymentMethod": "CASHIER",
+      "paymentStatus": "PENDING",
+      "orderStatus": "RECEIVED",
+      "qrisDataUrl": null,
+      "createdAt": "2026-11-13T12:12:57.610Z"
+    },
+    {
+      "id": "ORD-20261113-1894",
+      "businessId": "biz-1",
+      "businessName": "Kopi & Selera Nusantara",
+      "outletId": "outlet-senopati",
+      "outletName": "Cabang Senopati (Pusat)",
+      "outletAddress": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
+      "outletPhone": "0812-8899-7766",
+      "receiptFooter": "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+      "channel": "DINE_IN",
+      "tableNumber": "Meja M-01",
+      "pickupTime": null,
+      "customerName": "Rudi",
+      "customerPhone": "-",
+      "notes": "",
+      "items": [
+        {
+          "menuId": "menu-8",
+          "name": "Cireng Krispi Sambal Rujak",
+          "price": 22000,
+          "qty": 1,
+          "options": [],
+          "notes": "",
+          "subtotal": 22000
+        }
+      ],
+      "subtotal": 22000,
+      "tax": 2200,
+      "service": 1100,
+      "total": 25300,
+      "paymentMethod": "QRIS",
+      "paymentStatus": "PENDING",
+      "orderStatus": "AWAITING_PAYMENT",
+      "qrisDataUrl": "data:image/png;base64,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",
+      "createdAt": "2026-11-13T11:54:46.907Z"
+    },
     {
       "id": "GF-20261113-6259",
       "businessId": "biz-1",

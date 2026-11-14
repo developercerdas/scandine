@@ -3,31 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>ScanDine | Login Privasi Gerai & Admin</title>
+  <title>ScanDine | Login Privasi Gerai & Backoffice</title>
+  <link rel="icon" type="image/svg+xml" href="/img/logo-icon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     body {
-      background: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
-      color: #f8fafc;
+      background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #f1f5f9 100%);
+      color: #0f172a;
       font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
       min-height: 100vh;
       min-height: 100dvh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px 16px;
+      padding: 32px 16px;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
     }
 
     .login-box {
       width: 100%;
-      max-width: 440px;
-      background: #111827;
-      border: 1px solid #1f2937;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       border-radius: 24px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 1px rgba(15, 23, 42, 0.05);
       padding: 32px 28px;
     }
 
@@ -36,30 +47,24 @@
       margin-bottom: 24px;
     }
 
-    .login-logo {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
-      border-radius: 18px;
-      font-size: 1.8rem;
-      margin-bottom: 12px;
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+    .login-logo-img {
+      height: 52px;
+      display: block;
+      margin: 0 auto 12px;
     }
 
     .login-title {
-      font-size: 1.45rem;
+      font-size: 1.35rem;
       font-weight: 900;
-      color: #fff;
-      letter-spacing: -0.5px;
+      color: #0f172a;
+      letter-spacing: -0.4px;
     }
 
     .login-subtitle {
-      font-size: 0.85rem;
-      color: #94a3b8;
+      font-size: 0.84rem;
+      color: #64748b;
       margin-top: 4px;
+      font-weight: 500;
     }
 
     .login-form-group {
@@ -70,7 +75,7 @@
       display: block;
       font-size: 0.85rem;
       font-weight: 700;
-      color: #cbd5e1;
+      color: #334155;
       margin-bottom: 6px;
     }
 
@@ -78,29 +83,31 @@
       width: 100%;
       padding: 12px 16px;
       min-height: 48px;
-      border: 1px solid #334155;
+      border: 1.5px solid #cbd5e1;
       border-radius: 12px;
-      background: #0f172a;
-      color: #fff;
-      font-size: 16px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 600;
       outline: none;
       transition: all 0.2s;
     }
 
     .login-input:focus {
-      border-color: #38bdf8;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      background: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
     }
 
     .login-btn {
       width: 100%;
       background: #0284c7;
-      color: #fff;
+      color: #ffffff;
       border: none;
       padding: 14px;
       min-height: 48px;
       border-radius: 12px;
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 800;
       cursor: pointer;
       display: flex;
@@ -109,12 +116,14 @@
       gap: 8px;
       transition: all 0.2s;
       margin-top: 20px;
+      box-shadow: 0 6px 16px -2px rgba(2, 132, 199, 0.35);
       touch-action: manipulation;
     }
 
     .login-btn:hover {
       background: #0369a1;
-      box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px -2px rgba(2, 132, 199, 0.45);
     }
 
     .login-btn:active {
@@ -122,9 +131,9 @@
     }
 
     .error-msg {
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.4);
-      color: #f87171;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      color: #b91c1c;
       padding: 10px 14px;
       border-radius: 10px;
       font-size: 0.85rem;
@@ -136,15 +145,15 @@
     .demo-accounts {
       margin-top: 28px;
       padding-top: 20px;
-      border-top: 1px solid #1e293b;
+      border-top: 1px dashed #e2e8f0;
     }
 
     .demo-title {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.8px;
-      color: #94a3b8;
+      color: #64748b;
       margin-bottom: 10px;
       display: flex;
       align-items: center;
@@ -153,11 +162,11 @@
 
     .demo-pill {
       width: 100%;
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       padding: 10px 14px;
       border-radius: 12px;
-      color: #e2e8f0;
+      color: #1e293b;
       font-size: 0.84rem;
       font-weight: 700;
       cursor: pointer;
@@ -171,90 +180,249 @@
     }
 
     .demo-pill:hover {
-      background: #27354f;
-      border-color: #38bdf8;
+      background: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.08);
       transform: translateY(-1px);
     }
 
     .demo-role-badge {
       font-size: 0.72rem;
-      padding: 2px 8px;
+      padding: 3px 8px;
       border-radius: 6px;
       font-weight: 800;
       text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
 
     .role-owner {
-      background: rgba(245, 158, 11, 0.2);
-      color: #fbbf24;
-      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
     }
 
     .role-branch {
-      background: rgba(56, 189, 248, 0.15);
-      color: #38bdf8;
-      border: 1px solid rgba(56, 189, 248, 0.4);
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    /* ======================================================= */
+    /* CUSTOM POWERED-BY FOOTER CARD (CV. ISTANA BARCODE)     */
+    /* ======================================================= */
+    .powered-card {
+      margin-top: 20px;
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 14px 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: transform 0.2s;
+    }
+
+    .powered-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .pc-icon-box {
+      width: 48px;
+      height: 48px;
+      background: #fffbeb;
+      border: 1.5px solid #fde68a;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 2px rgba(245, 158, 11, 0.1);
+    }
+
+    .pc-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .pc-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 3px;
+      flex-wrap: wrap;
+    }
+
+    .pc-powered-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #94a3b8;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+
+    .pc-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      color: #0284c7;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .pc-company {
+      font-size: 0.96rem;
+      font-weight: 900;
+      color: #3b1d07;
+      letter-spacing: -0.3px;
+      line-height: 1.25;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    }
+
+    .pc-tags {
+      font-size: 0.72rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .pc-dot {
+      color: #f59e0b;
+      font-weight: 900;
+      font-size: 0.8rem;
+    }
+
+    .back-home {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      transition: color 0.15s;
+    }
+
+    .back-home:hover {
+      color: #0284c7;
     }
   </style>
 </head>
 <body>
 
-<div class="login-box">
-  <div class="login-brand">
-    <div class="login-logo">☕</div>
-    <h1 class="login-title">ScanDine Merchant</h1>
-    <p class="login-subtitle">Akses Login Privasi Gerai & Backoffice</p>
+<div class="login-wrapper">
+  <!-- Login Box -->
+  <div class="login-box">
+    <div class="login-brand">
+      <img src="/img/logo.svg" alt="ScanDine Logo" class="login-logo-img">
+      <h1 class="login-title">ScanDine Merchant</h1>
+      <p class="login-subtitle">Akses Login Privasi Gerai & Backoffice</p>
+    </div>
+
+    <div class="error-msg" id="login-error"></div>
+
+    <form onsubmit="handleLogin(event)">
+      <div class="login-form-group">
+        <label class="login-label">Username</label>
+        <input type="text" id="username" class="login-input" placeholder="Masukkan username gerai / owner" required autofocus autocomplete="username">
+      </div>
+
+      <div class="login-form-group">
+        <label class="login-label">Password</label>
+        <input type="password" id="password" class="login-input" placeholder="Masukkan password" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="login-btn" id="btn-login-submit">
+        <span>Masuk ke Dashboard</span>
+        <span>➔</span>
+      </button>
+    </form>
+
+    <!-- Demo 1-Click Login Quick Pills -->
+    <div class="demo-accounts">
+      <div class="demo-title">
+        <span>⚡ KLIK 1-TAP UNTUK DEMO CEPAT:</span>
+      </div>
+
+      <button type="button" class="demo-pill" onclick="quickFill('owner', 'password123')">
+        <div>
+          <div style="font-weight: 800; color: #0f172a;">👑 Bpk. Djohan</div>
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Akses Penuh Seluruh Gerai (Pusat)</div>
+        </div>
+        <span class="demo-role-badge role-owner">OWNER</span>
+      </button>
+
+      <button type="button" class="demo-pill" onclick="quickFill('senopati', 'password123')">
+        <div>
+          <div style="font-weight: 800; color: #0f172a;">👔 Dimas (Gerai Senopati)</div>
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Terkunci Khusus Cabang Senopati</div>
+        </div>
+        <span class="demo-role-badge role-branch">SENOPATI</span>
+      </button>
+
+      <button type="button" class="demo-pill" onclick="quickFill('kemang', 'password123')">
+        <div>
+          <div style="font-weight: 800; color: #0f172a;">👔 Nadia (Gerai Kemang)</div>
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Terkunci Khusus Cabang Kemang</div>
+        </div>
+        <span class="demo-role-badge role-branch">KEMANG</span>
+      </button>
+    </div>
   </div>
 
-  <div class="error-msg" id="login-error"></div>
-
-  <form onsubmit="handleLogin(event)">
-    <div class="login-form-group">
-      <label class="login-label">Username</label>
-      <input type="text" id="username" class="login-input" placeholder="Masukkan username" required autofocus autocomplete="username">
+  <!-- Custom Partner / Developer Card Footer (CV. ISTANA BARCODE COMPUTER) -->
+  <div class="powered-card">
+    <div class="pc-icon-box">
+      <!-- Amber QR Code Barcode vector icon -->
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <circle cx="6.5" cy="6.5" r="1" fill="#d97706" />
+        <circle cx="17.5" cy="6.5" r="1" fill="#d97706" />
+        <circle cx="6.5" cy="17.5" r="1" fill="#d97706" />
+        <path d="M14 14h3v3h-3z" />
+        <path d="M20 14v4" />
+        <path d="M14 20h6" />
+      </svg>
     </div>
-
-    <div class="login-form-group">
-      <label class="login-label">Password</label>
-      <input type="password" id="password" class="login-input" placeholder="Masukkan password" required autocomplete="current-password">
+    <div class="pc-content">
+      <div class="pc-top">
+        <span class="pc-powered-label">POWERED BY</span>
+        <span class="pc-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          Developer Cerdas
+        </span>
+      </div>
+      <div class="pc-company">CV. ISTANA BARCODE COMPUTER</div>
+      <div class="pc-tags">
+        <span>Barcode</span>
+        <span class="pc-dot">•</span>
+        <span>POS</span>
+        <span class="pc-dot">•</span>
+        <span>Komputer</span>
+        <span class="pc-dot">•</span>
+        <span>Software</span>
+        <span class="pc-dot">•</span>
+        <span>Smart Digital CCTV</span>
+      </div>
     </div>
-
-    <button type="submit" class="login-btn" id="btn-login-submit">
-      <span>Masuk ke Dashboard</span>
-      <span>➔</span>
-    </button>
-  </form>
-
-  <!-- Demo 1-Click Login Quick Pills -->
-  <div class="demo-accounts">
-    <div class="demo-title">
-      <span>⚡ KLIK 1-TAP UNTUK DEMO CEPAT:</span>
-    </div>
-
-    <button type="button" class="demo-pill" onclick="quickFill('owner', 'password123')">
-      <div>
-        <div>👑 Bpk. Djohan</div>
-        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Akses Penuh Seluruh Gerai (Pusat)</div>
-      </div>
-      <span class="demo-role-badge role-owner">OWNER</span>
-    </button>
-
-    <button type="button" class="demo-pill" onclick="quickFill('senopati', 'password123')">
-      <div>
-        <div>👔 Dimas (Gerai Senopati)</div>
-        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Terkunci Khusus Cabang Senopati</div>
-      </div>
-      <span class="demo-role-badge role-branch">SENOPATI</span>
-    </button>
-
-    <button type="button" class="demo-pill" onclick="quickFill('kemang', 'password123')">
-      <div>
-        <div>👔 Nadia (Gerai Kemang)</div>
-        <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 500;">Terkunci Khusus Cabang Kemang</div>
-      </div>
-      <span class="demo-role-badge role-branch">KEMANG</span>
-    </button>
   </div>
+
+  <a href="/" class="back-home">← Kembali ke Portal Utama ScanDine</a>
 </div>
 
 <script>
@@ -315,5 +483,10 @@ async function handleLogin(e) {
 }
 </script>
 
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+</script>
 </body>
 </html>

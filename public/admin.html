@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>ScanDine | Backoffice & Manajemen Resto</title>
+  <title>ScanDine | Backoffice & Manajemen Multi-Cabang</title>
+  <link rel="icon" type="image/svg+xml" href="/img/logo-icon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,9 +23,9 @@
     }
 
     .admin-container {
-      max-width: 1120px;
+      max-width: 1140px;
       margin: 0 auto;
-      padding: 24px 20px 60px;
+      padding: 24px 20px 80px;
     }
 
     /* Stats Grid */
@@ -93,14 +98,13 @@
     }
     .tab-content.active {
       display: block;
-      animation: fadeIn 0.25s ease-in-out;
+      animation: fadeIn 0.2s ease-in-out;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Cards & Containers */
     .admin-card {
       background: #fff;
       border-radius: var(--radius);
@@ -118,6 +122,43 @@
       text-align: center;
       max-width: 340px;
       margin: 0 auto;
+    }
+
+    /* Presets for Bulk Generator */
+    .preset-qty-btn {
+      flex: 1;
+      padding: 8px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-qty-btn.active, .preset-qty-btn:hover {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: #fff;
+    }
+
+    .batch-qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .batch-qr-sticker-item {
+      background: #ffffff;
+      border: 1.5px dashed #cbd5e1;
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .batch-qr-sticker-item:hover {
+      border-color: #0284c7;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.1);
     }
 
     /* Toggle Switch */
@@ -159,28 +200,29 @@
       transform: translateX(20px);
     }
 
-    /* Menu Grid for Mobile */
-    .menu-admin-grid {
+    /* Menu & Outlet Grid */
+    .menu-admin-grid, .outlet-admin-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
       gap: 16px;
     }
-    .menu-admin-card {
+    .menu-admin-card, .outlet-card-item {
       background: #fff;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
+      border-radius: 16px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: 12px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-    .menu-admin-card:hover {
-      border-color: #cbd5e1;
+    .outlet-card-item.active-current {
+      border-color: var(--primary);
+      background: #f0f9ff;
     }
 
-    /* Modal Styling */
+    /* Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -206,44 +248,45 @@
       padding: 24px;
     }
 
-    /* Mobile Responsive */
+    /* QRIS Mode Selector */
+    .qris-mode-card {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f8fafc;
+      margin-bottom: 12px;
+    }
+    .qris-mode-card:hover {
+      border-color: #cbd5e1;
+    }
+    .qris-mode-card.active {
+      border-color: var(--primary);
+      background: #f0f9ff;
+    }
+
     @media (max-width: 768px) {
-      .admin-container {
-        padding: 14px 12px 60px;
-      }
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-      }
-      .stat-card {
-        padding: 14px;
-      }
-      .stat-val {
-        font-size: 1.3rem;
-      }
-      .nav-tabs {
-        gap: 4px;
-        margin-bottom: 16px;
-      }
-      .tab-btn {
-        padding: 10px 14px;
-        font-size: 0.82rem;
-      }
-      .menu-admin-grid {
-        grid-template-columns: 1fr;
-      }
       .grid-2col {
         grid-template-columns: 1fr !important;
-        gap: 16px !important;
       }
-      .pos-nav-title {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
       }
-      #admin-outlet-select {
-        margin-left: 0 !important;
+      #batch-qr-container, #batch-qr-container *, #qr-sticker-area, #qr-sticker-area * {
+        visibility: visible;
+      }
+      #batch-qr-container {
+        position: absolute;
+        left: 0;
+        top: 0;
         width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
       }
     }
   </style>
@@ -253,19 +296,17 @@
 <!-- Navbar -->
 <header class="pos-navbar">
   <div class="pos-nav-title">
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <span>☕</span>
-      <span style="font-weight: 900;" id="nav-brand-title">ScanDine Backoffice</span>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <img src="/img/logo.svg" alt="ScanDine" style="height: 32px; filter: brightness(0) invert(1);">
+      <span style="font-weight: 900; display: none;" id="nav-brand-title">ScanDine Backoffice</span>
     </div>
     <select id="admin-outlet-select" onchange="changeAdminOutlet(this.value)" style="background: #1e293b; color: #fff; border: 1px solid #475569; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-left: 10px;">
-      <option value="senopati">📍 Cabang Senopati (Pusat)</option>
-      <option value="kemang">📍 Cabang Kemang Raya</option>
+      <!-- Populated dynamically from DB -->
     </select>
   </div>
   <div class="pos-links" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
     <a href="/pos" class="pos-link" id="link-kds-pos">🖥️ Kasir & KDS</a>
     <a href="/order?table=1" target="_blank" class="pos-link" id="link-preview-menu">📱 Menu Tamu</a>
-    <!-- Logged in User Badge & Logout -->
     <div id="user-auth-badge" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #334155; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; color: #e2e8f0;">
       <span id="user-display-name">Memuat...</span>
       <button onclick="logoutAdmin()" style="background: #ef4444; color: #fff; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer; margin-left: 4px;">Keluar</button>
@@ -277,7 +318,7 @@
   <!-- Stats Section -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div style="font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase;">Total Omzet Lunas</div>
+      <div style="font-size: 0.78rem; font-weight: 800; color: var(--muted); text-transform: uppercase;">Total Omzet Cabang Ini</div>
       <div class="stat-val" id="stat-revenue" style="color: var(--primary);">Rp 0</div>
       <div class="stat-sub">Dari transaksi QRIS & Kasir lunas</div>
     </div>
@@ -298,32 +339,34 @@
     </div>
   </div>
 
-  <!-- Navigation Tabs (4 Fitur Terpadu) -->
+  <!-- Navigation Tabs (Semua Modul Terintegrasi) -->
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('tab-profile', this)">🏢 Profil Resto & Struk</button>
+    <button class="tab-btn active" onclick="switchTab('tab-profile', this)">🏢 Profil Cabang & Struk</button>
     <button class="tab-btn" onclick="switchTab('tab-menu', this)">🍲 Kelola Menu, Harga & Foto</button>
-    <button class="tab-btn" onclick="switchTab('tab-qr', this)">📍 Generator QR Meja (<span id="tab-table-count">0</span> Meja)</button>
+    <button class="tab-btn" onclick="switchTab('tab-qr', this)">📍 Generator QR Meja (<span id="tab-table-count">0</span>)</button>
+    <button class="tab-btn" onclick="switchTab('tab-outlets', this)">🏬 Kelola Banyak Cabang</button>
+    <button class="tab-btn" onclick="switchTab('tab-qris', this)">💳 Pengaturan QRIS Toko</button>
     <button class="tab-btn" onclick="switchTab('tab-ojol', this)">🛵 Konfigurasi Ojol</button>
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 1: PROFIL RESTO & FORMAT STRUK (SINKRON KE SELURUH SISTEM) -->
+  <!-- TAB 1: PROFIL CABANG AKTIF & FORMAT STRUK (SINKRON KE KASIR & TAMU) -->
   <!-- ======================================================================= -->
   <div id="tab-profile" class="tab-content active">
     <div class="admin-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
         <div>
-          <h3 style="font-size: 1.2rem; font-weight: 800;">Profil Toko & Informasi Struk Thermal</h3>
-          <p style="font-size: 0.85rem; color: var(--muted);">Data di bawah ini otomatis sinkron ke HP Pelanggan, Layar Kasir/Dapur, dan Struk Cetak 58mm.</p>
+          <h3 style="font-size: 1.2rem; font-weight: 800;">Profil Cabang Aktif & Format Cetak Struk 58mm</h3>
+          <p style="font-size: 0.85rem; color: var(--muted);">Data di bawah ini khusus untuk cabang yang sedang dipilih dan otomatis tercetak di kepala struk kasir.</p>
         </div>
         <button onclick="saveStoreProfile()" class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">
-          💾 Simpan & Sinkronkan
+          💾 Simpan Profil Cabang Ini
         </button>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
         <div class="form-group">
-          <label class="form-label">Nama Bisnis / Resto Utama</label>
+          <label class="form-label">Nama Bisnis / Brand Resto Utama</label>
           <input type="text" id="prof-biz-name" class="form-input" placeholder="Contoh: Kopi & Selera Nusantara">
         </div>
         <div class="form-group">
@@ -331,17 +374,17 @@
           <input type="text" id="prof-tagline" class="form-input" placeholder="Contoh: Authentic Indonesian Taste">
         </div>
         <div class="form-group">
-          <label class="form-label">Nama Gerai / Cabang Ini</label>
+          <label class="form-label">Nama Cabang / Gerai Ini</label>
           <input type="text" id="prof-outlet-name" class="form-input" placeholder="Contoh: Cabang Senopati (Pusat)">
         </div>
         <div class="form-group">
-          <label class="form-label">No. Telepon / WhatsApp Resto</label>
+          <label class="form-label">No. Telepon / WhatsApp Cabang Ini</label>
           <input type="text" id="prof-phone" class="form-input" placeholder="Contoh: 0812-8899-7766">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Alamat Lengkap Gerai (Tercetak di Kepala Struk)</label>
+        <label class="form-label">Alamat Lengkap Cabang Ini (Tercetak di Struk)</label>
         <input type="text" id="prof-address" class="form-input" placeholder="Contoh: Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan">
       </div>
 
@@ -357,8 +400,8 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Pesan Penutup Struk (Footer Receipt)</label>
-        <textarea id="prof-footer" class="form-input" rows="2" placeholder="Terima kasih atas kunjungan Anda! Silakan datang kembali."></textarea>
+        <label class="form-label">Pesan Penutup Struk (Footer Receipt 58mm)</label>
+        <textarea id="prof-footer" class="form-input" rows="2" placeholder="Terima kasih atas kunjungan Anda!\nSilakan datang kembali."></textarea>
       </div>
     </div>
   </div>
@@ -383,79 +426,252 @@
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 3: GENERATOR QR MEJA -->
+  <!-- TAB 3: GENERATOR MEJA & QR CODE (MASSAL / 10 MEJA) -->
   <!-- ======================================================================= -->
   <div id="tab-qr" class="tab-content">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: flex-start;" class="grid-2col">
-      <!-- Table Selector & Add -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: flex-start; margin-bottom: 24px;" class="grid-2col">
+      <!-- Left Box: Generator & Control -->
       <div class="admin-card">
-        <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 14px;">Pilih Meja untuk Cetak Stiker QR</h3>
-        
-        <div class="form-group">
-          <label class="form-label">Daftar Meja Gerai Ini</label>
-          <select id="select-table" class="form-input" onchange="onTableSelectChange()">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--dark);">⚡ Generator Meja & QR Otomatis</h3>
+          <span class="badge" style="background: #e0f2fe; color: #0284c7; font-weight: 800; font-size: 0.78rem; padding: 4px 12px; border-radius: 9999px;" id="badge-total-tables">0 Meja</span>
+        </div>
+        <p style="font-size: 0.84rem; color: var(--muted); margin-bottom: 16px; line-height: 1.45;">
+          Buat deretan nomor meja dan barcode QR unik sekaligus dalam 1 klik. Sangat praktis untuk setup resto baru atau mengubah kapasitas meja.
+        </p>
+
+        <!-- Presets Buttons -->
+        <div style="margin-bottom: 16px;">
+          <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">Jumlah Meja yang Ingin Dibuat:</label>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px;">
+            <button type="button" class="preset-qty-btn" onclick="setBulkCount(5, this)">5 Meja</button>
+            <button type="button" class="preset-qty-btn active" onclick="setBulkCount(10, this)">10 Meja</button>
+            <button type="button" class="preset-qty-btn" onclick="setBulkCount(15, this)">15 Meja</button>
+            <button type="button" class="preset-qty-btn" onclick="setBulkCount(20, this)">20 Meja</button>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="number" id="bulk-table-count" class="form-input" value="10" min="1" max="100" style="font-weight: 800; font-size: 1rem; width: 120px;" placeholder="Jumlah">
+            <input type="text" id="bulk-table-prefix" class="form-input" value="Meja " placeholder="Prefix (misal: Meja )" style="flex: 1; font-weight: 700;">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label">Mode Pembuatan:</label>
+          <select id="bulk-table-mode" class="form-input" style="font-weight: 700;">
+            <option value="replace">Ganti Semua (Reset & Buat Meja 01 s/d N Baru)</option>
+            <option value="append">Tambahkan Lanjutan (Setelah Meja Terakhir)</option>
+          </select>
+        </div>
+
+        <button onclick="executeBulkGenerate()" id="btn-bulk-generate" style="width: 100%; padding: 13px; background: #0284c7; color: #fff; border: none; border-radius: 12px; font-weight: 800; font-size: 0.94rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);">
+          <span>🚀 Generate Meja &amp; QR Otomatis</span>
+        </button>
+
+        <hr style="border: none; border-top: 1px dashed var(--border); margin: 20px 0;">
+
+        <!-- Single Table Inspector -->
+        <h4 style="font-size: 0.92rem; font-weight: 800; margin-bottom: 8px; color: var(--dark);">🎯 Pilih Meja Tertentu untuk Preview Stiker</h4>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <select id="select-table" class="form-input" onchange="onTableSelectChange()" style="font-weight: 700;">
             <!-- Populated by JS -->
           </select>
         </div>
 
-        <div style="margin-top: 14px; display: flex; gap: 10px;">
-          <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 12px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 10px; font-size: 0.88rem;">
-            🔗 Buka Menu Meja Ini
+        <div style="display: flex; gap: 10px;">
+          <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 11px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 10px; font-size: 0.85rem; border: 1px solid #cbd5e1;">
+            🔗 Buka Menu Tamu
           </a>
-          <button onclick="printQrSticker()" style="flex: 1; padding: 12px; background: var(--dark); color: #fff; border: none; font-weight: 700; border-radius: 10px; font-size: 0.88rem; cursor: pointer;">
-            🖨️ Cetak Stiker Meja
-          </button>
-        </div>
-
-        <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
-
-        <h4 style="font-size: 0.98rem; font-weight: 800; margin-bottom: 10px;">+ Tambah Meja Baru di Gerai Ini</h4>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <input type="text" id="new-table-num" class="form-input" style="flex: 1; min-width: 80px;" placeholder="No. Meja (misal: 25)">
-          <input type="text" id="new-table-name" class="form-input" style="flex: 2; min-width: 140px;" placeholder="Nama (misal: Meja 25 Garden)">
-          <button onclick="addNewTable()" style="white-space: nowrap; padding: 10px 18px; background: var(--primary); color: #fff; border: none; border-radius: 10px; font-weight: 800; cursor: pointer;">
-            + Tambah Meja
+          <button onclick="printSingleQrSticker()" style="flex: 1; padding: 11px; background: #0f172a; color: #fff; border: none; font-weight: 700; border-radius: 10px; font-size: 0.85rem; cursor: pointer;">
+            🖨️ Cetak Stiker Meja Ini
           </button>
         </div>
       </div>
 
-      <!-- Live QR Sticker Preview (Sinkron dengan Nama Resto) -->
+      <!-- Right Box: Single Live Preview Sticker -->
       <div>
         <div class="qr-card-preview" id="qr-sticker-area">
-          <div style="font-size: 0.8rem; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; color: var(--primary);" id="preview-resto-name">
+          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; color: #0284c7;" id="preview-resto-name">
             KOPI & SELERA NUSANTARA
           </div>
-          <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;" id="preview-outlet-name">
-            Cabang Senopati (Pusat)
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 700;" id="preview-outlet-name">
+            Cabang Senopati
           </div>
-          <h2 id="preview-table-title" style="font-size: 1.6rem; font-weight: 900; margin: 8px 0 12px; color: var(--dark);">
+          <h2 id="preview-table-title" style="font-size: 1.6rem; font-weight: 900; margin: 8px 0 12px; color: #0f172a;">
             MEJA 01
           </h2>
 
-          <div style="background: #fff; padding: 12px; border-radius: 16px; display: inline-block; border: 1px solid var(--border); box-shadow: var(--shadow);">
-            <img id="qr-preview-image" src="" alt="QR Meja" style="width: 220px; height: 220px; display: block;">
+          <div style="background: #fff; padding: 12px; border-radius: 16px; display: inline-block; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
+            <img id="qr-preview-image" src="" alt="Barcode QR Meja" style="width: 200px; height: 200px; display: block; object-fit: contain;">
           </div>
 
-          <p style="font-size: 0.82rem; color: var(--muted); margin-top: 12px; line-height: 1.4;">
-            Pindai QR ini dengan kamera HP untuk pesan & bayar langsung dari meja tanpa menunggu pelayan.
+          <p style="font-size: 0.82rem; color: #64748b; margin-top: 12px; line-height: 1.4;">
+            Pindai QR ini dengan kamera HP untuk pesan &amp; bayar langsung dari meja tanpa menunggu pelayan.
           </p>
-          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px; word-break: break-all;" id="preview-url-text">
+          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px; word-break: break-all; font-family: monospace;" id="preview-url-text">
             -
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Box: Batch Sheet of ALL Tables -->
+    <div class="admin-card">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-size: 1.18rem; font-weight: 800; color: var(--dark);">📋 Lembar Stiker QR Seluruh Meja di Cabang Ini</h3>
+          <p style="font-size: 0.84rem; color: var(--muted);">Siap cetak sekaligus atau gunting untuk ditempel langsung di meja makan.</p>
+        </div>
+        <button onclick="printAllQrSheet()" style="padding: 10px 18px; background: #059669; color: #fff; border: none; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);">
+          🖨️ Cetak Semua Stiker Sekaligus (<span id="batch-print-count">0</span> Meja)
+        </button>
+      </div>
+
+      <div class="batch-qr-grid" id="batch-qr-container">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 4: KELOLA BANYAK CABANG (MULTI-OUTLET CRUD) -->
+  <!-- ======================================================================= -->
+  <div id="tab-outlets" class="tab-content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <h3 style="font-size: 1.2rem; font-weight: 800;">Daftar Semua Cabang & Gerai Restoran</h3>
+        <p style="font-size: 0.85rem; color: var(--muted);">Kelola cabang yang aktif, alamat, pajak spesifik per kota, dan buat akun manager untuk masing-masing cabang.</p>
+      </div>
+      <button onclick="openAddOutletModal()" class="btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.9rem;">
+        + Tambah Cabang Baru
+      </button>
+    </div>
+
+    <div class="outlet-admin-grid" id="outlet-admin-list">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- TAB 5: PENGATURAN QRIS TOKO SENDIRI & PAYMENT GATEWAY -->
+  <!-- ======================================================================= -->
+  <div id="tab-qris" class="tab-content">
+    <div class="admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h3 style="font-size: 1.2rem; font-weight: 800;">Pengaturan QRIS Merchant & Metode Pembayaran</h3>
+          <p style="font-size: 0.85rem; color: var(--muted);">Pilih apakah ingin menggunakan QRIS bank sendiri (BCA/Mandiri/GoPay/OVO/Dana), Payment Gateway, atau Simulasi Demo.</p>
+        </div>
+        <button onclick="saveQrisSettings()" class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">
+          💾 Simpan Pengaturan QRIS
+        </button>
+      </div>
+
+      <!-- Mode Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 24px;">
+        <!-- Mode 1: Static QRIS Sendiri -->
+        <div class="qris-mode-card" id="qris-card-static" onclick="selectQrisMode('STATIC_OWN')">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <span style="font-size: 1.6rem;">🏦</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">QRIS Bank Sendiri</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">BCA, Mandiri, BRI, GoPay, OVO, Dana</div>
+            </div>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--slate); line-height: 1.4;">
+            Gunakan barcode QRIS resmi dari bank toko Anda. Dana langsung masuk ke rekening toko Anda tanpa potongan platform.
+          </p>
+        </div>
+
+        <!-- Mode 2: Payment Gateway Midtrans / Xendit -->
+        <div class="qris-mode-card" id="qris-card-gateway" onclick="selectQrisMode('GATEWAY')">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <span style="font-size: 1.6rem;">⚡</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">Payment Gateway Otomatis</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">Midtrans, Xendit, DOKU API</div>
+            </div>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--slate); line-height: 1.4;">
+            QR dinamis otomatis berubah sesuai jumlah rupiah pesanan. Terverifikasi lunas seketika lewat webhook gateway.
+          </p>
+        </div>
+
+        <!-- Mode 3: Demo Sandbox -->
+        <div class="qris-mode-card" id="qris-card-demo" onclick="selectQrisMode('DYNAMIC_MOCK')">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+            <span style="font-size: 1.6rem;">🧪</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem;">Demo & Sandbox Cerdas</div>
+              <div style="font-size: 0.75rem; color: var(--muted);">Untuk Presentasi & Simulasi</div>
+            </div>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--slate); line-height: 1.4;">
+            Membuat barcode QRIS simulasi dengan tombol instant webhook untuk mendemokan sistem kasir & KDS secara live.
+          </p>
+        </div>
+      </div>
+
+      <!-- Config Form Details -->
+      <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 16px; padding: 20px;">
+        <h4 style="font-size: 1rem; font-weight: 800; margin-bottom: 14px;">Detail Informasi QRIS yang Ditampilkan ke Tamu</h4>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
+          <div class="form-group">
+            <label class="form-label">Nama Merchant / Toko di QRIS</label>
+            <input type="text" id="qris-merchant-name" class="form-input" placeholder="Contoh: KOPI NUSANTARA SENOPATI">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nomor National Merchant ID (NMID)</label>
+            <input type="text" id="qris-nmid" class="form-input" placeholder="Contoh: ID1020030040050">
+          </div>
+        </div>
+
+        <!-- Static QRIS Upload / URL Container -->
+        <div id="qris-static-fields" style="margin-top: 10px;">
+          <div class="form-group">
+            <label class="form-label">URL / File Gambar QRIS Toko Sendiri</label>
+            <input type="text" id="qris-image-url" class="form-input" placeholder="https://... atau tempel data:image/png;base64">
+            <p style="font-size: 0.75rem; color: var(--muted); margin-top: 4px;">
+              💡 Anda dapat mengunggah gambar QRIS bank Anda ke hosting atau menempelkan tautan gambarnya di sini.
+            </p>
+          </div>
+        </div>
+
+        <!-- Gateway Container -->
+        <div id="qris-gateway-fields" style="display: none; margin-top: 10px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
+            <div class="form-group">
+              <label class="form-label">Penyedia Gateway</label>
+              <select id="qris-gateway-provider" class="form-input">
+                <option value="MIDTRANS">Midtrans Snap / Core API</option>
+                <option value="XENDIT">Xendit Invoice QRIS</option>
+                <option value="DOKU">DOKU Payment Gateway</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Server Key / API Secret</label>
+              <input type="password" id="qris-gateway-key" class="form-input" placeholder="SB-Mid-server-xxxx">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+          <label class="form-label">Petunjuk Tambahan Pembayaran untuk Tamu</label>
+          <input type="text" id="qris-instructions" class="form-input" placeholder="Dukung seluruh E-Wallet & Mobile Banking Indonesia">
         </div>
       </div>
     </div>
   </div>
 
   <!-- ======================================================================= -->
-  <!-- TAB 4: KONFIGURASI OJOL -->
+  <!-- TAB 6: KONFIGURASI OJOL -->
   <!-- ======================================================================= -->
   <div id="tab-ojol" class="tab-content">
     <div class="admin-card">
-      <div style="margin-bottom: 18px;">
-        <h3 style="font-size: 1.2rem; font-weight: 800;">Integrasi Webhook Omnichannel Ojol</h3>
-        <p style="font-size: 0.85rem; color: var(--muted);">Salin URL webhook di bawah ini ke Merchant Portal GoBiz, GrabMerchant, atau Shopee Partner agar pesanan online langsung masuk ke POS & KDS ScanDine.</p>
-      </div>
+      <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 8px;">Integrasi Pesanan Online (GoFood, GrabFood, ShopeeFood)</h3>
+      <p style="font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 20px;">
+        Hubungkan webhook resto Anda agar pesanan ojol masuk otomatis ke layar kasir dan TV dapur ScanDine tanpa staf mengetik ulang di 3 HP berbeda.
+      </p>
 
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <!-- GoFood -->
@@ -463,7 +679,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span style="font-size: 1.2rem;">🟢</span>
-              <strong style="font-size: 0.95rem;">GoFood (GoBiz Webhook)</strong>
+              <strong style="font-size: 0.95rem;">GoFood (GoBiz Partner Webhook)</strong>
             </div>
             <button onclick="testOjolFromAdmin('gofood')" style="background: #15803d; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
               ⚡ Uji Pesanan GoFood
@@ -517,10 +733,116 @@
       </div>
     </div>
   </div>
+
+  <!-- Custom Partner / Developer Card Footer (CV. ISTANA BARCODE COMPUTER) -->
+  <div style="margin: 40px auto 0; max-width: 480px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 14px 18px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04); display: flex; align-items: center; gap: 14px;">
+    <div style="width: 48px; height: 48px; background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <circle cx="6.5" cy="6.5" r="1" fill="#d97706" />
+        <circle cx="17.5" cy="6.5" r="1" fill="#d97706" />
+        <circle cx="6.5" cy="17.5" r="1" fill="#d97706" />
+        <path d="M14 14h3v3h-3z" />
+        <path d="M20 14v4" />
+        <path d="M14 20h6" />
+      </svg>
+    </div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px;">
+        <span style="font-size: 0.68rem; font-weight: 800; color: #94a3b8; letter-spacing: 0.8px; text-transform: uppercase;">POWERED BY</span>
+        <span style="display: inline-flex; align-items: center; gap: 4px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; padding: 2px 8px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          Developer Cerdas
+        </span>
+      </div>
+      <div style="font-size: 0.96rem; font-weight: 900; color: #3b1d07; letter-spacing: -0.3px; line-height: 1.25;">CV. ISTANA BARCODE COMPUTER</div>
+      <div style="font-size: 0.72rem; color: #64748b; font-weight: 600; margin-top: 3px; display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+        <span>Barcode</span>
+        <span style="color: #f59e0b; font-weight: 900;">•</span>
+        <span>POS</span>
+        <span style="color: #f59e0b; font-weight: 900;">•</span>
+        <span>Komputer</span>
+        <span style="color: #f59e0b; font-weight: 900;">•</span>
+        <span>Software</span>
+        <span style="color: #f59e0b; font-weight: 900;">•</span>
+        <span>Smart Digital CCTV</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ========================================================================= -->
-<!-- MODAL EDIT / TAMBAH MENU -->
+<!-- MODAL TAMBAH CABANG BARU -->
+<!-- ========================================================================= -->
+<div class="modal-backdrop" id="modal-outlet-add">
+  <div class="modal-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h3 style="font-size: 1.2rem; font-weight: 800;">+ Tambah Cabang / Gerai Baru</h3>
+      <button onclick="closeAddOutletModal()" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.1rem;">✕</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Nama Cabang Baru *</label>
+      <input type="text" id="new-out-name" class="form-input" placeholder="Contoh: Cabang Bandung Dago">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Slug / ID URL (Huruf kecil, tanpa spasi) *</label>
+      <input type="text" id="new-out-slug" class="form-input" placeholder="Contoh: bandung">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Alamat Lengkap Cabang *</label>
+      <input type="text" id="new-out-address" class="form-input" placeholder="Contoh: Jl. Ir. H. Juanda No. 102, Dago, Bandung">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">No. Telepon / WhatsApp Cabang</label>
+      <input type="text" id="new-out-phone" class="form-input" placeholder="Contoh: 0812-3344-5566">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <div class="form-group">
+        <label class="form-label">Pajak PB1 (%)</label>
+        <input type="number" id="new-out-tax" class="form-input" value="10">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Service Charge (%)</label>
+        <input type="number" id="new-out-service" class="form-input" value="5">
+      </div>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid var(--border); margin: 16px 0;">
+    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 10px;">Akun Khusus Manager Cabang Ini (Opsional)</h4>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+      <div class="form-group">
+        <label class="form-label">Username Manager</label>
+        <input type="text" id="new-out-manager-user" class="form-input" placeholder="misal: bandung">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password Manager</label>
+        <input type="password" id="new-out-manager-pass" class="form-input" value="password123">
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button type="button" onclick="closeAddOutletModal()" style="flex: 1; padding: 12px; background: #f1f5f9; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">
+        Batal
+      </button>
+      <button type="button" onclick="submitCreateOutlet()" class="btn-primary" style="flex: 2; margin: 0; justify-content: center;">
+        🚀 Tambah Cabang Sekarang
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL EDIT/TAMBAH MENU -->
 <!-- ========================================================================= -->
 <div class="modal-backdrop" id="modal-menu-edit">
   <div class="modal-card">
@@ -532,41 +854,37 @@
     <input type="hidden" id="edit-menu-id">
 
     <div class="form-group">
-      <label class="form-label">Nama Menu</label>
-      <input type="text" id="edit-menu-name" class="form-input" placeholder="Contoh: Nasi Goreng Spesial">
+      <label class="form-label">Nama Menu Makanan / Minuman</label>
+      <input type="text" id="edit-menu-name" class="form-input" placeholder="Contoh: Nasi Goreng Wagyu Selera">
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
       <div class="form-group">
-        <label class="form-label">Harga (Rp)</label>
-        <input type="number" id="edit-menu-price" class="form-input" placeholder="50000" min="0">
+        <label class="form-label">Harga Jual (Rp)</label>
+        <input type="number" id="edit-menu-price" class="form-input" placeholder="58000">
       </div>
       <div class="form-group">
         <label class="form-label">Kategori</label>
         <select id="edit-menu-cat" class="form-input">
-          <option value="cat-1">🍛 Makanan Utama</option>
-          <option value="cat-2">☕ Kopi & Minuman</option>
-          <option value="cat-3">🍟 Cemilan & Snack</option>
-          <option value="cat-4">🍰 Dessert & Manisan</option>
+          <option value="cat-1">Makanan Utama</option>
+          <option value="cat-2">Kopi & Minuman</option>
+          <option value="cat-3">Cemilan & Snack</option>
+          <option value="cat-4">Dessert & Manisan</option>
         </select>
       </div>
     </div>
 
     <div class="form-group">
-      <label class="form-label">Foto Menu (URL Gambar)</label>
-      <input type="text" id="edit-menu-image" class="form-input" placeholder="https://..." oninput="updateImagePreview(this.value)">
-      <!-- Quick Photo Presets -->
-      <div style="margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap;">
-        <span style="font-size: 0.75rem; color: var(--muted); align-self: center;">Pilihan Cepat:</span>
-        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">🍛 Nasi Goreng</button>
-        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">🥩 Sate / Daging</button>
-        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">☕ Kopi Susu</button>
-        <button type="button" onclick="setPresetImg('https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=600&auto=format&fit=crop&q=80')" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer;">🍹 Es Segar</button>
+      <label class="form-label">URL Foto Menu</label>
+      <input type="text" id="edit-menu-image" class="form-input" placeholder="https://images.unsplash.com/..." oninput="previewMenuPhoto(this.value)">
+      <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+        <span style="font-size: 0.72rem; color: var(--muted); align-self: center;">Contoh foto cepat:</span>
+        <button type="button" onclick="setPresetPhoto('fried-rice')" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer;">🍛 Nasi Goreng</button>
+        <button type="button" onclick="setPresetPhoto('chicken')" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer;">🍗 Ayam Bakar</button>
+        <button type="button" onclick="setPresetPhoto('coffee')" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer;">☕ Es Kopi Susu</button>
+        <button type="button" onclick="setPresetPhoto('fries')" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer;">🍟 Truffle Fries</button>
       </div>
-      <!-- Image Preview Thumbnail -->
-      <div style="margin-top: 10px; text-align: center;">
-        <img id="edit-img-preview" src="" style="width: 100%; max-height: 160px; object-fit: cover; border-radius: 10px; display: none; border: 1px solid var(--border);">
-      </div>
+      <img id="edit-img-preview" src="" style="width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin-top: 10px; display: none; border: 1px solid var(--border);">
     </div>
 
     <div class="form-group">
@@ -587,9 +905,11 @@
 
 <script>
 let currentAdminOutlet = "senopati";
+let allOutlets = [];
 let tables = [];
 let menus = [];
 let currentStoreProfile = {};
+let currentQrisSettings = {};
 let currentUser = null;
 
 // Auth Verification
@@ -602,21 +922,18 @@ function verifyAuth() {
   currentUser = JSON.parse(raw);
   document.getElementById('user-display-name').innerText = `${currentUser.avatar || '👤'} ${currentUser.name}`;
 
-  // If GERAI_MANAGER, lock outlet dropdown to their assigned outlet
   if (currentUser.role === 'GERAI_MANAGER' && currentUser.assignedOutlet) {
     currentAdminOutlet = currentUser.assignedOutlet.slug;
     const sel = document.getElementById('admin-outlet-select');
     sel.innerHTML = `<option value="${currentUser.assignedOutlet.slug}">🔒 Gerai: ${currentUser.assignedOutlet.name}</option>`;
     sel.disabled = true;
   } else {
-    // Owner can use query param
     const urlParams = new URLSearchParams(window.location.search);
     const qOutlet = urlParams.get('outlet');
     if (qOutlet) currentAdminOutlet = qOutlet;
-    document.getElementById('admin-outlet-select').value = currentAdminOutlet;
   }
 
-  // Update quick nav links
+  // Update nav links
   document.getElementById('link-kds-pos').href = `/pos?outlet=${currentAdminOutlet}`;
   document.getElementById('link-preview-menu').href = `/order?outlet=${currentAdminOutlet}&table=1`;
 
@@ -630,11 +947,30 @@ function logoutAdmin() {
   }
 }
 
+// Persist tab across browser refresh (User request)
 function switchTab(tabId, btn) {
   document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(tb => tb.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  btn.classList.add('active');
+  
+  const targetContent = document.getElementById(tabId);
+  if (targetContent) targetContent.classList.add('active');
+  
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    const matchingBtn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
+    if (matchingBtn) matchingBtn.classList.add('active');
+  }
+
+  // Persist across browser refresh in localStorage & URL hash
+  localStorage.setItem('scandine_admin_active_tab', tabId);
+  try {
+    history.replaceState(null, null, `#${tabId}`);
+  } catch(e) {}
+
+  if (tabId === 'tab-qr') {
+    loadBatchTableQr();
+  }
 }
 
 function changeAdminOutlet(slug) {
@@ -650,7 +986,7 @@ function formatRupiah(num) {
 }
 
 // -----------------------------------------------------------------------------
-// TAB 1: PROFIL RESTO & FORMAT STRUK
+// TAB 1: PROFIL RESTO & STRUK (PER CABANG)
 // -----------------------------------------------------------------------------
 async function loadStoreProfile() {
   try {
@@ -667,7 +1003,7 @@ async function loadStoreProfile() {
     document.getElementById('prof-service').value = data.serviceRate !== undefined ? data.serviceRate : 5;
     document.getElementById('prof-footer').value = data.receiptFooter || "";
 
-    // Sync QR preview header
+    // Sync QR Preview
     document.getElementById('preview-resto-name').innerText = (data.businessName || "SCAN DINE").toUpperCase();
     document.getElementById('preview-outlet-name').innerText = data.outletName || "";
     document.getElementById('nav-brand-title').innerText = `${data.businessName || 'ScanDine'} • Backoffice`;
@@ -696,8 +1032,9 @@ async function saveStoreProfile() {
     });
     const result = await res.json();
     if (result.success) {
-      alert("✅ Profil Restoran & Format Struk BERHASIL Disimpan dan Disinkronkan ke Seluruh Sistem!");
+      alert("✅ Profil Cabang & Format Struk BERHASIL Disimpan dan Disinkronkan!");
       loadStoreProfile();
+      fetchOutlets();
     } else {
       alert("Gagal menyimpan profil: " + (result.error || ""));
     }
@@ -783,7 +1120,13 @@ function openEditMenuModal(menuId) {
   document.getElementById('edit-menu-image').value = menu.image || "";
   document.getElementById('edit-menu-desc').value = menu.description || "";
 
-  updateImagePreview(menu.image);
+  if (menu.image) {
+    document.getElementById('edit-img-preview').src = menu.image;
+    document.getElementById('edit-img-preview').style.display = 'block';
+  } else {
+    document.getElementById('edit-img-preview').style.display = 'none';
+  }
+
   document.getElementById('modal-menu-edit').classList.add('active');
 }
 
@@ -791,59 +1134,65 @@ function closeMenuModal() {
   document.getElementById('modal-menu-edit').classList.remove('active');
 }
 
-function setPresetImg(url) {
-  document.getElementById('edit-menu-image').value = url;
-  updateImagePreview(url);
+function previewMenuPhoto(val) {
+  const p = document.getElementById('edit-img-preview');
+  if (val) {
+    p.src = val;
+    p.style.display = 'block';
+  } else {
+    p.style.display = 'none';
+  }
 }
 
-function updateImagePreview(url) {
-  const img = document.getElementById('edit-img-preview');
-  if (url && url.startsWith('http')) {
-    img.src = url;
-    img.style.display = 'block';
-  } else {
-    img.style.display = 'none';
+function setPresetPhoto(type) {
+  const presets = {
+    'fried-rice': 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=600&auto=format&fit=crop&q=80',
+    'chicken': 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600&auto=format&fit=crop&q=80',
+    'coffee': 'https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=600&auto=format&fit=crop&q=80',
+    'fries': 'https://images.unsplash.com/photo-1576107232684-1279f3908594?w=600&auto=format&fit=crop&q=80'
+  };
+  const url = presets[type];
+  if (url) {
+    document.getElementById('edit-menu-image').value = url;
+    previewMenuPhoto(url);
   }
 }
 
 async function saveMenuData() {
-  const menuId = document.getElementById('edit-menu-id').value;
+  const id = document.getElementById('edit-menu-id').value;
   const name = document.getElementById('edit-menu-name').value.trim();
-  const price = document.getElementById('edit-menu-price').value;
+  const price = parseInt(document.getElementById('edit-menu-price').value) || 0;
   const categoryId = document.getElementById('edit-menu-cat').value;
   const image = document.getElementById('edit-menu-image').value.trim();
   const description = document.getElementById('edit-menu-desc').value.trim();
 
-  if (!name || price === "") {
-    alert("Mohon isi nama menu dan harga dengan benar.");
+  if (!name || price <= 0) {
+    alert("Nama menu dan harga harus diisi.");
     return;
   }
 
-  const payload = { name, price: Number(price), categoryId, image, description };
+  const payload = { name, price, categoryId, image, description };
 
   try {
     let res;
-    if (menuId) {
-      // Edit existing
-      res = await fetch(`/api/admin/menus/${menuId}`, {
+    if (id) {
+      res = await fetch(`/api/admin/menus/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
     } else {
-      // Create new
-      res = await fetch('/api/admin/menus', {
+      res = await fetch(`/api/admin/menus`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
     }
-
     const data = await res.json();
     if (data.success) {
-      alert("✅ Menu berhasil disimpan!");
       closeMenuModal();
       fetchAdminMenus();
+      alert("✅ Data menu berhasil disimpan!");
     } else {
       alert("Gagal: " + (data.error || ""));
     }
@@ -867,13 +1216,64 @@ async function toggleMenuStatus(menuId) {
 }
 
 // -----------------------------------------------------------------------------
-// TAB 3: GENERATOR QR MEJA
+// TAB 3: GENERATOR QR MEJA & BULK GENERATOR (10 MEJA)
 // -----------------------------------------------------------------------------
+function setBulkCount(count, btn) {
+  document.getElementById('bulk-table-count').value = count;
+  document.querySelectorAll('.preset-qty-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+async function executeBulkGenerate() {
+  const count = parseInt(document.getElementById('bulk-table-count').value) || 10;
+  const prefix = document.getElementById('bulk-table-prefix').value || "Meja ";
+  const mode = document.getElementById('bulk-table-mode').value || "replace";
+  const btn = document.getElementById('btn-bulk-generate');
+
+  const confirmMsg = mode === 'replace'
+    ? `⚠️ Perhatian: Mode ini akan me-RESET seluruh meja cabang ini dan membuat ${count} meja baru (${prefix}01 s/d ${prefix}${count < 10 ? '0'+count : count}). Lanjutkan?`
+    : `Tambahkan ${count} meja baru ke cabang ini?`;
+
+  if (!confirm(confirmMsg)) return;
+
+  btn.disabled = true;
+  btn.innerText = "⏳ Sedang Men-generate Meja...";
+
+  try {
+    const res = await fetch('/api/admin/tables/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        outlet: currentAdminOutlet,
+        count: count,
+        prefix: prefix,
+        capacity: 4,
+        mode: mode
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ Berhasil membuat ${data.count} meja dan barcode QR!`);
+      await fetchTables();
+      await loadBatchTableQr();
+    } else {
+      alert("Gagal generate meja: " + (data.error || ""));
+    }
+  } catch (err) {
+    alert("Terjadi kesalahan jaringan.");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<span>🚀 Generate Meja &amp; QR Otomatis</span>`;
+  }
+}
+
 async function fetchTables() {
   try {
     const res = await fetch(`/api/admin/tables?outlet=${currentAdminOutlet}`);
     tables = await res.json();
     document.getElementById('tab-table-count').innerText = tables.length;
+    const badge = document.getElementById('badge-total-tables');
+    if (badge) badge.innerText = `${tables.length} Meja`;
     renderTableSelect();
   } catch (err) {
     console.error("Gagal memuat meja:", err);
@@ -882,6 +1282,7 @@ async function fetchTables() {
 
 function renderTableSelect() {
   const sel = document.getElementById('select-table');
+  if (!sel) return;
   sel.innerHTML = "";
   tables.forEach(t => {
     const opt = document.createElement('option');
@@ -895,7 +1296,9 @@ function renderTableSelect() {
 }
 
 async function onTableSelectChange() {
-  const tableNum = document.getElementById('select-table').value;
+  const sel = document.getElementById('select-table');
+  if (!sel) return;
+  const tableNum = sel.value;
   if (!tableNum) return;
   const currentTable = tables.find(t => t.number.toString() === tableNum.toString());
 
@@ -904,50 +1307,267 @@ async function onTableSelectChange() {
   try {
     const res = await fetch(`/api/admin/tables/${encodeURIComponent(tableNum)}/qr?outlet=${currentAdminOutlet}`);
     const data = await res.json();
-    document.getElementById('qr-preview-image').src = data.qrCodeDataUrl;
-    document.getElementById('preview-url-text').innerText = data.orderUrl;
-    document.getElementById('btn-preview-link').href = data.orderUrl;
+    // Support both qrCodeDataUrl and qrDataUrl
+    const qrSrc = data.qrCodeDataUrl || data.qrDataUrl || '';
+    const targetUrl = data.orderUrl || data.targetUrl || '';
+    document.getElementById('qr-preview-image').src = qrSrc;
+    document.getElementById('preview-url-text').innerText = targetUrl;
+    document.getElementById('btn-preview-link').href = targetUrl;
   } catch (err) {
     console.error("Gagal generate QR meja:", err);
   }
 }
 
-async function addNewTable() {
-  const num = document.getElementById('new-table-num').value.trim();
-  const name = document.getElementById('new-table-name').value.trim();
-  if (!num) {
-    alert("Masukkan nomor meja.");
-    return;
-  }
+async function loadBatchTableQr() {
+  const container = document.getElementById('batch-qr-container');
+  if (!container) return;
+  container.innerHTML = `<div style="padding: 24px; color: var(--muted); text-align: center; grid-column: 1 / -1;">⏳ Memuat semua stiker barcode QR meja...</div>`;
 
   try {
-    const res = await fetch('/api/admin/tables', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        outlet: currentAdminOutlet,
-        number: num,
-        name: name || `Meja ${num}`,
-        capacity: 4
-      })
-    });
-    if (res.ok) {
-      document.getElementById('new-table-num').value = "";
-      document.getElementById('new-table-name').value = "";
-      alert("✅ Meja baru berhasil ditambahkan!");
-      fetchTables();
+    const res = await fetch(`/api/admin/tables/batch-qr?outlet=${currentAdminOutlet}`);
+    const data = await res.json();
+    const tableList = data.tables || [];
+    const countEl = document.getElementById('batch-print-count');
+    if (countEl) countEl.innerText = tableList.length;
+
+    if (tableList.length === 0) {
+      container.innerHTML = `<div style="padding: 30px; color: var(--muted); text-align: center; grid-column: 1 / -1;">Belum ada meja. Silakan gunakan generator di atas untuk membuat meja!</div>`;
+      return;
     }
+
+    let html = "";
+    tableList.forEach(t => {
+      html += `
+        <div class="batch-qr-sticker-item">
+          <div style="font-size: 0.72rem; font-weight: 900; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px;">${t.businessName || 'SCANDINE'}</div>
+          <div style="font-size: 0.68rem; color: #64748b; font-weight: 700;">${t.outletName || ''}</div>
+          <div style="font-size: 1.15rem; font-weight: 900; color: #0f172a; margin: 4px 0 6px;">${t.name}</div>
+          <div style="background: #fff; padding: 6px; border-radius: 10px; display: inline-block; border: 1.5px solid #e2e8f0;">
+            <img src="${t.qrDataUrl}" alt="${t.name}" style="width: 130px; height: 130px; display: block; object-fit: contain;">
+          </div>
+          <div style="font-size: 0.68rem; color: #64748b; margin-top: 6px; font-weight: 600;">Scan untuk Pesan</div>
+          <a href="${t.orderUrl}" target="_blank" style="display: block; font-size: 0.72rem; color: #0284c7; text-decoration: none; font-weight: 800; margin-top: 6px;">Buka Link ➔</a>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
   } catch (err) {
-    alert("Gagal menambahkan meja.");
+    container.innerHTML = `<div style="color: #ef4444; padding: 20px;">Gagal memuat batch QR.</div>`;
   }
 }
 
-function printQrSticker() {
+function printSingleQrSticker() {
+  window.print();
+}
+
+function printAllQrSheet() {
   window.print();
 }
 
 // -----------------------------------------------------------------------------
-// TAB 4: OJOL INTEGRATION
+// TAB 4: KELOLA BANYAK CABANG (MULTI-OUTLET CRUD)
+// -----------------------------------------------------------------------------
+async function fetchOutlets() {
+  try {
+    const res = await fetch('/api/admin/outlets');
+    allOutlets = await res.json();
+    renderOutletsList();
+    renderOutletSelectorDropdown();
+  } catch (err) {
+    console.error("Gagal memuat outlets:", err);
+  }
+}
+
+function renderOutletSelectorDropdown() {
+  const sel = document.getElementById('admin-outlet-select');
+  if (currentUser && currentUser.role === 'GERAI_MANAGER') return;
+
+  let html = "";
+  allOutlets.forEach(o => {
+    html += `<option value="${o.slug}" ${o.slug === currentAdminOutlet ? 'selected' : ''}>🏢 ${o.name}</option>`;
+  });
+  sel.innerHTML = html;
+}
+
+function renderOutletsList() {
+  const container = document.getElementById('outlet-admin-list');
+  let html = "";
+
+  allOutlets.forEach(out => {
+    const isCurrent = out.slug === currentAdminOutlet;
+    html += `
+      <div class="outlet-card-item ${isCurrent ? 'active-current' : ''}">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+              <span style="font-size: 0.72rem; font-weight: 800; color: ${isCurrent ? 'var(--primary)' : 'var(--muted)'}; text-transform: uppercase;">
+                ${isCurrent ? '● Cabang Sedang Aktif' : 'Cabang Resto'}
+              </span>
+              <h4 style="font-size: 1.15rem; font-weight: 900; color: var(--dark); margin: 2px 0 6px;">${out.name}</h4>
+            </div>
+            <span style="background: #e2e8f0; font-size: 0.74rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">
+              ${out.tableCount || out.tables?.length || 0} Meja
+            </span>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--slate); line-height: 1.4; margin-bottom: 8px;">
+            📍 ${out.address || 'Alamat belum diatur'}
+          </p>
+          <div style="font-size: 0.78rem; color: var(--muted);">
+            📞 ${out.phone || '-'} • PB1: <strong>${out.taxRate}%</strong> • Service: <strong>${out.serviceRate}%</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 10px; border-top: 1px dashed var(--border); padding-top: 10px;">
+          ${!isCurrent ? `
+            <button onclick="changeAdminOutlet('${out.slug}')" style="flex: 1; padding: 8px 12px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: pointer;">
+              Pilih Cabang Ini ➔
+            </button>
+          ` : `
+            <button disabled style="flex: 1; padding: 8px 12px; background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; border-radius: 8px; font-weight: 800; font-size: 0.8rem;">
+              ✓ Sedang Dikelola
+            </button>
+          `}
+          <a href="/pos?outlet=${out.slug}" target="_blank" style="padding: 8px 12px; background: #f1f5f9; color: var(--dark); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.8rem;">
+            Layar POS
+          </a>
+          <a href="/order?outlet=${out.slug}&table=1" target="_blank" style="padding: 8px 12px; background: #f1f5f9; color: var(--dark); text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 0.8rem;">
+            Menu Tamu
+          </a>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function openAddOutletModal() {
+  document.getElementById('modal-outlet-add').classList.add('active');
+}
+
+function closeAddOutletModal() {
+  document.getElementById('modal-outlet-add').classList.remove('active');
+}
+
+async function submitCreateOutlet() {
+  const name = document.getElementById('new-out-name').value.trim();
+  const slug = document.getElementById('new-out-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+  const address = document.getElementById('new-out-address').value.trim();
+  const phone = document.getElementById('new-out-phone').value.trim();
+  const taxRate = Number(document.getElementById('new-out-tax').value) || 10;
+  const serviceRate = Number(document.getElementById('new-out-service').value) || 5;
+  const managerUsername = document.getElementById('new-out-manager-user').value.trim();
+  const managerPassword = document.getElementById('new-out-manager-pass').value;
+
+  if (!name || !slug || !address) {
+    alert("Nama cabang, slug, dan alamat wajib diisi.");
+    return;
+  }
+
+  const payload = {
+    name, slug, address, phone, taxRate, serviceRate, managerUsername, managerPassword
+  };
+
+  try {
+    const res = await fetch('/api/admin/outlets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert(`✅ Cabang ${name} BERHASIL Ditambahkan!\nOtomatis dibuatkan 10 meja dan QR.`);
+      closeAddOutletModal();
+      await fetchOutlets();
+      changeAdminOutlet(slug);
+    } else {
+      alert("Gagal: " + (data.error || ""));
+    }
+  } catch (err) {
+    alert("Terjadi kesalahan jaringan.");
+  }
+}
+
+// -----------------------------------------------------------------------------
+// TAB 5: PENGATURAN QRIS TOKO
+// -----------------------------------------------------------------------------
+async function loadQrisSettings() {
+  try {
+    const res = await fetch('/api/admin/qris-settings');
+    const data = await res.json();
+    currentQrisSettings = data;
+
+    selectQrisMode(data.mode || 'DYNAMIC_MOCK', false);
+
+    document.getElementById('qris-merchant-name').value = data.merchantName || "";
+    document.getElementById('qris-nmid').value = data.nmid || "";
+    document.getElementById('qris-image-url').value = data.staticQrImage || "";
+    document.getElementById('qris-instructions').value = data.instructions || "";
+    if (data.gatewayConfig) {
+      document.getElementById('qris-gateway-provider').value = data.gatewayConfig.provider || "MIDTRANS";
+      document.getElementById('qris-gateway-key').value = data.gatewayConfig.serverKey || "";
+    }
+  } catch (err) {
+    console.error("Gagal load QRIS settings:", err);
+  }
+}
+
+let activeQrisMode = 'DYNAMIC_MOCK';
+
+function selectQrisMode(mode, highlight = true) {
+  activeQrisMode = mode;
+  document.getElementById('qris-card-static').classList.toggle('active', mode === 'STATIC_OWN');
+  document.getElementById('qris-card-gateway').classList.toggle('active', mode === 'GATEWAY');
+  document.getElementById('qris-card-demo').classList.toggle('active', mode === 'DYNAMIC_MOCK');
+
+  const staticFields = document.getElementById('qris-static-fields');
+  const gatewayFields = document.getElementById('qris-gateway-fields');
+
+  if (mode === 'STATIC_OWN') {
+    staticFields.style.display = 'block';
+    gatewayFields.style.display = 'none';
+  } else if (mode === 'GATEWAY') {
+    staticFields.style.display = 'none';
+    gatewayFields.style.display = 'block';
+  } else {
+    staticFields.style.display = 'none';
+    gatewayFields.style.display = 'none';
+  }
+}
+
+async function saveQrisSettings() {
+  const payload = {
+    mode: activeQrisMode,
+    merchantName: document.getElementById('qris-merchant-name').value.trim(),
+    nmid: document.getElementById('qris-nmid').value.trim(),
+    staticQrImage: document.getElementById('qris-image-url').value.trim(),
+    instructions: document.getElementById('qris-instructions').value.trim(),
+    gatewayConfig: {
+      provider: document.getElementById('qris-gateway-provider').value,
+      serverKey: document.getElementById('qris-gateway-key').value.trim()
+    }
+  };
+
+  try {
+    const res = await fetch('/api/admin/qris-settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (result.success) {
+      alert("✅ Pengaturan QRIS Toko BERHASIL Disimpan dan Terhubung ke Layar Tamu!");
+      loadQrisSettings();
+    } else {
+      alert("Gagal: " + (result.error || ""));
+    }
+  } catch (err) {
+    alert("Terjadi kesalahan jaringan.");
+  }
+}
+
+// -----------------------------------------------------------------------------
+// TAB 6: OJOL
 // -----------------------------------------------------------------------------
 function populateWebhookUrls() {
   const base = window.location.origin;
@@ -968,14 +1588,14 @@ function copyWebhook(inputId) {
 }
 
 async function testOjolFromAdmin(channel) {
-  const outletId = currentAdminOutlet === 'kemang' ? 'outlet-kemang' : 'outlet-senopati';
+  const outletId = `outlet-${currentAdminOutlet}`;
   try {
     const res = await fetch(`/api/webhooks/${channel}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         outletId: outletId,
-        customerName: "Budi Santoso (Via " + channel.toUpperCase() + ")",
+        customerName: "Pelanggan " + channel.toUpperCase(),
         driverName: "Driver Ojol",
         driverPhone: "0812-3344-5566",
         items: [
@@ -1022,16 +1642,30 @@ async function fetchStats() {
 // -----------------------------------------------------------------------------
 function initAdmin() {
   if (!verifyAuth()) return;
+  fetchOutlets();
   loadStoreProfile();
   fetchAdminMenus();
   fetchTables();
+  loadQrisSettings();
   fetchStats();
   populateWebhookUrls();
+
+  // Restore last active tab on page refresh
+  const hashTab = window.location.hash.replace('#', '');
+  const savedTab = hashTab || localStorage.getItem('scandine_admin_active_tab') || 'tab-profile';
+  if (document.getElementById(savedTab)) {
+    switchTab(savedTab);
+  }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   initAdmin();
 });
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>

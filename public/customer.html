@@ -3,20 +3,651 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>ScanDine | Menu Digital & Self-Order</title>
+  <title>ScanDine | Digital Menu & Self-Order</title>
+  <link rel="icon" type="image/svg+xml" href="/img/logo-icon.svg">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #f59e0b;
+      --dark: #0f172a;
+      --slate: #334155;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --card-bg: #ffffff;
+      --bg: #f8fafc;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background-color: #f1f5f9;
+      color: var(--dark);
+    }
+
+    .customer-container {
+      background: #ffffff;
+      max-width: 520px;
+      margin: 0 auto;
+      min-height: 100vh;
+      min-height: 100dvh;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+      position: relative;
+      padding-bottom: 110px;
+    }
+
+    /* Top Brand Nav */
+    .top-brand-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      background: #ffffff;
+    }
+
+    .brand-logo-small {
+      height: 28px;
+      display: block;
+    }
+
+    /* Language Switcher Pill & Dropdown */
+    .lang-switcher-wrap {
+      position: relative;
+    }
+
+    .lang-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      padding: 5px 10px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lang-pill-btn:hover {
+      background: #ffffff;
+      border-color: #0284c7;
+      color: #0284c7;
+    }
+
+    .lang-dropdown-menu {
+      position: absolute;
+      top: 115%;
+      right: 0;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      padding: 6px;
+      width: 170px;
+      z-index: 100;
+      display: none;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    .lang-dropdown-menu.show {
+      display: block;
+    }
+
+    .lang-opt-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: #334155;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .lang-opt-item:hover, .lang-opt-item.active {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+
+    /* Resto Header */
+    .resto-header {
+      padding: 12px 16px 14px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(12px);
+    }
+
+    .table-info-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .table-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e0f2fe;
+      color: #0284c7;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .service-call-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .quick-call-btn {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+
+    .quick-call-btn:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+      color: #b91c1c;
+    }
+
+    .resto-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+    }
+
+    .resto-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    /* Category Bar */
+    .category-scroll {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 16px;
+      background: #ffffff;
+      border-bottom: 1px solid #f1f5f9;
+      scrollbar-width: none;
+    }
+    .category-scroll::-webkit-scrollbar { display: none; }
+
+    .category-btn {
+      white-space: nowrap;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      border: 1.5px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
+      font-size: 0.84rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .category-btn.active {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+    }
+
+    /* Menu Section */
+    .menu-section {
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .menu-card {
+      display: flex;
+      gap: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      transition: all 0.2s;
+    }
+
+    .menu-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    .menu-img {
+      width: 90px;
+      height: 90px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #f1f5f9;
+    }
+
+    .menu-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .menu-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.3;
+    }
+
+    .menu-desc {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 3px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .menu-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .menu-price {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #0284c7;
+    }
+
+    .add-btn {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      color: #0284c7;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .add-btn:hover {
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    .sold-out-badge {
+      background: #fee2e2;
+      color: #b91c1c;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    /* Bottom Floating Cart Bar */
+    .cart-floating-bar {
+      position: fixed;
+      bottom: max(16px, env(safe-area-inset-bottom, 16px));
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 488px;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cart-floating-bar:active {
+      transform: translateX(-50%) scale(0.98);
+    }
+
+    .cart-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cart-qty-badge {
+      background: #0284c7;
+      color: #ffffff;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.95rem;
+    }
+
+    .cart-price-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-price-label {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .cart-total-price {
+      font-size: 1rem;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .cart-bar-btn {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Modal / Drawer */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 60;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .drawer-backdrop.active {
+      display: block;
+      opacity: 1;
+    }
+
+    .drawer-content {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 100%);
+      width: 100%;
+      max-width: 520px;
+      background: #ffffff;
+      border-radius: 24px 24px 0 0;
+      z-index: 70;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .drawer-content.active {
+      transform: translate(-50%, 0);
+    }
+
+    .drawer-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .drawer-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      font-size: 1.1rem;
+      color: #64748b;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .drawer-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .drawer-footer {
+      padding: 16px 20px max(16px, env(safe-area-inset-bottom, 16px));
+      border-top: 1px solid #e2e8f0;
+      background: #ffffff;
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+      transition: all 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: #0369a1;
+    }
+
+    .payment-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .payment-card {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #f8fafc;
+    }
+
+    .payment-card.active {
+      border-color: #0284c7;
+      background: #f0f9ff;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+    }
+
+    .p-icon { font-size: 1.6rem; margin-bottom: 4px; }
+    .p-name { font-size: 0.85rem; font-weight: 800; color: #0f172a; }
+    .p-sub { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
+
+    /* Timeline tracker */
+    .status-steps {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin: 24px 0 20px;
+    }
+    .status-steps::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      height: 3px;
+      background: #e2e8f0;
+      z-index: 1;
+    }
+    .step-item {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      flex: 1;
+    }
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 6px;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+    .step-item.active .step-dot {
+      border-color: #0284c7;
+      background: #0284c7;
+      color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.2);
+    }
+    .step-item.completed .step-dot {
+      border-color: #10b981;
+      background: #10b981;
+      color: #ffffff;
+    }
+    .step-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .step-item.active .step-label {
+      color: #0284c7;
+      font-weight: 800;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
 
 <div class="customer-container">
+  <!-- Top Brand Nav & 4-Language Selector -->
+  <div class="top-brand-bar">
+    <img src="/img/logo.svg" alt="ScanDine" class="brand-logo-small">
+    
+    <!-- 4-Language Switcher (ID, EN, KO, ZH) -->
+    <div class="lang-switcher-wrap">
+      <button class="lang-pill-btn" onclick="toggleLangDropdown(event)">
+        <span id="current-lang-flag">🇮🇩</span>
+        <span id="current-lang-code">ID</span>
+        <span style="font-size: 0.68rem; color: #94a3b8;">▼</span>
+      </button>
+      <div class="lang-dropdown-menu" id="lang-dropdown-menu">
+        <button class="lang-opt-item" id="lang-opt-id" onclick="setLanguage('id')">
+          <span>🇮🇩</span> <span>Indonesia</span>
+        </button>
+        <button class="lang-opt-item" id="lang-opt-en" onclick="setLanguage('en')">
+          <span>🇬🇧</span> <span>English</span>
+        </button>
+        <button class="lang-opt-item" id="lang-opt-ko" onclick="setLanguage('ko')">
+          <span>🇰🇷</span> <span>한국어 (Korean)</span>
+        </button>
+        <button class="lang-opt-item" id="lang-opt-zh" onclick="setLanguage('zh')">
+          <span>🇨🇳</span> <span>中文 (Chinese)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Header -->
   <header class="resto-header">
-    <div class="table-badge">
-      <span>📍</span>
-      <span id="display-table-name">Memuat Meja...</span>
+    <div class="table-info-row">
+      <div class="table-badge">
+        <span>📍</span>
+        <span id="display-table-name">Memuat Meja...</span>
+      </div>
+      <div class="service-call-btns">
+        <button class="quick-call-btn" onclick="callWaiter()" id="btn-call-waiter">
+          <span>🔔</span> <span data-i18n="call_waiter">Panggil Pelayan</span>
+        </button>
+        <button class="quick-call-btn" onclick="requestBill()" id="btn-req-bill">
+          <span>🧾</span> <span data-i18n="req_bill">Minta Struk</span>
+        </button>
+      </div>
     </div>
-    <h1 class="resto-title" id="display-resto-name">Kopi & Selera Nusantara</h1>
-    <p class="resto-sub" id="display-resto-sub">Silakan pilih menu favorit Anda di bawah ini</p>
+    <h1 class="resto-title" id="display-resto-name">ScanDine Resto</h1>
+    <p class="resto-sub" id="display-resto-sub" data-i18n="resto_sub">Silakan pilih menu favorit Anda di bawah ini</p>
   </header>
 
   <!-- Categories Scroll -->
@@ -27,7 +658,7 @@
   <!-- Menu List Section -->
   <main class="menu-section">
     <div class="section-title">
-      <span id="current-category-name">Semua Menu</span>
+      <span id="current-category-name" data-i18n="all_menu">Semua Menu</span>
     </div>
     <div id="menu-items-list">
       <!-- Populated by JS -->
@@ -39,11 +670,11 @@
     <div class="cart-bar-left">
       <div class="cart-qty-badge" id="cart-total-qty">0</div>
       <div class="cart-price-info">
-        <span class="cart-price-label">Keranjang Anda</span>
+        <span class="cart-price-label" data-i18n="your_cart">Keranjang Anda</span>
         <span class="cart-total-price" id="cart-bar-total">Rp 0</span>
       </div>
     </div>
-    <button class="cart-bar-btn">Lihat Pesanan 🛒</button>
+    <button class="cart-bar-btn"><span data-i18n="view_order">Lihat Pesanan</span> 🛒</button>
   </div>
 </div>
 
@@ -53,15 +684,15 @@
 <div class="drawer-backdrop" id="item-backdrop" onclick="closeItemDrawer()"></div>
 <div class="drawer-content" id="item-drawer">
   <div class="drawer-header">
-    <h3 class="drawer-title" id="item-modal-title">Pilih Varian</h3>
+    <h3 class="drawer-title" id="item-modal-title" data-i18n="choose_variant">Pilih Varian</h3>
     <button class="drawer-close" onclick="closeItemDrawer()">✕</button>
   </div>
   <div class="drawer-body">
-    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-      <img id="item-modal-img" src="" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover;">
+    <div style="display: flex; gap: 14px; margin-bottom: 16px;">
+      <img id="item-modal-img" src="" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;">
       <div>
-        <h4 id="item-modal-name" style="font-size: 1rem; font-weight: 700;">-</h4>
-        <p id="item-modal-price" style="color: var(--primary); font-weight: 800; font-size: 1.1rem; margin-top: 4px;">Rp 0</p>
+        <h4 id="item-modal-name" style="font-size: 1rem; font-weight: 800; color: #0f172a;">-</h4>
+        <p id="item-modal-price" style="color: #0284c7; font-weight: 900; font-size: 1.15rem; margin-top: 4px;">Rp 0</p>
       </div>
     </div>
 
@@ -70,23 +701,25 @@
 
     <!-- Notes -->
     <div class="form-group" style="margin-top: 14px;">
-      <label class="form-label">Catatan Tambahan untuk Koki / Barista (Opsional)</label>
-      <input type="text" id="item-modal-notes" class="form-input" placeholder="Contoh: jangan pakai bawang goreng, kuah dipisah">
+      <label class="form-label" style="font-size: 0.84rem; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;" data-i18n="notes_label">
+        Catatan Tambahan untuk Koki / Barista (Opsional)
+      </label>
+      <input type="text" id="item-modal-notes" class="form-input" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.88rem;" placeholder="Contoh: jangan pakai bawang goreng, kuah dipisah">
     </div>
 
     <!-- Quantity Controls -->
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding: 12px; background: #f8fafc; border-radius: 12px;">
-      <span style="font-weight: 700; font-size: 0.9rem;">Jumlah</span>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding: 12px 14px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+      <span style="font-weight: 800; font-size: 0.9rem;" data-i18n="qty_label">Jumlah</span>
       <div style="display: flex; align-items: center; gap: 14px;">
-        <button onclick="changeModalQty(-1)" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid #cbd5e1; background: #fff; font-size: 1.1rem; cursor: pointer;">-</button>
-        <span id="item-modal-qty" style="font-weight: 800; font-size: 1.1rem;">1</span>
-        <button onclick="changeModalQty(1)" style="width: 32px; height: 32px; border-radius: 50%; border: none; background: var(--primary); color: #fff; font-size: 1.1rem; cursor: pointer;">+</button>
+        <button onclick="changeModalQty(-1)" style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid #cbd5e1; background: #fff; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">-</button>
+        <span id="item-modal-qty" style="font-weight: 900; font-size: 1.1rem; min-width: 20px; text-align: center;">1</span>
+        <button onclick="changeModalQty(1)" style="width: 34px; height: 34px; border-radius: 50%; border: none; background: #0284c7; color: #fff; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">+</button>
       </div>
     </div>
   </div>
   <div class="drawer-footer">
     <button class="btn-primary" onclick="confirmAddToCart()">
-      <span>Tambahkan ke Keranjang</span>
+      <span data-i18n="add_to_cart_btn">Tambahkan ke Keranjang</span>
       <span id="item-modal-subtotal-btn">Rp 0</span>
     </button>
   </div>
@@ -98,7 +731,7 @@
 <div class="drawer-backdrop" id="cart-backdrop" onclick="closeCartDrawer()"></div>
 <div class="drawer-content" id="cart-drawer">
   <div class="drawer-header">
-    <h3 class="drawer-title">Konfirmasi Pesanan</h3>
+    <h3 class="drawer-title" data-i18n="order_confirmation">Konfirmasi Pesanan</h3>
     <button class="drawer-close" onclick="closeCartDrawer()">✕</button>
   </div>
   <div class="drawer-body">
@@ -106,52 +739,52 @@
     <div id="cart-items-list" style="margin-bottom: 20px;"></div>
 
     <!-- Customer Info -->
-    <div class="form-group">
-      <label class="form-label">Nama Pemesan *</label>
-      <input type="text" id="cust-name" class="form-input" placeholder="Masukkan nama Anda (misal: Budi)">
+    <div class="form-group" style="margin-bottom: 16px;">
+      <label class="form-label" style="font-size: 0.84rem; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;" data-i18n="cust_name_label">Nama Pemesan *</label>
+      <input type="text" id="cust-name" class="form-input" style="width: 100%; padding: 12px 14px; border: 1.5px solid #cbd5e1; border-radius: 12px; font-size: 0.95rem;" placeholder="Masukkan nama Anda (misal: Budi)">
     </div>
 
     <!-- Payment Method Selector -->
-    <div class="form-group">
-      <label class="form-label">Pilih Metode Pembayaran *</label>
+    <div class="form-group" style="margin-bottom: 16px;">
+      <label class="form-label" style="font-size: 0.84rem; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;" data-i18n="pay_method_label">Pilih Metode Pembayaran *</label>
       <div class="payment-options">
         <div class="payment-card active" id="pay-qris-card" onclick="selectPaymentMethod('QRIS')">
           <div class="p-icon">📱</div>
-          <div class="p-name">Bayar via QRIS</div>
-          <div class="p-sub">Gopay, OVO, Dana, BCA, dll.</div>
+          <div class="p-name" data-i18n="pay_qris_title">Bayar via QRIS</div>
+          <div class="p-sub" data-i18n="pay_qris_sub">Gopay, OVO, Dana, BCA, dll.</div>
         </div>
         <div class="payment-card" id="pay-cashier-card" onclick="selectPaymentMethod('CASHIER')">
           <div class="p-icon">💵</div>
-          <div class="p-name">Bayar di Kasir</div>
-          <div class="p-sub">Tunai / EDC di akhir makan</div>
+          <div class="p-name" data-i18n="pay_cashier_title">Bayar di Kasir</div>
+          <div class="p-sub" data-i18n="pay_cashier_sub">Tunai / EDC di akhir makan</div>
         </div>
       </div>
     </div>
 
     <!-- Price Summary -->
-    <div style="background: #f8fafc; border-radius: 12px; padding: 14px; font-size: 0.88rem;">
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; font-size: 0.88rem;">
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-        <span style="color: var(--muted);">Subtotal</span>
-        <span id="summary-subtotal" style="font-weight: 600;">Rp 0</span>
+        <span style="color: #64748b;" data-i18n="subtotal_lbl">Subtotal</span>
+        <span id="summary-subtotal" style="font-weight: 700;">Rp 0</span>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-        <span style="color: var(--muted);" id="summary-tax-label">PPN (10%)</span>
-        <span id="summary-tax" style="font-weight: 600;">Rp 0</span>
+        <span style="color: #64748b;" id="summary-tax-label">PB1 / Pajak (10%)</span>
+        <span id="summary-tax" style="font-weight: 700;">Rp 0</span>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-        <span style="color: var(--muted);" id="summary-service-label">Service (5%)</span>
-        <span id="summary-service" style="font-weight: 600;">Rp 0</span>
+        <span style="color: #64748b;" id="summary-service-label">Service (5%)</span>
+        <span id="summary-service" style="font-weight: 700;">Rp 0</span>
       </div>
-      <hr style="border: none; border-top: 1px dashed var(--border); margin: 8px 0;">
-      <div style="display: flex; justify-content: space-between; font-size: 1rem; font-weight: 800;">
-        <span>Total Pembayaran</span>
-        <span id="summary-total" style="color: var(--primary);">Rp 0</span>
+      <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 10px 0;">
+      <div style="display: flex; justify-content: space-between; font-size: 1.05rem; font-weight: 900;">
+        <span data-i18n="total_payment_lbl">Total Pembayaran</span>
+        <span id="summary-total" style="color: #0284c7;">Rp 0</span>
       </div>
     </div>
   </div>
   <div class="drawer-footer">
     <button class="btn-primary" id="btn-submit-order" onclick="submitOrder()">
-      <span>Kirim Pesanan Sekarang</span>
+      <span data-i18n="place_order_btn">Kirim Pesanan Sekarang</span>
       <span id="btn-submit-total">Rp 0</span>
     </button>
   </div>
@@ -172,30 +805,33 @@
       <div class="table-badge" style="margin-bottom: 12px;">
         <span id="qris-table-badge">Meja 1</span>
       </div>
-      <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 4px;">Pindai QRIS untuk Bayar</h3>
-      <p style="font-size: 0.82rem; color: var(--muted); margin-bottom: 16px;">
-        Dukung seluruh E-Wallet & Mobile Banking Indonesia
+      <h3 style="font-size: 1.2rem; font-weight: 900; margin-bottom: 4px;" data-i18n="scan_qris_title">Pindai QRIS untuk Bayar</h3>
+      <div id="qris-merchant-display" style="font-size: 0.95rem; font-weight: 900; color: #0284c7; margin-bottom: 4px; text-transform: uppercase;">
+        ScanDine Merchant
+      </div>
+      <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px; padding: 0 10px;" id="qris-instructions-display" data-i18n="qris_instructions">
+        Dukung seluruh E-Wallet & Mobile Banking Indonesia (BCA, Mandiri, BRI, BNI, GoPay, OVO, Dana, ShopeePay)
       </p>
 
-      <div style="background: #fff; padding: 12px; border-radius: 16px; display: inline-block; box-shadow: var(--shadow-lg); border: 1px solid var(--border);">
-        <img id="qris-img-tag" src="" alt="QRIS Code" style="width: 240px; height: 240px; display: block; margin: 0 auto;">
-        <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; margin-top: 6px; letter-spacing: 1px;">
-          NMID: ID10200000099
+      <div style="background: #ffffff; padding: 14px; border-radius: 18px; display: inline-block; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); border: 1.5px solid #e2e8f0;">
+        <img id="qris-img-tag" src="" alt="QRIS Code" style="width: 220px; height: 220px; display: block; margin: 0 auto; object-fit: contain;">
+        <div style="font-size: 0.74rem; font-weight: 800; color: #64748b; margin-top: 8px; letter-spacing: 0.8px;" id="qris-nmid-display">
+          NMID: ID1020030040050
         </div>
       </div>
 
       <div style="margin-top: 16px;">
-        <span style="font-size: 0.85rem; color: var(--muted);">Total Tagihan:</span>
-        <h2 id="qris-total-amount" style="color: var(--primary); font-size: 1.4rem; font-weight: 800; margin-top: 2px;">Rp 0</h2>
+        <span style="font-size: 0.82rem; color: #64748b;" data-i18n="bill_total">Total Tagihan:</span>
+        <h2 id="qris-total-amount" style="color: #0284c7; font-size: 1.45rem; font-weight: 900; margin-top: 2px;">Rp 0</h2>
       </div>
 
       <!-- Simulator Button for Testing -->
-      <div style="margin-top: 20px; padding: 14px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;">
-        <p style="font-size: 0.78rem; color: #166534; margin-bottom: 8px;">
-          💡 <em>Mode Testing Pembayaran Otomatis:</em>
+      <div style="margin-top: 18px; padding: 12px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;">
+        <p style="font-size: 0.76rem; color: #166534; margin-bottom: 8px;">
+          💡 <em data-i18n="sim_testing_hint">Mode Testing Pembayaran Otomatis:</em>
         </p>
-        <button onclick="simulatePaymentSuccess()" style="background: #16a34a; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; width: 100%;">
-          ⚡ Simulasikan Pembayaran Berhasil (Instant Webhook)
+        <button onclick="simulatePaymentSuccess()" style="background: #16a34a; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 800; font-size: 0.82rem; cursor: pointer; width: 100%;">
+          ⚡ <span data-i18n="sim_pay_success">Simulasikan Pembayaran Berhasil (Instant Webhook)</span>
         </button>
       </div>
     </div>
@@ -204,8 +840,8 @@
     <div id="tracker-status-view" style="display: none;">
       <div style="text-align: center; margin-bottom: 20px;">
         <div style="font-size: 2.5rem; margin-bottom: 8px;" id="status-icon">👨‍🍳</div>
-        <h3 id="status-heading" style="font-size: 1.2rem; font-weight: 800;">Pesanan Diterima</h3>
-        <p id="status-description" style="font-size: 0.85rem; color: var(--muted); margin-top: 4px;">
+        <h3 id="status-heading" style="font-size: 1.2rem; font-weight: 900; color: #0f172a;">Pesanan Diterima</h3>
+        <p id="status-description" style="font-size: 0.84rem; color: #64748b; margin-top: 4px;">
           Pesanan Anda telah diteruskan ke dapur.
         </p>
       </div>
@@ -214,56 +850,384 @@
       <div class="status-steps">
         <div class="step-item" id="step-1">
           <div class="step-dot">1</div>
-          <span class="step-label">Diterima</span>
+          <span class="step-label" data-i18n="step_1">Diterima</span>
         </div>
         <div class="step-item" id="step-2">
           <div class="step-dot">2</div>
-          <span class="step-label">Dimasak</span>
+          <span class="step-label" data-i18n="step_2">Dimasak</span>
         </div>
         <div class="step-item" id="step-3">
           <div class="step-dot">3</div>
-          <span class="step-label">Siap</span>
+          <span class="step-label" data-i18n="step_3">Siap</span>
         </div>
         <div class="step-item" id="step-4">
           <div class="step-dot">4</div>
-          <span class="step-label">Selesai</span>
+          <span class="step-label" data-i18n="step_4">Selesai</span>
         </div>
       </div>
 
       <!-- Order Details Summary -->
-      <div style="margin-top: 24px; background: #f8fafc; border-radius: 12px; padding: 14px;">
+      <div style="margin-top: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.82rem;">
-          <span style="color: var(--muted);">ID Pesanan:</span>
-          <span id="tracker-order-id" style="font-weight: 700;">-</span>
+          <span style="color: #64748b;" data-i18n="order_id_lbl">ID Pesanan:</span>
+          <span id="tracker-order-id" style="font-weight: 800; font-family: monospace;">-</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.82rem;">
-          <span style="color: var(--muted);">Status Pembayaran:</span>
-          <span id="tracker-pay-status" class="badge badge-paid">LUNAS</span>
+          <span style="color: #64748b;" data-i18n="pay_status_lbl">Status Pembayaran:</span>
+          <span id="tracker-pay-status" class="badge badge-paid" style="padding: 2px 8px; border-radius: 6px; font-weight: 800; font-size: 0.74rem;">LUNAS</span>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
-          <span style="color: var(--muted);">Nomor Meja:</span>
-          <span id="tracker-table-num" style="font-weight: 700;">-</span>
+          <span style="color: #64748b;" data-i18n="table_no_lbl">Nomor Meja:</span>
+          <span id="tracker-table-num" style="font-weight: 800;">-</span>
         </div>
       </div>
     </div>
   </div>
   <div class="drawer-footer">
-    <button class="btn-primary" onclick="closeTrackerDrawer()">Kembali ke Halaman Menu</button>
+    <button class="btn-primary" onclick="closeTrackerDrawer()" style="justify-content: center;">
+      <span data-i18n="back_to_menu">Kembali ke Halaman Menu</span>
+    </button>
   </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-// State Management
+// =============================================================================
+// I18N 4-LANGUAGE TRANSLATION DICTIONARY (ID, EN, KO, ZH)
+// =============================================================================
+const I18N = {
+  id: {
+    flag: "🇮🇩",
+    code: "ID",
+    all_menu: "Semua Menu",
+    all_cat: "🌟 Semua",
+    resto_sub: "Silakan pilih menu favorit Anda di bawah ini",
+    call_waiter: "Panggil Pelayan",
+    req_bill: "Minta Struk",
+    your_cart: "Keranjang Anda",
+    view_order: "Lihat Pesanan",
+    choose_variant: "Pilih Varian",
+    notes_label: "Catatan Tambahan untuk Koki / Barista (Opsional)",
+    notes_placeholder: "Contoh: jangan pakai bawang goreng, kuah dipisah",
+    qty_label: "Jumlah",
+    add_to_cart_btn: "Tambahkan ke Keranjang",
+    order_confirmation: "Konfirmasi Pesanan",
+    cust_name_label: "Nama Pemesan *",
+    cust_name_placeholder: "Masukkan nama Anda (misal: Budi)",
+    pay_method_label: "Pilih Metode Pembayaran *",
+    pay_qris_title: "Bayar via QRIS",
+    pay_qris_sub: "Gopay, OVO, Dana, BCA, dll.",
+    pay_cashier_title: "Bayar di Kasir",
+    pay_cashier_sub: "Tunai / EDC di akhir makan",
+    subtotal_lbl: "Subtotal",
+    total_payment_lbl: "Total Pembayaran",
+    place_order_btn: "Kirim Pesanan Sekarang",
+    scan_qris_title: "Pindai QRIS untuk Bayar",
+    qris_instructions: "Dukung seluruh E-Wallet & Mobile Banking Indonesia (BCA, Mandiri, BRI, BNI, GoPay, OVO, Dana, ShopeePay)",
+    bill_total: "Total Tagihan:",
+    sim_testing_hint: "Mode Testing Pembayaran Otomatis:",
+    sim_pay_success: "Simulasikan Pembayaran Berhasil (Instant Webhook)",
+    step_1: "Diterima",
+    step_2: "Dimasak",
+    step_3: "Siap",
+    step_4: "Selesai",
+    order_id_lbl: "ID Pesanan:",
+    pay_status_lbl: "Status Pembayaran:",
+    table_no_lbl: "Nomor Meja:",
+    back_to_menu: "Kembali ke Halaman Menu",
+    status_rcv_title: "Pesanan Diterima Dapur",
+    status_rcv_desc: "Koki kami telah menerima pesanan dan menyiapkan bahan makanan.",
+    status_cook_title: "Sedang Dimasak",
+    status_cook_desc: "Makanan favorit Anda sedang dimasak dengan sepenuh hati.",
+    status_ready_title: "Makanan Siap Diantar",
+    status_ready_desc: "Pesanan selesai dimasak dan pelayan sedang mengantar ke meja Anda.",
+    status_done_title: "Pesanan Selesai",
+    status_done_desc: "Selamat menikmati hidangan! Terima kasih atas kunjungan Anda.",
+    waiter_called: "Pelayan telah dipanggil ke meja Anda! Mohon tunggu sebentar.",
+    bill_requested: "Permintaan tagihan telah terkirim ke kasir!",
+    add_btn: "+ Tambah",
+    sold_out: "Habis",
+    empty_cat: "Belum ada menu di kategori ini."
+  },
+  en: {
+    flag: "🇬🇧",
+    code: "EN",
+    all_menu: "All Menu Items",
+    all_cat: "🌟 All",
+    resto_sub: "Please select your favorite dishes and drinks below",
+    call_waiter: "Call Waiter",
+    req_bill: "Request Bill",
+    your_cart: "Your Cart",
+    view_order: "View Order",
+    choose_variant: "Select Options",
+    notes_label: "Special Instructions for Kitchen / Barista (Optional)",
+    notes_placeholder: "e.g., less sugar, separate sauce, extra chili",
+    qty_label: "Quantity",
+    add_to_cart_btn: "Add to Cart",
+    order_confirmation: "Order Confirmation",
+    cust_name_label: "Guest Name *",
+    cust_name_placeholder: "Enter your name (e.g. John)",
+    pay_method_label: "Choose Payment Method *",
+    pay_qris_title: "Pay with QRIS / QR",
+    pay_qris_sub: "Scan with m-Banking or E-Wallet",
+    pay_cashier_title: "Pay at Cashier",
+    pay_cashier_sub: "Pay cash/card when done",
+    subtotal_lbl: "Subtotal",
+    total_payment_lbl: "Total Amount",
+    place_order_btn: "Place Order Now",
+    scan_qris_title: "Scan QRIS to Pay",
+    qris_instructions: "Supports all major banking apps and digital e-wallets",
+    bill_total: "Total Bill:",
+    sim_testing_hint: "Payment Testing Simulation:",
+    sim_pay_success: "Simulate Payment Success (Instant Webhook)",
+    step_1: "Received",
+    step_2: "Cooking",
+    step_3: "Ready",
+    step_4: "Served",
+    order_id_lbl: "Order ID:",
+    pay_status_lbl: "Payment Status:",
+    table_no_lbl: "Table Number:",
+    back_to_menu: "Back to Menu",
+    status_rcv_title: "Order Received by Kitchen",
+    status_rcv_desc: "Chefs have received your order and are preparing ingredients.",
+    status_cook_title: "Cooking in Progress",
+    status_cook_desc: "Your delicious meal is freshly prepared with care.",
+    status_ready_title: "Ready to Serve",
+    status_ready_desc: "Your food is ready and waiter is delivering to your table.",
+    status_done_title: "Order Completed",
+    status_done_desc: "Enjoy your meal! Thank you for dining with us.",
+    waiter_called: "A waiter has been dispatched to your table! Please wait a moment.",
+    bill_requested: "Bill request has been sent to the cashier desk!",
+    add_btn: "+ Add",
+    sold_out: "Sold Out",
+    empty_cat: "No items available in this category."
+  },
+  ko: {
+    flag: "🇰🇷",
+    code: "KO",
+    all_menu: "전체 메뉴",
+    all_cat: "🌟 전체",
+    resto_sub: "아래에서 원하시는 메뉴를 선택해 주세요",
+    call_waiter: "직원 호출",
+    req_bill: "영수증 요청",
+    your_cart: "내 장바구니",
+    view_order: "주문서 확인",
+    choose_variant: "옵션 선택",
+    notes_label: "주방 / 바리스타 요청사항 (선택)",
+    notes_placeholder: "예: 덜 달게 해주세요, 소스는 따로 담아주세요",
+    qty_label: "수량",
+    add_to_cart_btn: "장바구니 담기",
+    order_confirmation: "주문 확인",
+    cust_name_label: "주문자 성함 *",
+    cust_name_placeholder: "성함을 입력해 주세요 (예: 김민수)",
+    pay_method_label: "결제 수단 선택 *",
+    pay_qris_title: "QRIS / QR 결제",
+    pay_qris_sub: "모바일뱅킹 및 전자지갑 스캔",
+    pay_cashier_title: "카운터에서 결제",
+    pay_cashier_sub: "식사 후 카운터에서 현금/카드 결제",
+    subtotal_lbl: "소계",
+    total_payment_lbl: "총 결제금액",
+    place_order_btn: "지금 주문하기",
+    scan_qris_title: "결제용 QRIS 스캔",
+    qris_instructions: "모든 주요 은행 앱 및 간편 결제 전자지갑을 지원합니다",
+    bill_total: "결제 금액:",
+    sim_testing_hint: "자동 결제 테스트 모드:",
+    sim_pay_success: "결제 완료 시뮬레이션 (즉시 웹훅)",
+    step_1: "접수",
+    step_2: "조리",
+    step_3: "준비",
+    step_4: "완료",
+    order_id_lbl: "주문 번호:",
+    pay_status_lbl: "결제 상태:",
+    table_no_lbl: "테이블 번호:",
+    back_to_menu: "메뉴 목록으로 이동",
+    status_rcv_title: "주문이 주방에 접수되었습니다",
+    status_rcv_desc: "주방에서 주문을 확인하고 신선한 재료를 준비하고 있습니다.",
+    status_cook_title: "정성껏 조리 중입니다",
+    status_cook_desc: "주문하신 메뉴를 맛있게 조리하고 있습니다.",
+    status_ready_title: "음식이 준비되었습니다",
+    status_ready_desc: "조리가 완료되어 직원이 테이블로 서빙 중입니다.",
+    status_done_title: "주문 완료",
+    status_done_desc: "맛있게 드세요! 찾아주셔서 대단히 감사합니다.",
+    waiter_called: "직원이 테이블로 방문할 예정입니다. 잠시만 기다려주세요.",
+    bill_requested: "카운터로 영수증/계산서 요청이 전송되었습니다!",
+    add_btn: "+ 담기",
+    sold_out: "품절",
+    empty_cat: "이 카테고리에 등록된 메뉴가 없습니다."
+  },
+  zh: {
+    flag: "🇨🇳",
+    code: "ZH",
+    all_menu: "全部菜单",
+    all_cat: "🌟 全部",
+    resto_sub: "请在下方挑选您心仪的美食与饮品",
+    call_waiter: "呼叫服务员",
+    req_bill: "请求结账",
+    your_cart: "您的购物车",
+    view_order: "查看订单",
+    choose_variant: "选择规格口味",
+    notes_label: "后厨/咖啡师特殊备注（选填）",
+    notes_placeholder: "例如：少糖、酱汁分开、免葱花、微辣",
+    qty_label: "数量",
+    add_to_cart_btn: "加入购物车",
+    order_confirmation: "确认订单",
+    cust_name_label: "顾客姓名 *",
+    cust_name_placeholder: "请输入您的称呼（如：王先生）",
+    pay_method_label: "选择支付方式 *",
+    pay_qris_title: "QRIS / 扫码支付",
+    pay_qris_sub: "支持主流电子钱包与手机银行",
+    pay_cashier_title: "收银台支付",
+    pay_cashier_sub: "就餐完毕后到前台现金或刷卡",
+    subtotal_lbl: "小计",
+    total_payment_lbl: "应付总额",
+    place_order_btn: "立即提交订单",
+    scan_qris_title: "扫描QRIS二维码支付",
+    qris_instructions: "支持印尼所有主流移动支付和电子钱包",
+    bill_total: "账单总计:",
+    sim_testing_hint: "自动支付测试模拟:",
+    sim_pay_success: "模拟支付成功（即时Webhook）",
+    step_1: "接单",
+    step_2: "烹饪",
+    step_3: "备齐",
+    step_4: "完成",
+    order_id_lbl: "订单编号:",
+    pay_status_lbl: "支付状态:",
+    table_no_lbl: "餐桌号:",
+    back_to_menu: "返回菜单",
+    status_rcv_title: "后厨已成功接单",
+    status_rcv_desc: "主厨已接收菜单，正在为您挑选并处理新鲜食材。",
+    status_cook_title: "菜品正在烹饪中",
+    status_cook_desc: "您的美食正在精心制作中，请耐心等候片刻。",
+    status_ready_title: "菜品已备齐出餐",
+    status_ready_desc: "所有菜品制作完成，服务员正为您端送至餐桌。",
+    status_done_title: "订单已完成",
+    status_done_desc: "请慢用！感谢您的光临与支持，祝您用餐愉快。",
+    waiter_called: "服务员已收到通知，正前往您的餐桌！请稍候。",
+    bill_requested: "结账单请求已成功发送至前台收银！",
+    add_btn: "+ 添加",
+    sold_out: "已售罄",
+    empty_cat: "该分类下暂无菜品。"
+  }
+};
+
+// Item translations dictionary for default menu items
+const MENU_TRANSLATIONS = {
+  "Nasi Goreng Spesial Resto": {
+    en: { name: "Special Signature Fried Rice", desc: "Wok-fried jasmine rice with tender chicken, egg, and homemade crackers." },
+    ko: { name: "시그니처 특제 볶음밥", desc: "부드러운 치킨과 계란, 바삭한 크래커가 어우러진 특제 나시고렝." },
+    zh: { name: "招牌特色印尼炒饭", desc: "精选香米搭配嫩滑鸡肉与煎蛋，镬气十足，配香脆虾饼。" }
+  },
+  "Ayam Bakar Madu Pedas": {
+    en: { name: "Spicy Honey Grilled Chicken", desc: "Marinated grilled chicken with spicy caramelized honey glaze." },
+    ko: { name: "매콤 꿀 바베큐 치킨", desc: "달콤한 꿀과 매콤한 양념이 깊게 밴 전통 바베큐 치킨." },
+    zh: { name: "秘制香辣蜜汁烤鸡", desc: "鲜嫩烤鸡裹上秘制香辣蜜汁烤制，焦香四溢，口感多汁。" }
+  },
+  "Es Kopi Susu Gula Aren": {
+    en: { name: "Palm Sugar Iced Latte", desc: "Signature espresso with fresh milk and organic Indonesian palm sugar." },
+    ko: { name: "팜슈가 아이스 라떼", desc: "신선한 우유와 유기농 팜슈가가 어우러진 시그니처 아이스 라떼." },
+    zh: { name: "棕榈糖冰拿铁咖啡", desc: "精选浓缩咖啡融合鲜牛奶与天然印尼棕榈糖，浓郁香甜。" }
+  },
+  "Matcha Latte Creamy": {
+    en: { name: "Creamy Matcha Latte", desc: "Authentic ceremonial Uji matcha blended with velvety steamed milk." },
+    ko: { name: "크리미 말차 라떼", desc: "진하고 부드러운 우지 말차와 벨벳 우유의 완벽한 조화." },
+    zh: { name: "浓郁宇治抹茶拿铁", desc: "正宗宇治抹茶粉搭配细腻丝滑鲜奶，茶香悠长。" }
+  },
+  "Croissant Butter Bakery": {
+    en: { name: "French Butter Croissant", desc: "Flaky and golden artisan croissant baked with 100% French butter." },
+    ko: { name: "프랑스산 버터 크루아상", desc: "100% 프랑스산 버터로 갓 구워낸 바삭하고 촉촉한 크루아상." },
+    zh: { name: "法式纯黄油牛角可颂", desc: "100%纯法式黄油烘焙，外酥里嫩，层层起酥散发浓郁麦香。" }
+  },
+  "Kentang Goreng Truffle": {
+    en: { name: "Truffle Shoestring Fries", desc: "Crispy shoestring fries tossed in premium truffle oil and parmesan." },
+    ko: { name: "트러플 감자튀김", desc: "고급 트러플 오일과 파마산 치즈가 솔솔 뿌려진 바삭한 감자튀김." },
+    zh: { name: "黑松露香脆细薯条", desc: "金黄酥脆薯条淋上特级黑松露油与帕玛森芝士碎，香味四溢。" }
+  },
+  "Paket Kenyang Ayam + Es Teh": {
+    en: { name: "Chicken Combo + Iced Tea", desc: "Full combo: Honey grilled chicken, fragrant jasmine rice, and iced tea." },
+    ko: { name: "치킨 콤보 세트 + 아이스티", desc: "꿀 바베큐 치킨 + 밥 + 시원한 아이스티 알뜰 구성." },
+    zh: { name: "招牌烤鸡超值套餐 + 冰红茶", desc: "含秘制烤鸡、茉莉香米饭及清爽解腻冰红茶一杯。" }
+  }
+};
+
+const CATEGORY_TRANSLATIONS = {
+  "Makanan Utama": { en: "Main Dishes", ko: "메인 요리", zh: "主食精选" },
+  "Kopi & Minuman": { en: "Coffee & Drinks", ko: "커피 & 음료", zh: "咖啡与饮品" },
+  "Camilan & Dessert": { en: "Snacks & Dessert", ko: "스낵 & 디저트", zh: "小吃与甜点" },
+  "Paket Hemat": { en: "Value Sets", ko: "알뜰 세트", zh: "超值套餐" }
+};
+
+// Current language state (persisted in localStorage)
+let currentLang = localStorage.getItem('scandine_lang') || 'id';
+
+function toggleLangDropdown(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('lang-dropdown-menu');
+  menu.classList.toggle('show');
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('lang-dropdown-menu');
+  if (menu && !e.target.closest('.lang-switcher-wrap')) {
+    menu.classList.remove('show');
+  }
+});
+
+function setLanguage(lang) {
+  if (!I18N[lang]) lang = 'id';
+  currentLang = lang;
+  localStorage.setItem('scandine_lang', lang);
+  document.documentElement.lang = lang;
+
+  // Update button pill
+  document.getElementById('current-lang-flag').innerText = I18N[lang].flag;
+  document.getElementById('current-lang-code').innerText = I18N[lang].code;
+
+  // Update active dropdown item
+  ['id', 'en', 'ko', 'zh'].forEach(l => {
+    const el = document.getElementById(`lang-opt-${l}`);
+    if (el) el.classList.toggle('active', l === lang);
+  });
+
+  const menu = document.getElementById('lang-dropdown-menu');
+  if (menu) menu.classList.remove('show');
+
+  // Apply translations to all DOM nodes with data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (I18N[lang] && I18N[lang][key]) {
+      el.innerText = I18N[lang][key];
+    }
+  });
+
+  // Update placeholders
+  const notesInput = document.getElementById('item-modal-notes');
+  if (notesInput) notesInput.placeholder = I18N[lang].notes_placeholder;
+  const custInput = document.getElementById('cust-name');
+  if (custInput) custInput.placeholder = I18N[lang].cust_name_placeholder;
+
+  // Re-render categories & menus
+  renderCategories();
+  renderMenus();
+
+  if (currentActiveOrder) {
+    updateTrackerUI(currentActiveOrder);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// STATE MANAGEMENT
+// -----------------------------------------------------------------------------
 let storeData = {
   settings: {},
   categories: [],
   menus: [],
-  table: {}
+  table: {},
+  outlet: {}
 };
 
 let currentCategory = "ALL";
-let cart = []; // [{ menuId, name, price, qty, options: [], notes, subtotal }]
+let cart = [];
 let selectedItemForModal = null;
 let modalQty = 1;
 let selectedPayment = "QRIS";
@@ -271,13 +1235,12 @@ let currentActiveOrder = null;
 
 const socket = io();
 
-// Parse Outlet and Table from URL parameter
+// Parse Outlet & Table from URL
 const urlParams = new URLSearchParams(window.location.search);
 const outletQuery = urlParams.get('outlet') || 'senopati';
 const tableQuery = urlParams.get('table') || '1';
-let currentOrderMode = 'DINE_IN'; // 'DINE_IN' | 'PICK_UP'
+let currentOrderMode = 'DINE_IN';
 
-// Format Currency
 function formatRupiah(amount) {
   return "Rp " + (amount || 0).toLocaleString('id-ID');
 }
@@ -290,15 +1253,21 @@ async function initApp() {
     const res = await fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`);
     storeData = await res.json();
 
-    const tableNameText = currentOrderMode === 'PICK_UP' ? 'Ambil Sendiri (Takeaway)' : (storeData.table.name || `Meja ${tableQuery}`);
+    const tableNameText = currentOrderMode === 'PICK_UP' 
+      ? (currentLang === 'en' ? 'Takeaway' : currentLang === 'ko' ? '포장 주문' : currentLang === 'zh' ? '打包自提' : 'Ambil Sendiri') 
+      : (storeData.table.name || `Meja ${tableQuery}`);
+
     document.getElementById('display-table-name').innerText = `${storeData.outlet.name} • ${tableNameText}`;
     document.getElementById('display-resto-name').innerText = storeData.business.name || "ScanDine Resto";
-    document.getElementById('display-resto-sub').innerText = storeData.business.tagline || "";
-    document.getElementById('summary-tax-label').innerText = `PB1 / Pajak (${storeData.outlet.taxRate}%)`;
-    document.getElementById('summary-service-label').innerText = `Service (${storeData.outlet.serviceRate}%)`;
+    document.getElementById('display-resto-sub').innerText = storeData.business.tagline || I18N[currentLang].resto_sub;
 
-    renderCategories();
-    renderMenus();
+    const taxRate = storeData.outlet.taxRate !== undefined ? storeData.outlet.taxRate : 10;
+    const serviceRate = storeData.outlet.serviceRate !== undefined ? storeData.outlet.serviceRate : 5;
+    document.getElementById('summary-tax-label').innerText = `PB1 / Pajak (${taxRate}%)`;
+    document.getElementById('summary-service-label').innerText = `Service (${serviceRate}%)`;
+
+    // Apply language
+    setLanguage(currentLang);
 
     const savedOrderId = sessionStorage.getItem('activeOrderId');
     if (savedOrderId) {
@@ -309,7 +1278,7 @@ async function initApp() {
   }
 }
 
-// Socket: Real-time menu & store profile updates
+// Socket Realtime
 socket.on('menu_changed', () => {
   fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`)
     .then(r => r.json())
@@ -321,23 +1290,6 @@ socket.on('menu_changed', () => {
     });
 });
 
-socket.on('store_updated', () => {
-  fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`)
-    .then(r => r.json())
-    .then(data => {
-      storeData = data;
-      const tableNameText = currentOrderMode === 'PICK_UP' ? 'Ambil Sendiri (Takeaway)' : (storeData.table.name || `Meja ${tableQuery}`);
-      document.getElementById('display-table-name').innerText = `${storeData.outlet.name} • ${tableNameText}`;
-      document.getElementById('display-resto-name').innerText = storeData.business.name || "ScanDine Resto";
-      document.getElementById('display-resto-sub').innerText = storeData.business.tagline || "";
-      document.getElementById('summary-tax-label').innerText = `PB1 / Pajak (${storeData.outlet.taxRate}%)`;
-      document.getElementById('summary-service-label').innerText = `Service (${storeData.outlet.serviceRate}%)`;
-      renderCategories();
-      renderMenus();
-    });
-});
-
-// Socket: Real-time order updates from kitchen / cashier
 socket.on('order_updated', (updatedOrder) => {
   if (currentActiveOrder && updatedOrder.id === currentActiveOrder.id) {
     currentActiveOrder = updatedOrder;
@@ -348,18 +1300,38 @@ socket.on('order_updated', (updatedOrder) => {
 // -----------------------------------------------------------------------------
 // RENDER VIEWS
 // -----------------------------------------------------------------------------
+function getTranslatedCategoryName(cat) {
+  if (CATEGORY_TRANSLATIONS[cat.name] && CATEGORY_TRANSLATIONS[cat.name][currentLang]) {
+    return CATEGORY_TRANSLATIONS[cat.name][currentLang];
+  }
+  return cat.name;
+}
+
+function getTranslatedMenuItem(menu) {
+  if (MENU_TRANSLATIONS[menu.name] && MENU_TRANSLATIONS[menu.name][currentLang]) {
+    return {
+      name: MENU_TRANSLATIONS[menu.name][currentLang].name,
+      description: MENU_TRANSLATIONS[menu.name][currentLang].desc
+    };
+  }
+  return { name: menu.name, description: menu.description || '' };
+}
+
 function renderCategories() {
   const container = document.getElementById('category-container');
-  let html = `<button class="category-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="selectCategory('ALL')">🌟 Semua</button>`;
+  let html = `<button class="category-btn ${currentCategory === 'ALL' ? 'active' : ''}" onclick="selectCategory('ALL')">${I18N[currentLang].all_cat}</button>`;
   
-  storeData.categories.forEach(cat => {
-    html += `
-      <button class="category-btn ${currentCategory === cat.id ? 'active' : ''}" onclick="selectCategory('${cat.id}')">
-        <span>${cat.icon || '🍽️'}</span>
-        <span>${cat.name}</span>
-      </button>
-    `;
-  });
+  if (storeData.categories) {
+    storeData.categories.forEach(cat => {
+      const catDisplayName = getTranslatedCategoryName(cat);
+      html += `
+        <button class="category-btn ${currentCategory === cat.id ? 'active' : ''}" onclick="selectCategory('${cat.id}')">
+          <span>${cat.icon || '🍽️'}</span>
+          <span>${catDisplayName}</span>
+        </button>
+      `;
+    });
+  }
   container.innerHTML = html;
 }
 
@@ -368,41 +1340,42 @@ function selectCategory(catId) {
   renderCategories();
   
   if (catId === 'ALL') {
-    document.getElementById('current-category-name').innerText = "Semua Menu";
+    document.getElementById('current-category-name').innerText = I18N[currentLang].all_menu;
   } else {
     const cat = storeData.categories.find(c => c.id === catId);
-    document.getElementById('current-category-name').innerText = cat ? cat.name : "Menu";
+    document.getElementById('current-category-name').innerText = cat ? getTranslatedCategoryName(cat) : "Menu";
   }
   renderMenus();
 }
 
 function renderMenus() {
   const list = document.getElementById('menu-items-list');
-  let filtered = storeData.menus;
+  let filtered = storeData.menus || [];
   if (currentCategory !== 'ALL') {
     filtered = filtered.filter(m => m.categoryId === currentCategory);
   }
 
   if (filtered.length === 0) {
-    list.innerHTML = `<div style="text-align: center; color: var(--muted); padding: 40px 0;">Belum ada menu di kategori ini.</div>`;
+    list.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 40px 0;">${I18N[currentLang].empty_cat}</div>`;
     return;
   }
 
   let html = "";
   filtered.forEach(menu => {
+    const tr = getTranslatedMenuItem(menu);
     html += `
-      <div class="menu-card" style="${!menu.isAvailable ? 'opacity: 0.6;' : ''}">
-        <img class="menu-img" src="${menu.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300'}" alt="${menu.name}">
+      <div class="menu-card" style="${!menu.isAvailable ? 'opacity: 0.55;' : ''}">
+        <img class="menu-img" src="${menu.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300'}" alt="${tr.name}">
         <div class="menu-info">
           <div>
-            <div class="menu-name">${menu.name}</div>
-            <div class="menu-desc">${menu.description || ''}</div>
+            <div class="menu-name">${tr.name}</div>
+            <div class="menu-desc">${tr.description}</div>
           </div>
           <div class="menu-bottom">
             <span class="menu-price">${formatRupiah(menu.price)}</span>
             ${menu.isAvailable 
-              ? `<button class="add-btn" onclick="openItemCustomizer('${menu.id}')">+ Tambah</button>`
-              : `<span class="sold-out-badge">Habis</span>`
+              ? `<button class="add-btn" onclick="openItemCustomizer('${menu.id}')">${I18N[currentLang].add_btn}</button>`
+              : `<span class="sold-out-badge">${I18N[currentLang].sold_out}</span>`
             }
           </div>
         </div>
@@ -421,25 +1394,25 @@ function openItemCustomizer(menuId) {
 
   selectedItemForModal = menu;
   modalQty = 1;
+  const tr = getTranslatedMenuItem(menu);
 
-  document.getElementById('item-modal-title').innerText = menu.name;
-  document.getElementById('item-modal-name').innerText = menu.name;
+  document.getElementById('item-modal-title').innerText = I18N[currentLang].choose_variant;
+  document.getElementById('item-modal-name').innerText = tr.name;
   document.getElementById('item-modal-price').innerText = formatRupiah(menu.price);
   document.getElementById('item-modal-img').src = menu.image || '';
   document.getElementById('item-modal-qty').innerText = "1";
   document.getElementById('item-modal-notes').value = "";
 
-  // Render options (e.g. Level pedas, Less sugar)
   const optionsContainer = document.getElementById('item-options-container');
   if (menu.options && menu.options.length > 0) {
     let optHtml = "";
     menu.options.forEach((opt, idx) => {
       optHtml += `
         <div style="margin-bottom: 14px;">
-          <label class="form-label">${opt.name}</label>
+          <label style="font-size: 0.82rem; font-weight: 800; color: #334155; margin-bottom: 6px; display: block;">${opt.name}</label>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             ${opt.choices.map((choice, cIdx) => `
-              <label style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; cursor: pointer;">
+              <label style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 6px 12px; border-radius: 8px; font-size: 0.82rem; cursor: pointer; font-weight: 600;">
                 <input type="radio" name="opt_${idx}" value="${choice}" ${cIdx === 0 ? 'checked' : ''}>
                 <span>${choice}</span>
               </label>
@@ -478,7 +1451,6 @@ function updateModalButtonPrice() {
 function confirmAddToCart() {
   if (!selectedItemForModal) return;
 
-  // Gather selected radio options
   const selectedOptions = [];
   if (selectedItemForModal.options) {
     selectedItemForModal.options.forEach((opt, idx) => {
@@ -490,10 +1462,12 @@ function confirmAddToCart() {
   }
 
   const notes = document.getElementById('item-modal-notes').value.trim();
+  const tr = getTranslatedMenuItem(selectedItemForModal);
 
   cart.push({
     menuId: selectedItemForModal.id,
-    name: selectedItemForModal.name,
+    name: tr.name,
+    rawName: selectedItemForModal.name,
     price: selectedItemForModal.price,
     qty: modalQty,
     options: selectedOptions,
@@ -526,7 +1500,6 @@ function updateCartUI() {
 function openCartDrawer() {
   if (cart.length === 0) return;
 
-  // Render items inside drawer
   const container = document.getElementById('cart-items-list');
   let html = "";
   let subtotal = 0;
@@ -535,27 +1508,26 @@ function openCartDrawer() {
     subtotal += item.subtotal;
     const optsText = item.options.map(o => `${o.value}`).join(', ');
     html += `
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed var(--border);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed #e2e8f0;">
         <div style="flex: 1;">
-          <div style="font-weight: 700; font-size: 0.92rem;">${item.name}</div>
-          ${optsText ? `<div style="font-size: 0.78rem; color: var(--muted);">${optsText}</div>` : ''}
-          ${item.notes ? `<div style="font-size: 0.76rem; color: #d97706;">* ${item.notes}</div>` : ''}
-          <div style="font-weight: 700; color: var(--primary); font-size: 0.88rem; margin-top: 4px;">${formatRupiah(item.subtotal)}</div>
+          <div style="font-weight: 800; font-size: 0.92rem; color: #0f172a;">${item.name}</div>
+          ${optsText ? `<div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">${optsText}</div>` : ''}
+          ${item.notes ? `<div style="font-size: 0.76rem; color: #d97706; margin-top: 2px;">* ${item.notes}</div>` : ''}
+          <div style="font-weight: 800; color: #0284c7; font-size: 0.9rem; margin-top: 4px;">${formatRupiah(item.subtotal)}</div>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <button onclick="changeCartItemQty(${index}, -1)" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer;">-</button>
-          <span style="font-weight: 700; font-size: 0.9rem;">${item.qty}</span>
-          <button onclick="changeCartItemQty(${index}, 1)" style="width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--primary); color: #fff; cursor: pointer;">+</button>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button onclick="changeCartItemQty(${index}, -1)" style="width: 28px; height: 28px; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; font-weight: 700;">-</button>
+          <span style="font-weight: 800; font-size: 0.9rem; min-width: 18px; text-align: center;">${item.qty}</span>
+          <button onclick="changeCartItemQty(${index}, 1)" style="width: 28px; height: 28px; border-radius: 6px; border: none; background: #0284c7; color: #fff; cursor: pointer; font-weight: 700;">+</button>
         </div>
       </div>
     `;
   });
   container.innerHTML = html;
 
-  // Calculate taxes using outlet rates safely
   const outlet = storeData.outlet || {};
-  const taxRate = (outlet.taxRate !== undefined) ? Number(outlet.taxRate) : 10;
-  const serviceRate = (outlet.serviceRate !== undefined) ? Number(outlet.serviceRate) : 5;
+  const taxRate = outlet.taxRate !== undefined ? Number(outlet.taxRate) : 10;
+  const serviceRate = outlet.serviceRate !== undefined ? Number(outlet.serviceRate) : 5;
   const tax = Math.round((subtotal * taxRate) / 100);
   const service = Math.round((subtotal * serviceRate) / 100);
   const grandTotal = subtotal + tax + service;
@@ -595,19 +1567,19 @@ function selectPaymentMethod(method) {
 }
 
 // -----------------------------------------------------------------------------
-// SUBMIT ORDER & TRACKING
+// SUBMIT ORDER
 // -----------------------------------------------------------------------------
 async function submitOrder() {
   const custName = document.getElementById('cust-name').value.trim();
   if (!custName) {
-    alert("Mohon masukkan nama pemesan terlebih dahulu.");
+    alert(I18N[currentLang].cust_name_placeholder);
     document.getElementById('cust-name').focus();
     return;
   }
 
   const btn = document.getElementById('btn-submit-order');
   btn.disabled = true;
-  btn.innerHTML = "Memproses Pesanan...";
+  btn.innerHTML = `<span style="width: 100%; text-align: center;">Memproses Pesanan...</span>`;
 
   try {
     const payload = {
@@ -631,15 +1603,11 @@ async function submitOrder() {
       currentActiveOrder = data.order;
       sessionStorage.setItem('activeOrderId', data.order.id);
 
-      // Join socket room for this order
       socket.emit('watch_order', data.order.id);
 
-      // Clear cart
       cart = [];
       updateCartUI();
       closeCartDrawer();
-
-      // Show live tracker
       showTrackerDrawer(data.order);
     } else {
       alert("Gagal mengirim pesanan: " + (data.error || "Terjadi kesalahan"));
@@ -649,7 +1617,7 @@ async function submitOrder() {
     alert("Koneksi gagal. Cek kembali server.");
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<span>Kirim Pesanan Sekarang</span> <span id="btn-submit-total">Rp 0</span>`;
+    btn.innerHTML = `<span>${I18N[currentLang].place_order_btn}</span> <span id="btn-submit-total">Rp 0</span>`;
   }
 }
 
@@ -670,24 +1638,40 @@ function updateTrackerUI(order) {
 
   document.getElementById('tracker-order-id').innerText = order.id;
   document.getElementById('tracker-table-num').innerText = order.tableNumber;
-  document.getElementById('tracker-pay-status').innerText = order.paymentStatus === 'PAID' ? 'LUNAS' : 'BELUM LUNAS';
-  document.getElementById('tracker-pay-status').className = `badge ${order.paymentStatus === 'PAID' ? 'badge-paid' : 'badge-pending'}`;
+  
+  const isPaid = order.paymentStatus === 'PAID';
+  document.getElementById('tracker-pay-status').innerText = isPaid ? I18N[currentLang].paid : I18N[currentLang].unpaid;
+  document.getElementById('tracker-pay-status').style.background = isPaid ? '#d1fae5' : '#fee2e2';
+  document.getElementById('tracker-pay-status').style.color = isPaid ? '#065f46' : '#991b1b';
 
-  // If order is QRIS and still pending
-  if (order.paymentMethod === 'QRIS' && order.paymentStatus !== 'PAID') {
+  // If QRIS and pending
+  if (order.paymentMethod === 'QRIS' && !isPaid) {
     qrisView.style.display = 'block';
     statusView.style.display = 'none';
     document.getElementById('qris-img-tag').src = order.qrisDataUrl;
     document.getElementById('qris-total-amount').innerText = formatRupiah(order.total);
     document.getElementById('qris-table-badge').innerText = order.tableNumber;
-    document.getElementById('tracker-header-title').innerText = "Menunggu Pembayaran QRIS";
+    document.getElementById('tracker-header-title').innerText = I18N[currentLang].scan_qris_title;
+
+    // Display customized merchant info from server
+    if (order.qrisInfo) {
+      if (order.qrisInfo.merchantName) {
+        document.getElementById('qris-merchant-display').innerText = order.qrisInfo.merchantName;
+      }
+      if (order.qrisInfo.nmid) {
+        document.getElementById('qris-nmid-display').innerText = `NMID: ${order.qrisInfo.nmid}`;
+      }
+      if (order.qrisInfo.instructions) {
+        document.getElementById('qris-instructions-display').innerText = order.qrisInfo.instructions;
+      }
+    }
     return;
   }
 
-  // Otherwise, show Kitchen Progress Timeline
+  // Otherwise show status view
   qrisView.style.display = 'none';
   statusView.style.display = 'block';
-  document.getElementById('tracker-header-title').innerText = "Status Pesanan Real-time";
+  document.getElementById('tracker-header-title').innerText = I18N[currentLang].order_confirmation;
 
   const step1 = document.getElementById('step-1');
   const step2 = document.getElementById('step-2');
@@ -702,34 +1686,33 @@ function updateTrackerUI(order) {
 
   if (order.orderStatus === 'RECEIVED') {
     step1.classList.add('active');
-    heading.innerText = "Pesanan Diterima Dapur";
-    desc.innerText = "Koki kami telah menerima pesanan dan menyiapkan bahan makanan.";
+    heading.innerText = I18N[currentLang].status_rcv_title;
+    desc.innerText = I18N[currentLang].status_rcv_desc;
     icon.innerText = "📋";
   } else if (order.orderStatus === 'COOKING') {
     step1.classList.add('completed');
     step2.classList.add('active');
-    heading.innerText = "Sedang Dimasak";
-    desc.innerText = "Makanan favorit Anda sedang dimasak dengan sepenuh hati.";
+    heading.innerText = I18N[currentLang].status_cook_title;
+    desc.innerText = I18N[currentLang].status_cook_desc;
     icon.innerText = "🍳";
   } else if (order.orderStatus === 'READY') {
     step1.classList.add('completed');
     step2.classList.add('completed');
     step3.classList.add('active');
-    heading.innerText = "Makanan Siap Diantar";
-    desc.innerText = "Pesanan selesai dimasak dan pelayan sedang mengantar ke meja Anda.";
+    heading.innerText = I18N[currentLang].status_ready_title;
+    desc.innerText = I18N[currentLang].status_ready_desc;
     icon.innerText = "🛵";
   } else if (order.orderStatus === 'COMPLETED') {
     step1.classList.add('completed');
     step2.classList.add('completed');
     step3.classList.add('completed');
     step4.classList.add('active');
-    heading.innerText = "Pesanan Selesai";
-    desc.innerText = "Selamat menikmati hidangan! Terima kasih atas kunjungan Anda.";
+    heading.innerText = I18N[currentLang].status_done_title;
+    desc.innerText = I18N[currentLang].status_done_desc;
     icon.innerText = "✨";
   }
 }
 
-// Simulator for QRIS Webhook
 async function simulatePaymentSuccess() {
   if (!currentActiveOrder) return;
   try {
@@ -755,8 +1738,29 @@ async function loadExistingOrder(orderId) {
   } catch (err) {}
 }
 
-// Start
+function callWaiter() {
+  alert(I18N[currentLang].waiter_called);
+  socket.emit('call_waiter', {
+    outletId: storeData.outlet?.id,
+    table: storeData.table?.name || `Meja ${tableQuery}`
+  });
+}
+
+function requestBill() {
+  alert(I18N[currentLang].bill_requested);
+  socket.emit('request_bill', {
+    outletId: storeData.outlet?.id,
+    table: storeData.table?.name || `Meja ${tableQuery}`
+  });
+}
+
+// Boot
 initApp();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 </script>
 </body>
 </html>

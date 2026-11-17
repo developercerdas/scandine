@@ -8,7 +8,8 @@
       "ownerName": "Djohan Hutagalung",
       "ownerPhone": "0812-8899-7766",
       "currency": "Rp",
-      "createdAt": "2026-01-10T08:00:00.000Z"
+      "createdAt": "2026-01-10T08:00:00.000Z",
+      "logoUrl": "/img/logo.svg"
     },
     {
       "id": "biz-2",
@@ -26,7 +27,7 @@
       "id": "outlet-senopati",
       "businessId": "biz-1",
       "slug": "senopati",
-      "name": "Cabang Senopati (Pusat)",
+      "name": "Cabang Senopati",
       "address": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
       "phone": "0812-8899-7766",
       "taxRate": 10,
@@ -55,9 +56,9 @@
           "number": "1",
           "name": "Meja 01 (Indoor)",
           "capacity": 2,
-          "status": "AVAILABLE",
-          "currentOrderId": null,
-          "occupiedSince": null
+          "status": "OCCUPIED",
+          "currentOrderId": "ORD-20261117-8519",
+          "occupiedSince": "2026-11-17T07:04:04.751Z"
         },
         {
           "id": "tbl-s-2",
@@ -276,7 +277,12 @@
         "serverKey": "",
         "clientKey": "",
         "instructions": "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
-      }
+      },
+      "logoUrl": "/img/logo.svg",
+      "wifiSsid": "KopiSelera_VIP",
+      "wifiPassword": "nusantararasa",
+      "tableTentSubtitle": "Scan kamera HP untuk pesan & bayar langsung dari meja",
+      "qrTemplate": "acrylic"
     },
     {
       "id": "outlet-kemang",
@@ -406,7 +412,10 @@
         "serverKey": "",
         "clientKey": "",
         "instructions": "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
-      }
+      },
+      "logoUrl": "/img/logo.svg",
+      "wifiSsid": "Resto_Guest",
+      "qrTemplate": "acrylic"
     }
   ],
   "categories": [
@@ -618,6 +627,102 @@
     }
   ],
   "orders": [
+    {
+      "id": "ORD-20261117-6863",
+      "businessId": "biz-1",
+      "businessName": "Kopi & Selera Nusantara",
+      "outletId": "outlet-senopati",
+      "outletName": "Cabang Senopati",
+      "outletAddress": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
+      "outletPhone": "0812-8899-7766",
+      "receiptFooter": "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+      "channel": "DINE_IN",
+      "tableNumber": "Meja 01",
+      "pickupTime": null,
+      "customerName": "Budi Santoso",
+      "customerPhone": "08123456789",
+      "notes": "",
+      "items": [
+        {
+          "menuId": "menu-1",
+          "name": "Nasi Goreng Wagyu Selera",
+          "price": 58000,
+          "qty": 2,
+          "options": [
+            {
+              "name": "Level Pedas",
+              "value": "Level 3 (Pedas Banget)"
+            }
+          ],
+          "notes": "Jangan pakai daun bawang",
+          "subtotal": 116000
+        }
+      ],
+      "subtotal": 116000,
+      "tax": 11600,
+      "service": 5800,
+      "total": 133400,
+      "paymentMethod": "QRIS",
+      "paymentStatus": "PAID",
+      "orderStatus": "COOKING",
+      "qrisDataUrl": "data:image/png;base64,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",
+      "qrisInfo": {
+        "mode": "DYNAMIC_MOCK",
+        "merchantName": "Cabang Senopati (Pusat)",
+        "nmid": "ID1020030040050",
+        "instructions": "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
+      },
+      "createdAt": "2026-11-17T07:46:31.839Z",
+      "paidAt": "2026-11-17T07:46:31.861Z"
+    },
+    {
+      "id": "ORD-20261117-8519",
+      "businessId": "biz-1",
+      "businessName": "Kopi & Selera Nusantara",
+      "outletId": "outlet-senopati",
+      "outletName": "Cabang Senopati (Pusat)",
+      "outletAddress": "Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan",
+      "outletPhone": "0812-8899-7766",
+      "receiptFooter": "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+      "channel": "DINE_IN",
+      "tableNumber": "Meja 1",
+      "pickupTime": null,
+      "customerName": "Budi Test",
+      "customerPhone": "-",
+      "notes": "",
+      "items": [
+        {
+          "menuId": "menu-1",
+          "name": "Nasi Goreng Wagyu Selera",
+          "price": 58000,
+          "qty": 2,
+          "options": [
+            {
+              "name": "Tingkat Kepedasan",
+              "value": "Pedas Gurih"
+            }
+          ],
+          "notes": "Bawang goreng banyakin",
+          "subtotal": 116000
+        }
+      ],
+      "subtotal": 116000,
+      "tax": 11600,
+      "service": 5800,
+      "total": 133400,
+      "paymentMethod": "QRIS",
+      "paymentStatus": "PAID",
+      "orderStatus": "RECEIVED",
+      "qrisDataUrl": "data:image/png;base64,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",
+      "qrisInfo": {
+        "mode": "DYNAMIC_MOCK",
+        "merchantName": "Cabang Senopati (Pusat)",
+        "nmid": "ID1020030040050",
+        "instructions": "Pindai QRIS di atas dengan m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, ShopeePay, Dana)."
+      },
+      "createdAt": "2026-11-17T07:04:04.751Z",
+      "paidAt": "2026-11-17T07:04:04.758Z"
+    },
     {
       "id": "ORD-20261113-7457",
       "businessId": "biz-1",
@@ -880,6 +985,44 @@
         "outlet-kemang"
       ],
       "avatar": "👔"
+    },
+    {
+      "id": "usr-admin",
+      "username": "admin",
+      "password": "password123",
+      "name": "Super Admin Resto",
+      "role": "ADMIN",
+      "businessId": "biz-1",
+      "allowedOutlets": [
+        "*"
+      ],
+      "avatar": "⚡"
+    },
+    {
+      "id": "usr-kasir",
+      "username": "kasir",
+      "password": "password123",
+      "name": "Siti (Kasir / Staff POS)",
+      "role": "CASHIER",
+      "businessId": "biz-1",
+      "allowedOutlets": [
+        "outlet-senopati",
+        "outlet-kemang"
+      ],
+      "avatar": "💻"
+    },
+    {
+      "id": "usr-waiter",
+      "username": "waiter",
+      "password": "password123",
+      "name": "Andi (Waiter / Pramusaji)",
+      "role": "WAITER",
+      "businessId": "biz-1",
+      "allowedOutlets": [
+        "outlet-senopati",
+        "outlet-kemang"
+      ],
+      "avatar": "🍽️"
     }
   ]
 }

@@ -266,27 +266,101 @@
       background: #f0f9ff;
     }
 
+    /* Tablet & Mobile Responsive Design */
+    @media (min-width: 769px) and (max-width: 1180px) {
+      .admin-container {
+        padding: 16px 14px;
+      }
+      .nav-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .tab-btn {
+        flex-shrink: 0;
+        font-size: 0.85rem;
+        padding: 10px 14px;
+      }
+      .grid-2col {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+    }
+
     @media (max-width: 768px) {
       .grid-2col {
         grid-template-columns: 1fr !important;
       }
+      .nav-tabs {
+        overflow-x: auto;
+        display: flex;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        gap: 8px;
+        padding-bottom: 4px;
+      }
+      .tab-btn {
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-size: 0.82rem;
+        padding: 9px 12px;
+      }
+      .modal-card {
+        max-width: 95vw !important;
+        max-height: 90vh !important;
+        overflow-y: auto !important;
+        padding: 18px 14px !important;
+      }
     }
 
+    /* Print Formatting for Table Tent / Acrylic Stand & Batch Sheet */
     @media print {
+      @page {
+        size: auto;
+        margin: 6mm;
+      }
       body * {
-        visibility: hidden;
+        visibility: hidden !important;
       }
-      #batch-qr-container, #batch-qr-container *, #qr-sticker-area, #qr-sticker-area * {
-        visibility: visible;
+      body.printing-single #qr-sticker-area,
+      body.printing-single #qr-sticker-area * {
+        visibility: visible !important;
       }
-      #batch-qr-container {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
+      body.printing-single #qr-sticker-area {
+        position: fixed !important;
+        left: 50% !important;
+        top: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 105mm !important;
+        max-width: 105mm !important;
+        background: #fff !important;
+        border: 2px solid #0f172a !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 18px !important;
+        border-radius: 16px !important;
+      }
+
+      body.printing-batch #batch-qr-container,
+      body.printing-batch #batch-qr-container * {
+        visibility: visible !important;
+      }
+      body.printing-batch #batch-qr-container {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 14px !important;
+        box-shadow: none !important;
+      }
+      .batch-qr-sticker-item {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+        border: 1.5px solid #0f172a !important;
+        box-shadow: none !important;
       }
     }
   </style>
@@ -357,51 +431,144 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
         <div>
           <h3 style="font-size: 1.2rem; font-weight: 800;">Profil Cabang Aktif & Format Cetak Struk 58mm</h3>
-          <p style="font-size: 0.85rem; color: var(--muted);">Data di bawah ini khusus untuk cabang yang sedang dipilih dan otomatis tercetak di kepala struk kasir.</p>
+          <p style="font-size: 0.85rem; color: var(--muted);">Data di bawah ini khusus untuk cabang yang sedang dipilih dan otomatis tercetak di kepala struk kasir dan akrilik meja.</p>
         </div>
         <button onclick="saveStoreProfile()" class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.9rem;">
-          💾 Simpan Profil Cabang Ini
+          💾 Simpan Profil &amp; Logo
         </button>
+      </div>
+
+      <!-- Upload Logo Resto Section -->
+      <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 16px; padding: 16px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 74px; height: 74px; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; display: flex; align-items: center; justify-content: center; padding: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); flex-shrink: 0;">
+              <img id="prof-logo-preview" src="/img/logo.svg" alt="Logo Restoran" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+            </div>
+            <div>
+              <div style="font-weight: 900; font-size: 1rem; color: #0f172a;">🖼️ Logo Resmi Resto / Cafe</div>
+              <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">Format PNG / JPG / SVG transparan. Tercetak di Struk Thermal &amp; Akrilik Meja.</div>
+              <div style="margin-top: 6px; font-size: 0.75rem; color: #0284c7; word-break: break-all; font-family: monospace;" id="prof-logo-path-text">/img/logo.svg</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="file" id="logo-file-input" accept="image/*" style="display: none;" onchange="handleLogoUpload(this)">
+            <button type="button" onclick="document.getElementById('logo-file-input').click()" style="background: #0284c7; color: #fff; border: none; padding: 9px 16px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25);">
+              📁 Unggah File Logo
+            </button>
+            <button type="button" onclick="resetRestoLogo()" style="background: #ffffff; color: #64748b; border: 1px solid #cbd5e1; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer;">
+              Reset Default
+            </button>
+          </div>
+        </div>
+        <input type="hidden" id="prof-logo-url" value="/img/logo.svg">
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
         <div class="form-group">
           <label class="form-label">Nama Bisnis / Brand Resto Utama</label>
-          <input type="text" id="prof-biz-name" class="form-input" placeholder="Contoh: Kopi & Selera Nusantara">
+          <input type="text" id="prof-biz-name" class="form-input" placeholder="Contoh: Kopi &amp; Selera Nusantara" oninput="syncLiveReceiptPreview()">
         </div>
         <div class="form-group">
           <label class="form-label">Slogan / Tagline Resto</label>
-          <input type="text" id="prof-tagline" class="form-input" placeholder="Contoh: Authentic Indonesian Taste">
+          <input type="text" id="prof-tagline" class="form-input" placeholder="Contoh: Authentic Indonesian Taste" oninput="syncLiveReceiptPreview()">
         </div>
         <div class="form-group">
           <label class="form-label">Nama Cabang / Gerai Ini</label>
-          <input type="text" id="prof-outlet-name" class="form-input" placeholder="Contoh: Cabang Senopati (Pusat)">
+          <input type="text" id="prof-outlet-name" class="form-input" placeholder="Contoh: Cabang Senopati (Pusat)" oninput="syncLiveReceiptPreview()">
         </div>
         <div class="form-group">
           <label class="form-label">No. Telepon / WhatsApp Cabang Ini</label>
-          <input type="text" id="prof-phone" class="form-input" placeholder="Contoh: 0812-8899-7766">
+          <input type="text" id="prof-phone" class="form-input" placeholder="Contoh: 0812-8899-7766" oninput="syncLiveReceiptPreview()">
         </div>
       </div>
 
       <div class="form-group">
         <label class="form-label">Alamat Lengkap Cabang Ini (Tercetak di Struk)</label>
-        <input type="text" id="prof-address" class="form-input" placeholder="Contoh: Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan">
+        <input type="text" id="prof-address" class="form-input" placeholder="Contoh: Jl. Senopati No. 88, Kebayoran Baru, Jakarta Selatan" oninput="syncLiveReceiptPreview()">
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
         <div class="form-group">
           <label class="form-label">Pajak Restoran PB1 (%)</label>
-          <input type="number" id="prof-tax" class="form-input" min="0" max="30" placeholder="10">
+          <input type="number" id="prof-tax" class="form-input" min="0" max="30" placeholder="10" oninput="syncLiveReceiptPreview()">
         </div>
         <div class="form-group">
           <label class="form-label">Service Charge (%)</label>
-          <input type="number" id="prof-service" class="form-input" min="0" max="20" placeholder="5">
+          <input type="number" id="prof-service" class="form-input" min="0" max="20" placeholder="5" oninput="syncLiveReceiptPreview()">
         </div>
       </div>
 
       <div class="form-group">
         <label class="form-label">Pesan Penutup Struk (Footer Receipt 58mm)</label>
-        <textarea id="prof-footer" class="form-input" rows="2" placeholder="Terima kasih atas kunjungan Anda!\nSilakan datang kembali."></textarea>
+        <textarea id="prof-footer" class="form-input" rows="2" placeholder="Terima kasih atas kunjungan Anda!\nSilakan datang kembali." oninput="syncLiveReceiptPreview()"></textarea>
+      </div>
+
+      <!-- Live Preview Struk Modern -->
+      <div style="margin-top: 24px; padding-top: 20px; border-top: 1.5px dashed var(--border);">
+        <h4 style="font-size: 0.95rem; font-weight: 800; color: #0f172a; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+          <span>🧾 Live Preview Hasil Cetak Struk Kasir (Thermal 58mm)</span>
+        </h4>
+        <div style="max-width: 320px; background: #ffffff; border: 2px solid #e2e8f0; border-radius: 14px; padding: 18px 14px; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.4; color: #000; box-shadow: 0 4px 14px rgba(0,0,0,0.06); margin: 0 auto;">
+          <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
+            <img id="rcpt-preview-logo" src="/img/logo.svg" style="max-height: 38px; max-width: 110px; object-fit: contain; display: block; margin: 0 auto 6px;">
+            <div style="font-size: 13px; font-weight: 900;" id="rcpt-preview-biz">KOPI &amp; SELERA NUSANTARA</div>
+            <div style="font-size: 10px; font-weight: bold;" id="rcpt-preview-outlet">Cabang Senopati</div>
+            <div style="font-size: 9px; color: #444;" id="rcpt-preview-addr">Jl. Senopati No. 88, Jaksel</div>
+            <div style="font-size: 9px; color: #444;" id="rcpt-preview-phone">Telp: 0812-8899-7766</div>
+          </div>
+          <div style="margin-bottom: 8px; font-size: 10px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>No: #SEN-0042</span>
+              <span>17/11/2026 14:30</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>Meja: <strong>Meja 04</strong></span>
+              <span>Kasir: Siti</span>
+            </div>
+          </div>
+          <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin-bottom: 6px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>2x Nasi Goreng Wagyu</span>
+              <span>Rp 116.000</span>
+            </div>
+            <div style="font-size: 9px; color: #555; padding-left: 8px;">• Level Pedas: Level 3</div>
+            <div style="display: flex; justify-content: space-between; margin-top: 3px;">
+              <span>1x Es Kopi Susu Aren</span>
+              <span>Rp 24.000</span>
+            </div>
+            <div style="font-size: 9px; color: #555; padding-left: 8px;">• Pilihan Es: Less Ice</div>
+          </div>
+          <div style="font-size: 10px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span>Subtotal:</span>
+              <span>Rp 140.000</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>PB1 Resto (<span id="rcpt-preview-tax">10</span>%):</span>
+              <span id="rcpt-preview-taxval">Rp 14.000</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span>Service Charge (<span id="rcpt-preview-svc">5</span>%):</span>
+              <span id="rcpt-preview-svcval">Rp 7.000</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; border-top: 1px solid #000; padding-top: 4px; margin-top: 4px;">
+              <span>TOTAL:</span>
+              <span id="rcpt-preview-total">Rp 161.000</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 9px; margin-top: 3px;">
+              <span>Metode:</span>
+              <span><strong>QRIS BCA [LUNAS]</strong></span>
+            </div>
+          </div>
+          <div style="text-align: center; border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; font-size: 9px; white-space: pre-line; color: #333;" id="rcpt-preview-footer">
+            Terima kasih atas kunjungan Anda!
+            Silakan datang kembali.
+          </div>
+          <div style="text-align: center; font-size: 8px; color: #777; margin-top: 6px;">
+            ScanDine POS • CV. ISTANA BARCODE COMPUTER
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -469,8 +636,37 @@
 
         <hr style="border: none; border-top: 1px dashed var(--border); margin: 20px 0;">
 
+        <!-- Table Display Template & Format Settings -->
+        <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 10px; color: var(--dark);">🪧 Format Tampilan Meja &amp; Akrilik</h4>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label class="form-label">Model Desain Meja:</label>
+          <select id="qr-template-model" class="form-input" onchange="updateQrDisplayModel(this.value)" style="font-weight: 700;">
+            <option value="acrylic" selected>🌟 Standing Akrilik T-Stand / Segitiga (Table Tent A6)</option>
+            <option value="sticker">🏷️ Stiker Meja Minimalis Kotak (Square 90x90mm)</option>
+            <option value="compact">🪪 Kartu Meja Mini Akrilik (A7 74x105mm)</option>
+          </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label" style="font-size: 0.78rem;">Nama Wi-Fi Tamu (SSID)</label>
+            <input type="text" id="qr-wifi-ssid" class="form-input" placeholder="Resto_Guest" style="font-size: 0.84rem;" oninput="syncAcrylicPreviewData()">
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label class="form-label" style="font-size: 0.78rem;">Sandi Wi-Fi Tamu</label>
+            <input type="text" id="qr-wifi-pass" class="form-input" placeholder="kopienak123" style="font-size: 0.84rem;" oninput="syncAcrylicPreviewData()">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 0.78rem;">Slogan / Petunjuk Meja</label>
+          <input type="text" id="qr-table-subtitle" class="form-input" placeholder="Scan kamera HP untuk pesan &amp; bayar langsung" style="font-size: 0.84rem;" oninput="syncAcrylicPreviewData()">
+        </div>
+
+        <hr style="border: none; border-top: 1px dashed var(--border); margin: 16px 0;">
+
         <!-- Single Table Inspector -->
-        <h4 style="font-size: 0.92rem; font-weight: 800; margin-bottom: 8px; color: var(--dark);">🎯 Pilih Meja Tertentu untuk Preview Stiker</h4>
+        <h4 style="font-size: 0.92rem; font-weight: 800; margin-bottom: 8px; color: var(--dark);">🎯 Pilih Nomor Meja untuk Preview:</h4>
         <div class="form-group" style="margin-bottom: 12px;">
           <select id="select-table" class="form-input" onchange="onTableSelectChange()" style="font-weight: 700;">
             <!-- Populated by JS -->
@@ -481,34 +677,71 @@
           <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 11px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 10px; font-size: 0.85rem; border: 1px solid #cbd5e1;">
             🔗 Buka Menu Tamu
           </a>
-          <button onclick="printSingleQrSticker()" style="flex: 1; padding: 11px; background: #0f172a; color: #fff; border: none; font-weight: 700; border-radius: 10px; font-size: 0.85rem; cursor: pointer;">
-            🖨️ Cetak Stiker Meja Ini
+          <button onclick="printSingleQrSticker()" style="flex: 1.2; padding: 11px; background: #0f172a; color: #fff; border: none; font-weight: 800; border-radius: 10px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);">
+            <span>🖨️ Cetak Akrilik Meja Ini</span>
           </button>
         </div>
       </div>
 
-      <!-- Right Box: Single Live Preview Sticker -->
+      <!-- Right Box: Single Live Preview (Standing Akrilik / Stiker) -->
       <div>
-        <div class="qr-card-preview" id="qr-sticker-area">
-          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; color: #0284c7;" id="preview-resto-name">
-            KOPI & SELERA NUSANTARA
+        <div class="qr-card-preview" id="qr-sticker-area" style="background: #ffffff; border: 2.5px solid #0f172a; border-radius: 20px; padding: 22px 18px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: all 0.3s;">
+          
+          <!-- Header Logo & Brand -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
+            <img id="preview-resto-logo" src="/img/logo.svg" alt="Logo Resto" style="max-height: 34px; max-width: 90px; object-fit: contain;">
           </div>
-          <div style="font-size: 0.74rem; color: #64748b; font-weight: 700;" id="preview-outlet-name">
+          <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; color: #0284c7;" id="preview-resto-name">
+            KOPI &amp; SELERA NUSANTARA
+          </div>
+          <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;" id="preview-outlet-name">
             Cabang Senopati
           </div>
-          <h2 id="preview-table-title" style="font-size: 1.6rem; font-weight: 900; margin: 8px 0 12px; color: #0f172a;">
-            MEJA 01
-          </h2>
 
-          <div style="background: #fff; padding: 12px; border-radius: 16px; display: inline-block; border: 1.5px solid #e2e8f0; box-shadow: 0 4px 14px rgba(0,0,0,0.06);">
-            <img id="qr-preview-image" src="" alt="Barcode QR Meja" style="width: 200px; height: 200px; display: block; object-fit: contain;">
+          <!-- Table Number Badge -->
+          <div style="margin: 12px auto 10px; display: inline-block; background: #0f172a; color: #ffffff; padding: 6px 20px; border-radius: 9999px;">
+            <h2 id="preview-table-title" style="font-size: 1.35rem; font-weight: 900; margin: 0; letter-spacing: 1px;">
+              MEJA 01
+            </h2>
           </div>
 
-          <p style="font-size: 0.82rem; color: #64748b; margin-top: 12px; line-height: 1.4;">
-            Pindai QR ini dengan kamera HP untuk pesan &amp; bayar langsung dari meja tanpa menunggu pelayan.
+          <!-- Large High-Contrast QR Code -->
+          <div style="background: #ffffff; padding: 12px; border-radius: 16px; display: inline-block; border: 2px solid #0f172a; box-shadow: 0 4px 14px rgba(0,0,0,0.06); margin: 6px 0;">
+            <img id="qr-preview-image" src="" alt="Barcode QR Meja" style="width: 210px; height: 210px; display: block; object-fit: contain;">
+          </div>
+
+          <!-- 3-Step Simple Guide -->
+          <div id="acrylic-steps-box" style="margin: 10px auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; font-size: 0.72rem; font-weight: 700; color: #334155;">
+            <div>
+              <div style="font-size: 1rem;">📷</div>
+              <div>1. Buka Kamera</div>
+            </div>
+            <div>
+              <div style="font-size: 1rem;">🍜</div>
+              <div>2. Pilih Menu</div>
+            </div>
+            <div>
+              <div style="font-size: 1rem;">💳</div>
+              <div>3. Bayar Praktis</div>
+            </div>
+          </div>
+
+          <!-- Wi-Fi Tamu Box -->
+          <div id="acrylic-wifi-box" style="margin: 8px auto; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 6px 12px; font-size: 0.74rem; color: #1e40af; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <span>📶 Wi-Fi: <strong id="preview-wifi-ssid">Resto_Guest</strong></span>
+            <span>• Sandi: <strong id="preview-wifi-pass">kopienak123</strong></span>
+          </div>
+
+          <p id="preview-subtitle-text" style="font-size: 0.78rem; color: #64748b; margin-top: 8px; line-height: 1.4; font-weight: 600;">
+            Pindai QR dengan kamera HP untuk pesan &amp; bayar langsung tanpa antre.
           </p>
-          <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 6px; word-break: break-all; font-family: monospace;" id="preview-url-text">
+
+          <div style="font-size: 0.68rem; color: #94a3b8; margin-top: 6px; word-break: break-all; font-family: monospace;" id="preview-url-text">
             -
+          </div>
+
+          <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #f1f5f9; font-size: 0.68rem; color: #64748b; font-weight: 700;">
+            Powered by ScanDine • CV. ISTANA BARCODE COMPUTER
           </div>
         </div>
       </div>
@@ -875,8 +1108,16 @@
     </div>
 
     <div class="form-group">
-      <label class="form-label">URL Foto Menu</label>
-      <input type="text" id="edit-menu-image" class="form-input" placeholder="https://images.unsplash.com/..." oninput="previewMenuPhoto(this.value)">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+        <label class="form-label" style="margin: 0;">Foto Menu Makanan / Minuman</label>
+        <div>
+          <input type="file" id="menu-photo-file-input" accept="image/*" style="display: none;" onchange="handleMenuPhotoUpload(this)">
+          <button type="button" onclick="document.getElementById('menu-photo-file-input').click()" style="background: #0284c7; color: #fff; border: none; padding: 5px 12px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);">
+            📁 Unggah Foto (HP/Kamera/Galeri)
+          </button>
+        </div>
+      </div>
+      <input type="text" id="edit-menu-image" class="form-input" placeholder="https://images.unsplash.com/... atau hasil unggahan" oninput="previewMenuPhoto(this.value)">
       <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
         <span style="font-size: 0.72rem; color: var(--muted); align-self: center;">Contoh foto cepat:</span>
         <button type="button" onclick="setPresetPhoto('fried-rice')" style="font-size: 0.72rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; cursor: pointer;">🍛 Nasi Goreng</button>
@@ -944,7 +1185,7 @@ let currentStoreProfile = {};
 let currentQrisSettings = {};
 let currentUser = null;
 
-// Auth Verification
+// Auth & Role Rules Verification: ONLY OWNER and ADMIN can access Backoffice!
 function verifyAuth() {
   const raw = localStorage.getItem('scandine_user');
   if (!raw) {
@@ -952,18 +1193,22 @@ function verifyAuth() {
     return false;
   }
   currentUser = JSON.parse(raw);
-  document.getElementById('user-display-name').innerText = `${currentUser.avatar || '👤'} ${currentUser.name}`;
 
-  if (currentUser.role === 'GERAI_MANAGER' && currentUser.assignedOutlet) {
-    currentAdminOutlet = currentUser.assignedOutlet.slug;
-    const sel = document.getElementById('admin-outlet-select');
-    sel.innerHTML = `<option value="${currentUser.assignedOutlet.slug}">🔒 Gerai: ${currentUser.assignedOutlet.name}</option>`;
-    sel.disabled = true;
-  } else {
-    const urlParams = new URLSearchParams(window.location.search);
-    const qOutlet = urlParams.get('outlet');
-    if (qOutlet) currentAdminOutlet = qOutlet;
+  // STRICT ACCESS CONTROL: Only OWNER and ADMIN are permitted into Backoffice Admin!
+  const allowedRoles = ['OWNER', 'ADMIN'];
+  if (!allowedRoles.includes(currentUser.role)) {
+    alert(`⛔ Akses Ditolak!\n\nAkun Anda: ${currentUser.name} (${currentUser.role})\n\nHalaman Pengaturan Backoffice Admin hanya boleh diakses oleh Pemilik (Owner) atau Super Admin.\n\nAnda dialihkan ke layar POS Kasir & KDS.`);
+    const outletSlug = currentUser.assignedOutlet ? currentUser.assignedOutlet.slug : 'senopati';
+    window.location.href = `/pos?outlet=${outletSlug}`;
+    return false;
   }
+
+  const roleLabel = currentUser.role === 'OWNER' ? '👑 Pemilik (Owner)' : '⚡ Super Admin';
+  document.getElementById('user-display-name').innerHTML = `${currentUser.avatar || '👤'} <strong>${currentUser.name}</strong> <span style="background: rgba(2,132,199,0.2); color: #38bdf8; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; margin-left: 4px; font-weight: 800;">${roleLabel}</span>`;
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const qOutlet = urlParams.get('outlet');
+  if (qOutlet) currentAdminOutlet = qOutlet;
 
   // Update nav links
   document.getElementById('link-kds-pos').href = `/pos?outlet=${currentAdminOutlet}`;
@@ -976,6 +1221,174 @@ function logoutAdmin() {
   if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
     localStorage.removeItem('scandine_user');
     window.location.href = '/login.html';
+  }
+}
+
+// -----------------------------------------------------------------------------
+// IMAGE UPLOAD HANDLERS (LOGO RESTO & FOTO MENU)
+// -----------------------------------------------------------------------------
+async function handleLogoUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const base64Data = e.target.result;
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-role': currentUser ? currentUser.role : 'OWNER'
+        },
+        body: JSON.stringify({
+          image: base64Data,
+          filename: `logo_${currentAdminOutlet}`
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        document.getElementById('prof-logo-preview').src = data.url;
+        document.getElementById('prof-logo-url').value = data.url;
+        document.getElementById('prof-logo-path-text').innerText = data.url;
+        
+        // Sync to previews
+        const rcptLogo = document.getElementById('rcpt-preview-logo');
+        if (rcptLogo) rcptLogo.src = data.url;
+        const qrLogo = document.getElementById('preview-resto-logo');
+        if (qrLogo) qrLogo.src = data.url;
+
+        alert("✅ Logo resto berhasil diunggah! Klik 'Simpan Profil & Logo' untuk menyimpan permanen.");
+        syncLiveReceiptPreview();
+        syncAcrylicPreviewData();
+      } else {
+        alert("Gagal mengunggah logo: " + (data.error || ""));
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan jaringan saat mengunggah logo.");
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetRestoLogo() {
+  const defaultLogo = "/img/logo.svg";
+  document.getElementById('prof-logo-preview').src = defaultLogo;
+  document.getElementById('prof-logo-url').value = defaultLogo;
+  document.getElementById('prof-logo-path-text').innerText = defaultLogo;
+  syncLiveReceiptPreview();
+  syncAcrylicPreviewData();
+}
+
+async function handleMenuPhotoUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const base64Data = e.target.result;
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-user-role': currentUser ? currentUser.role : 'OWNER'
+        },
+        body: JSON.stringify({
+          image: base64Data,
+          filename: `menu_${Date.now()}`
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        document.getElementById('edit-menu-image').value = data.url;
+        previewMenuPhoto(data.url);
+      } else {
+        alert("Gagal mengunggah foto menu: " + (data.error || ""));
+      }
+    } catch (err) {
+      alert("Terjadi kesalahan jaringan saat mengunggah foto menu.");
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Live Receipt Synchronizer
+function syncLiveReceiptPreview() {
+  const bizName = document.getElementById('prof-biz-name').value || "KOPI & SELERA NUSANTARA";
+  const outletName = document.getElementById('prof-outlet-name').value || "Cabang Senopati";
+  const address = document.getElementById('prof-address').value || "Jl. Senopati No. 88, Jakarta Selatan";
+  const phone = document.getElementById('prof-phone').value || "0812-8899-7766";
+  const tax = Number(document.getElementById('prof-tax').value) || 10;
+  const svc = Number(document.getElementById('prof-service').value) || 5;
+  const footer = document.getElementById('prof-footer').value || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.";
+  const logo = document.getElementById('prof-logo-url').value || "/img/logo.svg";
+
+  const elBiz = document.getElementById('rcpt-preview-biz');
+  if (elBiz) elBiz.innerText = bizName.toUpperCase();
+  const elOut = document.getElementById('rcpt-preview-outlet');
+  if (elOut) elOut.innerText = outletName;
+  const elAddr = document.getElementById('rcpt-preview-addr');
+  if (elAddr) elAddr.innerText = address;
+  const elPhone = document.getElementById('rcpt-preview-phone');
+  if (elPhone) elPhone.innerText = phone ? `Telp: ${phone}` : '';
+  const elTax = document.getElementById('rcpt-preview-tax');
+  if (elTax) elTax.innerText = tax;
+  const elTaxVal = document.getElementById('rcpt-preview-taxval');
+  if (elTaxVal) elTaxVal.innerText = formatRupiah(Math.round(140000 * tax / 100));
+  const elSvc = document.getElementById('rcpt-preview-svc');
+  if (elSvc) elSvc.innerText = svc;
+  const elSvcVal = document.getElementById('rcpt-preview-svcval');
+  if (elSvcVal) elSvcVal.innerText = formatRupiah(Math.round(140000 * svc / 100));
+  const elTotal = document.getElementById('rcpt-preview-total');
+  if (elTotal) elTotal.innerText = formatRupiah(140000 + Math.round(140000 * tax / 100) + Math.round(140000 * svc / 100));
+  const elFooter = document.getElementById('rcpt-preview-footer');
+  if (elFooter) elFooter.innerText = footer;
+  const elLogo = document.getElementById('rcpt-preview-logo');
+  if (elLogo) elLogo.src = logo;
+}
+
+// Live Acrylic Stand Synchronizer
+function syncAcrylicPreviewData() {
+  const ssid = document.getElementById('qr-wifi-ssid').value || "Resto_Guest";
+  const pass = document.getElementById('qr-wifi-pass').value || "kopienak123";
+  const subtitle = document.getElementById('qr-table-subtitle').value || "Pindai QR dengan kamera HP untuk pesan & bayar langsung tanpa antre.";
+  const logo = document.getElementById('prof-logo-url').value || "/img/logo.svg";
+
+  const elSsid = document.getElementById('preview-wifi-ssid');
+  if (elSsid) elSsid.innerText = ssid;
+  const elPass = document.getElementById('preview-wifi-pass');
+  if (elPass) elPass.innerText = pass;
+  const elSub = document.getElementById('preview-subtitle-text');
+  if (elSub) elSub.innerText = subtitle;
+  const elLogo = document.getElementById('preview-resto-logo');
+  if (elLogo) elLogo.src = logo;
+}
+
+function updateQrDisplayModel(model) {
+  const card = document.getElementById('qr-sticker-area');
+  const stepsBox = document.getElementById('acrylic-steps-box');
+  const wifiBox = document.getElementById('acrylic-wifi-box');
+
+  if (model === 'sticker') {
+    card.style.maxWidth = '280px';
+    card.style.padding = '16px';
+    card.style.borderRadius = '14px';
+    if (stepsBox) stepsBox.style.display = 'none';
+    if (wifiBox) wifiBox.style.display = 'none';
+  } else if (model === 'compact') {
+    card.style.maxWidth = '260px';
+    card.style.padding = '14px';
+    card.style.borderRadius = '12px';
+    if (stepsBox) stepsBox.style.display = 'none';
+    if (wifiBox) wifiBox.style.display = 'inline-flex';
+  } else {
+    // acrylic table tent
+    card.style.maxWidth = '360px';
+    card.style.padding = '22px 18px';
+    card.style.borderRadius = '20px';
+    if (stepsBox) stepsBox.style.display = 'grid';
+    if (wifiBox) wifiBox.style.display = 'inline-flex';
   }
 }
 
@@ -1022,7 +1435,9 @@ function formatRupiah(num) {
 // -----------------------------------------------------------------------------
 async function loadStoreProfile() {
   try {
-    const res = await fetch(`/api/admin/store-profile?outlet=${currentAdminOutlet}`);
+    const res = await fetch(`/api/admin/store-profile?outlet=${currentAdminOutlet}`, {
+      headers: { 'x-user-role': currentUser ? currentUser.role : 'OWNER' }
+    });
     const data = await res.json();
     currentStoreProfile = data;
 
@@ -1035,10 +1450,24 @@ async function loadStoreProfile() {
     document.getElementById('prof-service').value = data.serviceRate !== undefined ? data.serviceRate : 5;
     document.getElementById('prof-footer').value = data.receiptFooter || "";
 
+    const logo = data.logoUrl || "/img/logo.svg";
+    document.getElementById('prof-logo-preview').src = logo;
+    document.getElementById('prof-logo-url').value = logo;
+    document.getElementById('prof-logo-path-text').innerText = logo;
+
+    if (document.getElementById('qr-wifi-ssid')) document.getElementById('qr-wifi-ssid').value = data.wifiSsid || "Resto_Guest";
+    if (document.getElementById('qr-wifi-pass')) document.getElementById('qr-wifi-pass').value = data.wifiPassword || "";
+    if (document.getElementById('qr-table-subtitle')) document.getElementById('qr-table-subtitle').value = data.tableTentSubtitle || "Scan kamera HP untuk pesan & bayar langsung";
+    if (document.getElementById('qr-template-model')) document.getElementById('qr-template-model').value = data.qrTemplate || "acrylic";
+
     // Sync QR Preview
     document.getElementById('preview-resto-name').innerText = (data.businessName || "SCAN DINE").toUpperCase();
     document.getElementById('preview-outlet-name').innerText = data.outletName || "";
     document.getElementById('nav-brand-title').innerText = `${data.businessName || 'ScanDine'} • Backoffice`;
+
+    syncLiveReceiptPreview();
+    syncAcrylicPreviewData();
+    updateQrDisplayModel(data.qrTemplate || "acrylic");
   } catch (err) {
     console.error("Gagal memuat profil toko:", err);
   }
@@ -1053,18 +1482,26 @@ async function saveStoreProfile() {
     address: document.getElementById('prof-address').value.trim(),
     taxRate: document.getElementById('prof-tax').value,
     serviceRate: document.getElementById('prof-service').value,
-    receiptFooter: document.getElementById('prof-footer').value.trim()
+    receiptFooter: document.getElementById('prof-footer').value.trim(),
+    logoUrl: document.getElementById('prof-logo-url').value.trim(),
+    wifiSsid: document.getElementById('qr-wifi-ssid') ? document.getElementById('qr-wifi-ssid').value.trim() : "",
+    wifiPassword: document.getElementById('qr-wifi-pass') ? document.getElementById('qr-wifi-pass').value.trim() : "",
+    tableTentSubtitle: document.getElementById('qr-table-subtitle') ? document.getElementById('qr-table-subtitle').value.trim() : "",
+    qrTemplate: document.getElementById('qr-template-model') ? document.getElementById('qr-template-model').value : "acrylic"
   };
 
   try {
     const res = await fetch(`/api/admin/store-profile?outlet=${currentAdminOutlet}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'x-user-role': currentUser ? currentUser.role : 'OWNER'
+      },
       body: JSON.stringify(payload)
     });
     const result = await res.json();
     if (result.success) {
-      alert("✅ Profil Cabang & Format Struk BERHASIL Disimpan dan Disinkronkan!");
+      alert("✅ Profil Cabang, Logo Resto & Format Meja BERHASIL Disimpan!");
       loadStoreProfile();
       fetchOutlets();
     } else {
@@ -1458,7 +1895,9 @@ async function loadBatchTableQr() {
   container.innerHTML = `<div style="padding: 24px; color: var(--muted); text-align: center; grid-column: 1 / -1;">⏳ Memuat semua stiker barcode QR meja...</div>`;
 
   try {
-    const res = await fetch(`/api/admin/tables/batch-qr?outlet=${currentAdminOutlet}`);
+    const res = await fetch(`/api/admin/tables/batch-qr?outlet=${currentAdminOutlet}`, {
+      headers: { 'x-user-role': currentUser ? currentUser.role : 'OWNER' }
+    });
     const data = await res.json();
     const tableList = data.tables || [];
     const countEl = document.getElementById('batch-print-count');
@@ -1469,18 +1908,32 @@ async function loadBatchTableQr() {
       return;
     }
 
+    const currentLogo = data.logoUrl || '/img/logo.svg';
+    const wifiSsid = data.wifiSsid || 'Resto_Guest';
+    const wifiPass = data.wifiPassword || '';
+
     let html = "";
     tableList.forEach(t => {
       html += `
-        <div class="batch-qr-sticker-item">
-          <div style="font-size: 0.72rem; font-weight: 900; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px;">${t.businessName || 'SCANDINE'}</div>
-          <div style="font-size: 0.68rem; color: #64748b; font-weight: 700;">${t.outletName || ''}</div>
-          <div style="font-size: 1.15rem; font-weight: 900; color: #0f172a; margin: 4px 0 6px;">${t.name}</div>
-          <div style="background: #fff; padding: 6px; border-radius: 10px; display: inline-block; border: 1.5px solid #e2e8f0;">
-            <img src="${t.qrDataUrl}" alt="${t.name}" style="width: 130px; height: 130px; display: block; object-fit: contain;">
+        <div class="batch-qr-sticker-item" style="border: 2px solid #0f172a; border-radius: 16px; padding: 14px; text-align: center; background: #fff; page-break-inside: avoid; break-inside: avoid;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 2px;">
+            <img src="${currentLogo}" alt="Logo" style="max-height: 22px; max-width: 60px; object-fit: contain;">
           </div>
-          <div style="font-size: 0.68rem; color: #64748b; margin-top: 6px; font-weight: 600;">Scan untuk Pesan</div>
-          <a href="${t.orderUrl}" target="_blank" style="display: block; font-size: 0.72rem; color: #0284c7; text-decoration: none; font-weight: 800; margin-top: 6px;">Buka Link ➔</a>
+          <div style="font-size: 0.68rem; font-weight: 900; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px;">${t.businessName || 'SCANDINE'}</div>
+          <div style="font-size: 0.62rem; color: #64748b; font-weight: 700;">${t.outletName || ''}</div>
+          <div style="display: inline-block; background: #0f172a; color: #fff; padding: 2px 14px; border-radius: 9999px; margin: 6px 0;">
+            <span style="font-size: 1.05rem; font-weight: 900; letter-spacing: 0.5px;">${t.name}</span>
+          </div>
+          <div style="background: #fff; padding: 6px; border-radius: 12px; display: inline-block; border: 1.5px solid #0f172a;">
+            <img src="${t.qrDataUrl}" alt="${t.name}" style="width: 140px; height: 140px; display: block; object-fit: contain;">
+          </div>
+          ${wifiSsid ? `
+            <div style="font-size: 0.62rem; color: #1e40af; font-weight: 700; margin-top: 4px; background: #eff6ff; padding: 2px 6px; border-radius: 6px; display: inline-block;">
+              📶 Wi-Fi: ${wifiSsid} ${wifiPass ? `• Pass: ${wifiPass}` : ''}
+            </div>
+          ` : ''}
+          <div style="font-size: 0.64rem; color: #64748b; margin-top: 4px; font-weight: 700;">Scan Kamera HP untuk Pesan</div>
+          <div style="font-size: 0.58rem; color: #94a3b8; margin-top: 2px;">CV. ISTANA BARCODE COMPUTER</div>
         </div>
       `;
     });
@@ -1491,11 +1944,17 @@ async function loadBatchTableQr() {
 }
 
 function printSingleQrSticker() {
+  document.body.classList.remove('printing-batch');
+  document.body.classList.add('printing-single');
   window.print();
+  setTimeout(() => document.body.classList.remove('printing-single'), 1200);
 }
 
 function printAllQrSheet() {
+  document.body.classList.remove('printing-single');
+  document.body.classList.add('printing-batch');
   window.print();
+  setTimeout(() => document.body.classList.remove('printing-batch'), 1200);
 }
 
 // -----------------------------------------------------------------------------

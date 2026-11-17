@@ -464,7 +464,31 @@
       color: #92400e;
     }
 
-    /* Mobile & Tablet Responsive Design */
+    /* Tablet Responsive Design (iPad, Galaxy Tab, 769px - 1180px) */
+    @media (min-width: 769px) and (max-width: 1180px) {
+      .kds-navbar {
+        padding: 12px 18px;
+        gap: 12px;
+      }
+      .kds-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+      }
+      .kds-table-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 14px !important;
+      }
+      .btn-bump {
+        min-height: 48px !important;
+        font-size: 0.88rem !important;
+        touch-action: manipulation;
+      }
+      .kds-card {
+        border-radius: 16px;
+      }
+    }
+
+    /* Mobile Responsive Design */
     @media (max-width: 768px) {
       .kds-navbar {
         flex-direction: column;
@@ -540,6 +564,29 @@
       .kds-table-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 8px;
+      }
+    }
+
+    /* Elegant Thermal Receipt Print Rules */
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #thermal-receipt-area, #thermal-receipt-area * {
+        visibility: visible !important;
+      }
+      #thermal-receipt-area {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 58mm !important;
+        max-width: 58mm !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #thermal-receipt-area.width-80mm {
+        width: 80mm !important;
+        max-width: 80mm !important;
       }
     }
   </style>
@@ -647,6 +694,34 @@
       </button>
       <button onclick="triggerDeliveryWebhook('shopeefood')" style="padding: 14px 10px; background: #c2410c; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer;">
         🟠 ShopeeFood
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Print Preview Modal (58mm / 80mm) -->
+<div class="drawer-backdrop" id="receipt-modal-backdrop" onclick="closeReceiptModal()"></div>
+<div class="drawer-content" id="receipt-modal-drawer" style="max-height: 90vh; max-width: 440px; margin: 0 auto; background: #ffffff; color: #000; border-radius: 24px; overflow-y: auto; padding-bottom: 20px;">
+  <div class="drawer-header" style="border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px;">
+    <h3 class="drawer-title" style="color: #0f172a; font-size: 1.05rem; font-weight: 800;">🧾 Preview Cetak Struk Kasir</h3>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <select id="receipt-width-select" onchange="toggleReceiptWidth(this.value)" style="padding: 6px 10px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; border: 1.5px solid #cbd5e1; background: #f8fafc; cursor: pointer;">
+        <option value="58mm">Thermal 58mm</option>
+        <option value="80mm">Thermal 80mm</option>
+      </select>
+      <button class="drawer-close" style="background: #f1f5f9; color: #0f172a; width: 32px; height: 32px; border-radius: 50%; border: none; font-size: 1rem; cursor: pointer;" onclick="closeReceiptModal()">✕</button>
+    </div>
+  </div>
+  <div class="drawer-body" style="padding: 16px;">
+    <div id="receipt-paper-view" style="background: #ffffff; border: 2px solid #0f172a; border-radius: 14px; padding: 18px 14px; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.4; color: #000; box-shadow: 0 4px 16px rgba(0,0,0,0.06); max-width: 320px; margin: 0 auto;">
+      <!-- Populated dynamically -->
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 18px;">
+      <button onclick="closeReceiptModal()" style="flex: 1; padding: 12px; background: #f1f5f9; border: none; border-radius: 12px; font-weight: 700; color: #475569; cursor: pointer;">
+        Tutup
+      </button>
+      <button onclick="triggerPhysicalPrint()" style="flex: 2; padding: 12px; background: #0284c7; border: none; border-radius: 12px; font-weight: 900; color: #ffffff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+        🖨️ Cetak ke Thermal Printer
       </button>
     </div>
   </div>
@@ -1095,7 +1170,7 @@ let storeProfile = {};
 
 async function fetchStoreProfile() {
   try {
-    const res = await fetch(`/api/admin/store-profile?outlet=${currentOutlet}`);
+    const res = await fetch(`/api/admin/store-profile?outlet=${currentOutletSlug}`);
     storeProfile = await res.json();
     if (storeProfile.businessName) {
       document.title = `${storeProfile.businessName} - KDS & POS`;
@@ -1106,22 +1181,30 @@ async function fetchStoreProfile() {
 }
 
 // -----------------------------------------------------------------------------
-// PRINT RECEIPT / STRUK (Ukuran Standar Thermal 58mm)
+// PRINT RECEIPT / STRUK (Ukuran Standar Thermal 58mm / 80mm Elegan & Modern)
 // -----------------------------------------------------------------------------
-function printReceipt(orderId) {
-  const order = orders.find(o => o.id === orderId);
-  if (!order) return;
+let activeReceiptOrder = null;
 
-  const area = document.getElementById('thermal-receipt-area');
+function generateReceiptHtml(order, width = '58mm') {
   let itemsRows = "";
-  order.items.forEach(it => {
+  (order.items || []).forEach(it => {
+    let optsHtml = "";
+    if (it.options && it.options.length) {
+      optsHtml = `<div style="font-size: 9px; color: #444; padding-left: 8px;">` + 
+        it.options.map(o => `• ${o.name ? o.name + ': ' : ''}<strong>${o.value}</strong>`).join('<br>') + 
+        `</div>`;
+    }
+    const notesHtml = it.notes ? `<div style="font-size: 9px; font-style: italic; color: #555; padding-left: 8px;">📝 ${it.notes}</div>` : '';
+
     itemsRows += `
-      <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-        <span style="font-weight: 600;">${it.qty}x ${it.name}</span>
-        <span>${formatRupiah(it.subtotal)}</span>
+      <div style="margin-bottom: 5px;">
+        <div style="display: flex; justify-content: space-between; font-weight: 700;">
+          <span>${it.qty}x ${it.name}</span>
+          <span>${formatRupiah(it.subtotal)}</span>
+        </div>
+        ${optsHtml}
+        ${notesHtml}
       </div>
-      ${it.options && it.options.length ? `<div style="font-size: 9px; color: #555; padding-left: 10px;">${it.options.map(o => o.value).join(', ')}</div>` : ''}
-      ${it.notes ? `<div style="font-size: 9px; font-style: italic; color: #555; padding-left: 10px;">* ${it.notes}</div>` : ''}
     `;
   });
 
@@ -1130,42 +1213,50 @@ function printReceipt(orderId) {
   const address = order.outletAddress || storeProfile.address || "";
   const phone = order.outletPhone || storeProfile.phone || "";
   const footerText = order.receiptFooter || storeProfile.receiptFooter || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.";
+  const logoUrl = storeProfile.logoUrl || "/img/logo.svg";
   const orderDate = new Date(order.createdAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' });
 
-  area.innerHTML = `
-    <div style="text-align: center; padding-bottom: 6px; border-bottom: 1px dashed #000; margin-bottom: 6px;">
+  return `
+    <div style="text-align: center; padding-bottom: 8px; border-bottom: 2px dashed #000; margin-bottom: 8px;">
+      <img src="${logoUrl}" alt="Logo" style="max-height: 40px; max-width: 120px; object-fit: contain; margin: 0 auto 6px; display: block;">
       <h3 style="font-size: 14px; margin: 0; font-weight: 900; letter-spacing: 0.5px;">${bizName.toUpperCase()}</h3>
-      <div style="font-size: 10px; font-weight: bold; margin-top: 2px;">${outletName}</div>
+      <div style="font-size: 10px; font-weight: 800; margin-top: 2px;">${outletName}</div>
       ${address ? `<div style="font-size: 9px; margin-top: 2px; color: #333;">${address}</div>` : ''}
       ${phone ? `<div style="font-size: 9px; color: #333;">Telp: ${phone}</div>` : ''}
     </div>
 
-    <div style="margin-bottom: 6px; font-size: 10px; line-height: 1.4;">
+    <div style="margin-bottom: 8px; font-size: 10px; line-height: 1.45;">
       <div style="display: flex; justify-content: space-between;">
-        <span>No: <strong>${order.id}</strong></span>
+        <span>No. Struk: <strong>${order.id}</strong></span>
         <span>${orderDate}</span>
       </div>
-      <div style="display: flex; justify-content: space-between;">
+      <div style="display: flex; justify-content: space-between; margin-top: 2px;">
         <span>Lokasi: <strong>${order.tableNumber}</strong></span>
-        <span>${order.customerName}</span>
+        <span>Pelanggan: <strong>${order.customerName}</strong></span>
       </div>
-      <div style="font-weight: bold; margin-top: 2px;">
-        Kanal: ${order.channel} ${order.driverInfo ? `(Driver: ${order.driverInfo.name} • PIN: ${order.driverInfo.pin})` : ''}
+      <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+        <span>Tipe: <strong>${order.channel}</strong></span>
+        <span>Kasir: <strong>POS Resto</strong></span>
       </div>
+      ${order.driverInfo ? `
+        <div style="margin-top: 3px; font-weight: 800; color: #047857; background: #ecfdf5; padding: 2px 4px; border-radius: 4px;">
+          Driver: ${order.driverInfo.name} • PIN: ${order.driverInfo.pin}
+        </div>
+      ` : ''}
     </div>
 
-    <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 6px 0; margin-bottom: 6px; font-size: 10px;">
+    <div style="border-top: 1.5px dashed #000; border-bottom: 1.5px dashed #000; padding: 8px 0; margin-bottom: 8px; font-size: 10px;">
       ${itemsRows}
     </div>
 
-    <div style="font-size: 10px; line-height: 1.4; margin-bottom: 8px;">
+    <div style="font-size: 10px; line-height: 1.45; margin-bottom: 8px;">
       <div style="display: flex; justify-content: space-between;">
         <span>Subtotal:</span>
         <span>${formatRupiah(order.subtotal)}</span>
       </div>
       ${order.tax ? `
       <div style="display: flex; justify-content: space-between;">
-        <span>PB1 / Resto Tax (${storeProfile.taxRate || 10}%):</span>
+        <span>PB1 Resto (${storeProfile.taxRate || 10}%):</span>
         <span>${formatRupiah(order.tax)}</span>
       </div>` : ''}
       ${order.service ? `
@@ -1173,22 +1264,75 @@ function printReceipt(orderId) {
         <span>Service Charge (${storeProfile.serviceRate || 5}%):</span>
         <span>${formatRupiah(order.service)}</span>
       </div>` : ''}
-      <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12px; margin-top: 4px; padding-top: 4px; border-top: 1px solid #000;">
-        <span>TOTAL:</span>
+      <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: 12.5px; margin-top: 6px; padding-top: 6px; border-top: 2px solid #000;">
+        <span>TOTAL PEMBAYARAN:</span>
         <span>${formatRupiah(order.total)}</span>
       </div>
-      <div style="display: flex; justify-content: space-between; font-size: 9px; margin-top: 4px;">
-        <span>Pembayaran:</span>
-        <span><strong>${order.paymentMethod} (${order.paymentStatus === 'PAID' ? 'LUNAS' : 'MENUNGGU'})</strong></span>
+      <div style="display: flex; justify-content: space-between; font-size: 9.5px; margin-top: 4px; background: #f8fafc; padding: 4px 6px; border-radius: 6px;">
+        <span>Status:</span>
+        <span><strong>${order.paymentMethod} • [ ${order.paymentStatus === 'PAID' ? 'LUNAS / PAID' : 'BELUM BAYAR'} ]</strong></span>
       </div>
     </div>
 
-    <div style="text-align: center; font-size: 9px; border-top: 1px dashed #000; padding-top: 6px; white-space: pre-line; color: #333;">
+    <div style="text-align: center; font-size: 9px; border-top: 1.5px dashed #000; padding-top: 8px; white-space: pre-line; color: #222;">
       ${footerText}
     </div>
-  `;
 
+    <div style="text-align: center; margin-top: 8px; padding-top: 6px; border-top: 1px dotted #ccc; font-size: 8px; color: #666;">
+      Smart Dine-In POS System
+      <strong>CV. ISTANA BARCODE COMPUTER</strong>
+    </div>
+  `;
+}
+
+function printReceipt(orderId) {
+  const order = orders.find(o => o.id === orderId);
+  if (!order) return;
+  activeReceiptOrder = order;
+
+  const width = document.getElementById('receipt-width-select')?.value || '58mm';
+  const html = generateReceiptHtml(order, width);
+
+  const paperView = document.getElementById('receipt-paper-view');
+  if (paperView) paperView.innerHTML = html;
+
+  const area = document.getElementById('thermal-receipt-area');
+  if (area) {
+    area.innerHTML = html;
+    if (width === '80mm') {
+      area.classList.add('width-80mm');
+    } else {
+      area.classList.remove('width-80mm');
+    }
+  }
+
+  // Open Preview Modal
+  document.getElementById('receipt-modal-backdrop').classList.add('active');
+  document.getElementById('receipt-modal-drawer').classList.add('active');
+}
+
+function toggleReceiptWidth(width) {
+  if (!activeReceiptOrder) return;
+  const html = generateReceiptHtml(activeReceiptOrder, width);
+  document.getElementById('receipt-paper-view').innerHTML = html;
+  const area = document.getElementById('thermal-receipt-area');
+  if (area) {
+    area.innerHTML = html;
+    if (width === '80mm') {
+      area.classList.add('width-80mm');
+    } else {
+      area.classList.remove('width-80mm');
+    }
+  }
+}
+
+function triggerPhysicalPrint() {
   window.print();
+}
+
+function closeReceiptModal() {
+  document.getElementById('receipt-modal-backdrop').classList.remove('active');
+  document.getElementById('receipt-modal-drawer').classList.remove('active');
 }
 
 // Live timer tick every second for kitchen cards

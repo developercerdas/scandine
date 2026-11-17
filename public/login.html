@@ -356,26 +356,34 @@
 
       <button type="button" class="demo-pill" onclick="quickFill('owner', 'password123')">
         <div>
-          <div style="font-weight: 800; color: #0f172a;">👑 Bpk. Djohan</div>
-          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Akses Penuh Seluruh Gerai (Pusat)</div>
+          <div style="font-weight: 800; color: #0f172a;">👑 Bpk. Djohan (Pemilik)</div>
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Hak Akses Penuh: Admin Backoffice & Multi-Cabang</div>
         </div>
-        <span class="demo-role-badge role-owner">OWNER</span>
+        <span class="demo-role-badge role-owner">PEMILIK</span>
+      </button>
+
+      <button type="button" class="demo-pill" onclick="quickFill('admin', 'password123')">
+        <div>
+          <div style="font-weight: 800; color: #0f172a;">⚡ Super Admin Resto</div>
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Hak Akses Backoffice & Kelola Sistem Pusat</div>
+        </div>
+        <span class="demo-role-badge" style="background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1;">ADMIN</span>
       </button>
 
       <button type="button" class="demo-pill" onclick="quickFill('senopati', 'password123')">
         <div>
-          <div style="font-weight: 800; color: #0f172a;">👔 Dimas (Gerai Senopati)</div>
-          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Terkunci Khusus Cabang Senopati</div>
+          <div style="font-weight: 800; color: #0f172a;">👔 Dimas (Manager Gerai)</div>
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Operasional Kasir & KDS Cabang Senopati</div>
         </div>
-        <span class="demo-role-badge role-branch">SENOPATI</span>
+        <span class="demo-role-badge role-branch">MANAGER</span>
       </button>
 
-      <button type="button" class="demo-pill" onclick="quickFill('kemang', 'password123')">
+      <button type="button" class="demo-pill" onclick="quickFill('kasir', 'password123')">
         <div>
-          <div style="font-weight: 800; color: #0f172a;">👔 Nadia (Gerai Kemang)</div>
-          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Terkunci Khusus Cabang Kemang</div>
+          <div style="font-weight: 800; color: #0f172a;">💻 Siti (Kasir Resto)</div>
+          <div style="font-size: 0.74rem; color: #64748b; font-weight: 500;">Layar POS Kasir, Cetak Struk & Pembayaran</div>
         </div>
-        <span class="demo-role-badge role-branch">KEMANG</span>
+        <span class="demo-role-badge" style="background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">KASIR</span>
       </button>
     </div>
   </div>
@@ -463,12 +471,24 @@ async function handleLogin(e) {
     // Save session
     localStorage.setItem('scandine_user', JSON.stringify(data.user));
 
-    // Redirect
+    // Redirect based on role rules:
+    // Only OWNER and ADMIN are routed to /admin backoffice!
+    // GERAI_MANAGER, CASHIER, and WAITER are routed to /pos operational screen!
     const urlParams = new URLSearchParams(window.location.search);
-    let target = urlParams.get('redirect') || '/admin';
+    let target = urlParams.get('redirect');
+    const isOwnerOrAdmin = data.user.role === 'OWNER' || data.user.role === 'ADMIN';
 
-    // If manager of specific gerai, append outlet param
-    if (data.user.role === 'GERAI_MANAGER' && data.user.assignedOutlet) {
+    if (!target || target === '/admin' || target.startsWith('/admin')) {
+      if (isOwnerOrAdmin) {
+        target = '/admin';
+      } else {
+        const outletSlug = data.user.assignedOutlet ? data.user.assignedOutlet.slug : 'senopati';
+        target = `/pos?outlet=${outletSlug}`;
+      }
+    } else if (!isOwnerOrAdmin && (target === '/admin' || target.startsWith('/admin'))) {
+      const outletSlug = data.user.assignedOutlet ? data.user.assignedOutlet.slug : 'senopati';
+      target = `/pos?outlet=${outletSlug}`;
+    } else if (data.user.assignedOutlet && !target.includes('outlet=')) {
       const sep = target.includes('?') ? '&' : '?';
       target = `${target}${sep}outlet=${data.user.assignedOutlet.slug}`;
     }

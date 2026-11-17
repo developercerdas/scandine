@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const QRCode = require('qrcode');
 const os = require('os');
@@ -21,8 +22,46 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3500;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Upload Image Endpoint (Base64 to static disk file)
+app.post('/api/upload', (req, res) => {
+  try {
+    const { image, filename } = req.body;
+    if (!image) {
+      return res.status(400).json({ error: "Data gambar tidak ditemukan." });
+    }
+
+    // Match data:image/...;base64,...
+    const matches = image.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+    let ext = 'png';
+    let base64Data = image;
+
+    if (matches && matches.length === 3) {
+      ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+      base64Data = matches[2];
+    }
+
+    const uploadsDir = path.join(__dirname, 'public', 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const prefix = filename ? filename.replace(/[^a-zA-Z0-9_-]/g, '_') : 'img';
+    const cleanName = `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}.${ext}`;
+    const filePath = path.join(uploadsDir, cleanName);
+
+    fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+
+    const publicUrl = `/uploads/${cleanName}`;
+    res.json({ success: true, url: publicUrl, filename: cleanName });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ error: "Gagal menyimpan gambar: " + err.message });
+  }
+});
 
 // Helper to get local network IP address
 function getLocalIp() {
@@ -257,8 +296,14 @@ app.get('/api/bootstrap', (req, res) => {
       isAvailable: m.isAvailable && !outletOutOfStock.includes(m.id)
     }));
 
+  const defaultLogo = "/img/logo.svg";
+  const effectiveLogo = currentOutlet.logoUrl || currentBiz.logoUrl || defaultLogo;
+
   res.json({
-    business: currentBiz,
+    business: {
+      ...currentBiz,
+      logoUrl: effectiveLogo
+    },
     outlet: {
       id: currentOutlet.id,
       slug: currentOutlet.slug,
@@ -267,7 +312,12 @@ app.get('/api/bootstrap', (req, res) => {
       phone: currentOutlet.phone,
       taxRate: currentOutlet.taxRate,
       serviceRate: currentOutlet.serviceRate,
-      deliverySettings: currentOutlet.deliverySettings
+      deliverySettings: currentOutlet.deliverySettings,
+      logoUrl: effectiveLogo,
+      wifiSsid: currentOutlet.wifiSsid || "Resto_Guest",
+      wifiPassword: currentOutlet.wifiPassword || "",
+      qrTemplate: currentOutlet.qrTemplate || "acrylic",
+      tables: currentOutlet.tables || []
     },
     categories: db.categories.filter(c => c.businessId === currentBiz.id),
     menus: menusForOutlet,
@@ -636,6 +686,26 @@ app.patch('/api/staff/orders/:id/status', (req, res) => {
   res.json({ success: true, order });
 });
 
+// Alias endpoints for updating order status from POS / Staff / KDS / Test scripts
+app.patch('/api/orders/:id/status', (req, res, next) => {
+  req.url = `/api/staff/orders/${req.params.id}/status`;
+  app.handle(req, res, next);
+});
+app.post('/api/orders/:id/status', (req, res, next) => {
+  req.url = `/api/staff/orders/${req.params.id}/status`;
+  app.handle(req, res, next);
+});
+
+// Role-based protection middleware for admin APIs:
+// When an explicit role is supplied in header or query, only OWNER and ADMIN are allowed!
+app.use('/api/admin', (req, res, next) => {
+  const role = req.headers['x-user-role'] || req.query.role;
+  if (role && !['OWNER', 'ADMIN'].includes(role.toUpperCase())) {
+    return res.status(403).json({ error: "Akses Ditolak: Hanya Pemilik (Owner) atau Super Admin yang diizinkan mengakses pengaturan ini." });
+  }
+  next();
+});
+
 // --------------------------------------------------------------------------
 // ADMIN / MERCHANT APIS
 // --------------------------------------------------------------------------
@@ -838,11 +908,17 @@ app.get('/api/admin/tables/batch-qr', async (req, res) => {
     }
 
     const biz = (db.businesses && db.businesses[0]) || { name: "ScanDine Resto" };
+    const effectiveLogo = outlet.logoUrl || biz.logoUrl || "/img/logo.svg";
+    const wifiSsid = outlet.wifiSsid || "Resto_Guest";
+    const wifiPassword = outlet.wifiPassword || "";
+    const tableTentSubtitle = outlet.tableTentSubtitle || "Scan kamera HP untuk pesan & bayar langsung dari meja";
+    const qrTemplate = outlet.qrTemplate || "acrylic";
+
     const results = [];
     for (const table of (outlet.tables || [])) {
       const orderUrl = `${req.protocol}://${effectiveHost}/order?outlet=${encodeURIComponent(outlet.slug)}&table=${encodeURIComponent(table.number)}`;
       const qrDataUrl = await QRCode.toDataURL(orderUrl, {
-        width: 320,
+        width: 360,
         margin: 2,
         color: { dark: '#09090b', light: '#ffffff' }
       });
@@ -857,7 +933,12 @@ app.get('/api/admin/tables/batch-qr', async (req, res) => {
         qrCodeDataUrl: qrDataUrl,
         outletName: outlet.name,
         outletSlug: outlet.slug,
-        businessName: biz.name || "ScanDine Resto"
+        businessName: biz.name || "ScanDine Resto",
+        logoUrl: effectiveLogo,
+        wifiSsid,
+        wifiPassword,
+        tableTentSubtitle,
+        qrTemplate
       });
     }
 
@@ -865,6 +946,11 @@ app.get('/api/admin/tables/batch-qr', async (req, res) => {
       outletName: outlet.name,
       outletSlug: outlet.slug,
       businessName: biz.name || "ScanDine Resto",
+      logoUrl: effectiveLogo,
+      wifiSsid,
+      wifiPassword,
+      tableTentSubtitle,
+      qrTemplate,
       tables: results
     });
   } catch (err) {
@@ -896,14 +982,23 @@ app.get('/api/admin/tables/:tableNum/qr', async (req, res) => {
       color: { dark: '#09090b', light: '#ffffff' }
     });
 
+    const biz = (db.businesses && db.businesses[0]) || { name: "ScanDine Resto" };
+    const effectiveLogo = outlet.logoUrl || biz.logoUrl || "/img/logo.svg";
+
     res.json({
       outletName: outlet.name,
       outletSlug: outlet.slug,
+      businessName: biz.name || "ScanDine Resto",
       tableNumber: tableNum,
       targetUrl: orderUrl,
       orderUrl: orderUrl,
       qrDataUrl: qrImage,
-      qrCodeDataUrl: qrImage
+      qrCodeDataUrl: qrImage,
+      logoUrl: effectiveLogo,
+      wifiSsid: outlet.wifiSsid || "Resto_Guest",
+      wifiPassword: outlet.wifiPassword || "",
+      tableTentSubtitle: outlet.tableTentSubtitle || "Scan kamera HP untuk pesan & bayar langsung dari meja",
+      qrTemplate: outlet.qrTemplate || "acrylic"
     });
   } catch (err) {
     console.error("Error generating QR:", err);
@@ -943,12 +1038,13 @@ app.get('/api/admin/stats', (req, res) => {
   });
 });
 
-// Store & Outlet Profile Settings (Nama Toko, Cabang, Struk, dll)
+// Store & Outlet Profile Settings (Nama Toko, Cabang, Struk, Logo, Wi-Fi & QR Akrilik)
 app.get('/api/admin/store-profile', (req, res) => {
   const { outlet: outletQuery } = req.query;
   const db = getDb();
   const outlet = resolveOutlet(db, outletQuery);
   const biz = db.businesses.find(b => b.id === outlet.businessId) || db.businesses[0] || {};
+  const effectiveLogo = outlet.logoUrl || biz.logoUrl || "/img/logo.svg";
 
   res.json({
     businessId: biz.id,
@@ -962,7 +1058,12 @@ app.get('/api/admin/store-profile', (req, res) => {
     phone: outlet.phone || "",
     taxRate: outlet.taxRate !== undefined ? outlet.taxRate : 10,
     serviceRate: outlet.serviceRate !== undefined ? outlet.serviceRate : 5,
-    receiptFooter: outlet.receiptFooter || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali."
+    receiptFooter: outlet.receiptFooter || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+    logoUrl: effectiveLogo,
+    wifiSsid: outlet.wifiSsid || "Resto_Guest",
+    wifiPassword: outlet.wifiPassword || "",
+    tableTentSubtitle: outlet.tableTentSubtitle || "Scan kamera HP untuk pesan & bayar langsung dari meja",
+    qrTemplate: outlet.qrTemplate || "acrylic"
   });
 });
 
@@ -976,7 +1077,12 @@ app.put('/api/admin/store-profile', (req, res) => {
     phone,
     taxRate,
     serviceRate,
-    receiptFooter
+    receiptFooter,
+    logoUrl,
+    wifiSsid,
+    wifiPassword,
+    tableTentSubtitle,
+    qrTemplate
   } = req.body;
 
   const db = getDb();
@@ -991,13 +1097,21 @@ app.put('/api/admin/store-profile', (req, res) => {
   if (taxRate !== undefined) outlet.taxRate = Number(taxRate) || 0;
   if (serviceRate !== undefined) outlet.serviceRate = Number(serviceRate) || 0;
   if (receiptFooter !== undefined) outlet.receiptFooter = receiptFooter.trim();
+  if (logoUrl !== undefined) {
+    outlet.logoUrl = logoUrl.trim();
+    biz.logoUrl = logoUrl.trim();
+  }
+  if (wifiSsid !== undefined) outlet.wifiSsid = wifiSsid.trim();
+  if (wifiPassword !== undefined) outlet.wifiPassword = wifiPassword.trim();
+  if (tableTentSubtitle !== undefined) outlet.tableTentSubtitle = tableTentSubtitle.trim();
+  if (qrTemplate !== undefined) outlet.qrTemplate = qrTemplate.trim();
 
   saveDb(db);
   io.emit('store_updated');
 
   res.json({
     success: true,
-    message: "Profil toko dan format struk berhasil disimpan & disinkronkan!",
+    message: "Profil toko, logo resto, dan format struk berhasil disimpan & disinkronkan!",
     profile: {
       businessName: biz.name,
       tagline: biz.tagline,
@@ -1006,7 +1120,12 @@ app.put('/api/admin/store-profile', (req, res) => {
       phone: outlet.phone,
       taxRate: outlet.taxRate,
       serviceRate: outlet.serviceRate,
-      receiptFooter: outlet.receiptFooter
+      receiptFooter: outlet.receiptFooter,
+      logoUrl: outlet.logoUrl || biz.logoUrl,
+      wifiSsid: outlet.wifiSsid,
+      wifiPassword: outlet.wifiPassword,
+      tableTentSubtitle: outlet.tableTentSubtitle,
+      qrTemplate: outlet.qrTemplate
     }
   });
 });

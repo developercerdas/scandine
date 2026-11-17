@@ -44,6 +44,53 @@
       padding-bottom: 110px;
     }
 
+    /* Tablet Responsive Design (iPad, Galaxy Tab, 768px - 1200px) */
+    @media (min-width: 768px) {
+      .customer-container {
+        max-width: 820px;
+        margin: 20px auto;
+        border-radius: 24px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        min-height: calc(100vh - 40px);
+      }
+      .menu-section {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+      .section-title {
+        grid-column: 1 / -1;
+      }
+      .menu-card {
+        margin-bottom: 0 !important;
+        border-radius: 18px;
+      }
+      .cart-floating-bar {
+        max-width: 780px !important;
+      }
+      .drawer-content {
+        max-width: 640px !important;
+        left: 50% !important;
+        transform: translate(-50%, 100%) !important;
+        border-radius: 28px 28px 0 0 !important;
+      }
+      .drawer-content.active {
+        transform: translate(-50%, 0) !important;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .customer-container {
+        max-width: 960px;
+      }
+      .cart-floating-bar {
+        max-width: 920px !important;
+      }
+      .drawer-content {
+        max-width: 700px !important;
+      }
+    }
+
     /* Top Brand Nav */
     .top-brand-bar {
       display: flex;
@@ -604,7 +651,7 @@
 <div class="customer-container">
   <!-- Top Brand Nav & 4-Language Selector -->
   <div class="top-brand-bar">
-    <img src="/img/logo.svg" alt="ScanDine" class="brand-logo-small">
+    <img id="customer-brand-logo" src="/img/logo.svg" alt="ScanDine" class="brand-logo-small">
     
     <!-- 4-Language Switcher (ID, EN, KO, ZH) -->
     <div class="lang-switcher-wrap">
@@ -1252,6 +1299,12 @@ async function initApp() {
   try {
     const res = await fetch(`/api/bootstrap?outlet=${encodeURIComponent(outletQuery)}&table=${encodeURIComponent(tableQuery)}`);
     storeData = await res.json();
+
+    const effectiveLogo = storeData.outlet.logoUrl || storeData.business.logoUrl;
+    if (effectiveLogo) {
+      const logoEl = document.getElementById('customer-brand-logo');
+      if (logoEl) logoEl.src = effectiveLogo;
+    }
 
     const tableNameText = currentOrderMode === 'PICK_UP' 
       ? (currentLang === 'en' ? 'Takeaway' : currentLang === 'ko' ? '포장 주문' : currentLang === 'zh' ? '打包自提' : 'Ambil Sendiri') 

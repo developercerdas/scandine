@@ -237,6 +237,16 @@ const initialData = {
       avatar: "👑"
     },
     {
+      id: "usr-admin",
+      username: "admin",
+      password: "password123",
+      name: "Super Admin Resto",
+      role: "ADMIN",
+      businessId: "biz-1",
+      allowedOutlets: ["*"],
+      avatar: "⚡"
+    },
+    {
       id: "usr-senopati",
       username: "senopati",
       password: "password123",
@@ -255,6 +265,26 @@ const initialData = {
       businessId: "biz-1",
       allowedOutlets: ["outlet-kemang"],
       avatar: "👔"
+    },
+    {
+      id: "usr-kasir",
+      username: "kasir",
+      password: "password123",
+      name: "Siti (Kasir / Staff POS)",
+      role: "CASHIER",
+      businessId: "biz-1",
+      allowedOutlets: ["outlet-senopati", "outlet-kemang"],
+      avatar: "💻"
+    },
+    {
+      id: "usr-waiter",
+      username: "waiter",
+      password: "password123",
+      name: "Andi (Waiter / Pramusaji)",
+      role: "WAITER",
+      businessId: "biz-1",
+      allowedOutlets: ["outlet-senopati", "outlet-kemang"],
+      avatar: "🍽️"
     }
   ]
 };

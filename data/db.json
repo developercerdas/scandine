@@ -462,6 +462,13 @@
             "Mata Sapi Matang",
             "Dadar"
           ]
+        },
+        {
+          "name": "Porsi Nasi",
+          "choices": [
+            "Porsi Standar",
+            "Porsi Jumbo (+Rp 5.000)"
+          ]
         }
       ]
     },

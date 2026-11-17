@@ -649,10 +649,10 @@ app.get('/api/menus', (req, res) => {
   res.json(db.menus);
 });
 
-// Update Menu Details (Nama, Harga, Gambar, Deskripsi, Kategori)
+// Update Menu Details (Nama, Harga, Gambar, Deskripsi, Kategori, Opsi/Varian)
 app.put('/api/admin/menus/:id', (req, res) => {
   const { id } = req.params;
-  const { name, price, description, image, categoryId, isAvailable } = req.body;
+  const { name, price, description, image, categoryId, isAvailable, options } = req.body;
   const db = getDb();
   const menu = db.menus.find(m => m.id === id);
   if (!menu) return res.status(404).json({ error: "Menu tidak ditemukan" });
@@ -664,6 +664,15 @@ app.put('/api/admin/menus/:id', (req, res) => {
   if (categoryId !== undefined) menu.categoryId = categoryId;
   if (isAvailable !== undefined) menu.isAvailable = Boolean(isAvailable);
 
+  if (options !== undefined && Array.isArray(options)) {
+    menu.options = options.map(opt => ({
+      name: opt.name ? opt.name.trim() : "Pilihan",
+      choices: Array.isArray(opt.choices)
+        ? opt.choices.map(c => typeof c === 'string' ? c.trim() : String(c)).filter(Boolean)
+        : []
+    })).filter(opt => opt.name && opt.choices.length > 0);
+  }
+
   saveDb(db);
   io.emit('menu_changed');
   res.json({ success: true, menu });
@@ -671,10 +680,19 @@ app.put('/api/admin/menus/:id', (req, res) => {
 
 // Tambah Menu Baru
 app.post('/api/admin/menus', (req, res) => {
-  const { name, price, description, image, categoryId } = req.body;
+  const { name, price, description, image, categoryId, options } = req.body;
   if (!name || price === undefined) {
     return res.status(400).json({ error: "Nama menu dan harga wajib diisi." });
   }
+
+  const formattedOptions = (options && Array.isArray(options))
+    ? options.map(opt => ({
+        name: opt.name ? opt.name.trim() : "Pilihan",
+        choices: Array.isArray(opt.choices)
+          ? opt.choices.map(c => typeof c === 'string' ? c.trim() : String(c)).filter(Boolean)
+          : []
+      })).filter(opt => opt.name && opt.choices.length > 0)
+    : [];
 
   const db = getDb();
   const newMenu = {
@@ -686,7 +704,7 @@ app.post('/api/admin/menus', (req, res) => {
     price: Number(price) || 0,
     image: image ? image.trim() : "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80",
     isAvailable: true,
-    options: []
+    options: formattedOptions
   };
 
   db.menus.push(newMenu);

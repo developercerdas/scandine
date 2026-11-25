@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 3500;
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // Upload Image Endpoint (Base64 to static disk file)
 app.post('/api/upload', (req, res) => {
@@ -1263,7 +1263,17 @@ app.get('/api/auth/users', (req, res) => {
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 app.get('/', (req, res) => {
+  const host = (req.get('host') || '').toLowerCase().split(':')[0];
+  // Main domain scandine.web.id serves the official product Landing Page
+  if (host === 'scandine.web.id' || host === 'www.scandine.web.id') {
+    return res.sendFile('landing.html', { root: PUBLIC_DIR });
+  }
+  // Subdomains (demo.scandine.web.id, resto.scandine.web.id, localhost, etc.) serve the app hub
   res.sendFile('index.html', { root: PUBLIC_DIR });
+});
+
+app.get('/landing', (req, res) => {
+  res.sendFile('landing.html', { root: PUBLIC_DIR });
 });
 
 app.get('/login', (req, res) => {

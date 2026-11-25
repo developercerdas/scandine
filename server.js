@@ -536,7 +536,7 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// Get specific order status
+// Get specific order status (Public for customer order tracking by ID)
 app.get('/api/orders/:id', (req, res) => {
   const { id } = req.params;
   const db = getDb();
@@ -544,13 +544,10 @@ app.get('/api/orders/:id', (req, res) => {
   if (!order) {
     return res.status(404).json({ error: "Pesanan tidak ditemukan." });
   }
-  if (!hasOutletAccess(req.authUser, { id: order.outletId, slug: order.outletId.replace('outlet-', '') })) {
-    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke pesanan cabang ini." });
-  }
   res.json(order);
 });
 
-// Mock Payment Success
+// Mock Payment Success (Allowed for customers in DYNAMIC_MOCK demo mode, or authenticated staff)
 app.post('/api/orders/:id/pay', (req, res) => {
   const { id } = req.params;
   const db = getDb();
@@ -559,8 +556,16 @@ app.post('/api/orders/:id/pay', (req, res) => {
   if (!order) {
     return res.status(404).json({ error: "Pesanan tidak ditemukan." });
   }
-  if (!hasOutletAccess(req.authUser, { id: order.outletId, slug: order.outletId.replace('outlet-', '') })) {
-    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke pesanan cabang ini." });
+
+  const outlet = db.outlets.find(o => o.id === order.outletId);
+  const mode = (outlet && outlet.qrisSettings && outlet.qrisSettings.mode) || 'DYNAMIC_MOCK';
+  if (mode !== 'DYNAMIC_MOCK') {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+    const staffUser = verifyToken(token);
+    if (!staffUser || !hasOutletAccess(staffUser, { id: order.outletId, slug: order.outletId.replace('outlet-', '') })) {
+      return res.status(403).json({ error: "Konfirmasi pembayaran hanya dapat dilakukan oleh Kasir/Staff cabang." });
+    }
   }
 
   order.paymentStatus = 'PAID';

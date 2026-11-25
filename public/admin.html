@@ -145,7 +145,7 @@
 
     .batch-qr-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
       gap: 16px;
     }
     .batch-qr-sticker-item {
@@ -370,8 +370,8 @@
 <!-- Navbar -->
 <header class="pos-navbar">
   <div class="pos-nav-title">
-    <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 4px 12px; border-radius: 10px;">
-      <img src="/img/logo.svg" alt="ScanDine" style="height: 38px; width: auto; display: block;">
+    <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 5px 14px; border-radius: 12px; flex-shrink: 0;">
+      <img src="/img/logo.svg" alt="ScanDine" style="height: 42px; width: auto; display: block;">
       <span style="font-weight: 900; display: none;" id="nav-brand-title">ScanDine Backoffice</span>
     </div>
     <select id="admin-outlet-select" onchange="changeAdminOutlet(this.value)" style="background: #1e293b; color: #fff; border: 1px solid #475569; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; margin-left: 10px;">
@@ -511,7 +511,7 @@
         </h4>
         <div style="max-width: 320px; background: #ffffff; border: 2px solid #e2e8f0; border-radius: 14px; padding: 18px 14px; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.4; color: #000; box-shadow: 0 4px 14px rgba(0,0,0,0.06); margin: 0 auto;">
           <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
-            <img id="rcpt-preview-logo" src="/img/logo.svg" style="max-height: 38px; max-width: 110px; object-fit: contain; display: block; margin: 0 auto 6px;">
+            <img id="rcpt-preview-logo" src="/img/logo.svg" style="max-height: 46px; max-width: 180px; width: auto; object-fit: contain; display: block; margin: 0 auto 6px;">
             <div style="font-size: 13px; font-weight: 900;" id="rcpt-preview-biz">KOPI &amp; SELERA NUSANTARA</div>
             <div style="font-size: 10px; font-weight: bold;" id="rcpt-preview-outlet">Cabang Senopati</div>
             <div style="font-size: 9px; color: #444;" id="rcpt-preview-addr">Jl. Senopati No. 88, Jaksel</div>
@@ -610,15 +610,15 @@
         <!-- Presets Buttons -->
         <div style="margin-bottom: 16px;">
           <label class="form-label" style="font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 6px; display: block;">Jumlah Meja yang Ingin Dibuat:</label>
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 8px; margin-bottom: 8px;">
             <button type="button" class="preset-qty-btn" onclick="setBulkCount(5, this)">5 Meja</button>
             <button type="button" class="preset-qty-btn active" onclick="setBulkCount(10, this)">10 Meja</button>
             <button type="button" class="preset-qty-btn" onclick="setBulkCount(15, this)">15 Meja</button>
             <button type="button" class="preset-qty-btn" onclick="setBulkCount(20, this)">20 Meja</button>
           </div>
-          <div style="display: flex; gap: 10px;">
-            <input type="number" id="bulk-table-count" class="form-input" value="10" min="1" max="100" style="font-weight: 800; font-size: 1rem; width: 120px;" placeholder="Jumlah">
-            <input type="text" id="bulk-table-prefix" class="form-input" value="Meja " placeholder="Prefix (misal: Meja )" style="flex: 1; font-weight: 700;">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+            <input type="number" id="bulk-table-count" class="form-input" value="10" min="1" max="100" style="font-weight: 800; font-size: 1rem; width: 110px; min-width: 90px;" placeholder="Jumlah">
+            <input type="text" id="bulk-table-prefix" class="form-input" value="Meja " placeholder="Prefix (misal: Meja )" style="flex: 1; min-width: 150px; font-weight: 700;">
           </div>
         </div>
 
@@ -673,23 +673,23 @@
           </select>
         </div>
 
-        <div style="display: flex; gap: 10px;">
-          <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; text-align: center; text-decoration: none; padding: 11px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 10px; font-size: 0.85rem; border: 1px solid #cbd5e1;">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+          <a id="btn-preview-link" href="#" target="_blank" style="flex: 1; min-width: 140px; text-align: center; text-decoration: none; padding: 11px; background: #f1f5f9; color: var(--dark); font-weight: 700; border-radius: 10px; font-size: 0.85rem; border: 1px solid #cbd5e1;">
             🔗 Buka Menu Tamu
           </a>
-          <button onclick="printSingleQrSticker()" style="flex: 1.2; padding: 11px; background: #0f172a; color: #fff; border: none; font-weight: 800; border-radius: 10px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);">
+          <button onclick="printSingleQrSticker()" style="flex: 1.2; min-width: 170px; padding: 11px; background: #0f172a; color: #fff; border: none; font-weight: 800; border-radius: 10px; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);">
             <span>🖨️ Cetak Akrilik Meja Ini</span>
           </button>
         </div>
       </div>
 
       <!-- Right Box: Single Live Preview (Standing Akrilik / Stiker) -->
-      <div>
-        <div class="qr-card-preview" id="qr-sticker-area" style="background: #ffffff; border: 2.5px solid #0f172a; border-radius: 20px; padding: 22px 18px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: all 0.3s;">
+      <div style="min-width: 0;">
+        <div class="qr-card-preview" id="qr-sticker-area" style="width: 100%; max-width: 360px; background: #ffffff; border: 2.5px solid #0f172a; border-radius: 20px; padding: 22px 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: all 0.3s; box-sizing: border-box;">
           
           <!-- Header Logo & Brand -->
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 4px;">
-            <img id="preview-resto-logo" src="/img/logo.svg" alt="Logo Resto" style="max-height: 34px; max-width: 90px; object-fit: contain;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
+            <img id="preview-resto-logo" src="/img/logo.svg" alt="Logo Resto" style="height: 44px; max-width: 220px; width: auto; object-fit: contain; display: block;">
           </div>
           <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; color: #0284c7;" id="preview-resto-name">
             KOPI &amp; SELERA NUSANTARA
@@ -706,12 +706,12 @@
           </div>
 
           <!-- Large High-Contrast QR Code -->
-          <div style="background: #ffffff; padding: 12px; border-radius: 16px; display: inline-block; border: 2px solid #0f172a; box-shadow: 0 4px 14px rgba(0,0,0,0.06); margin: 6px 0;">
-            <img id="qr-preview-image" src="" alt="Barcode QR Meja" style="width: 210px; height: 210px; display: block; object-fit: contain;">
+          <div style="background: #ffffff; padding: 10px; border-radius: 16px; display: inline-block; border: 2px solid #0f172a; box-shadow: 0 4px 14px rgba(0,0,0,0.06); margin: 6px auto; max-width: 100%;">
+            <img id="qr-preview-image" src="" alt="Barcode QR Meja" style="width: 100%; max-width: 210px; height: auto; aspect-ratio: 1/1; display: block; object-fit: contain;">
           </div>
 
           <!-- 3-Step Simple Guide -->
-          <div id="acrylic-steps-box" style="margin: 10px auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 10px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; font-size: 0.72rem; font-weight: 700; color: #334155;">
+          <div id="acrylic-steps-box" style="margin: 10px auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 8px 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 0.72rem; font-weight: 700; color: #334155;">
             <div>
               <div style="font-size: 1rem;">📷</div>
               <div>1. Buka Kamera</div>
@@ -727,7 +727,7 @@
           </div>
 
           <!-- Wi-Fi Tamu Box -->
-          <div id="acrylic-wifi-box" style="margin: 8px auto; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 6px 12px; font-size: 0.74rem; color: #1e40af; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+          <div id="acrylic-wifi-box" style="margin: 8px auto; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 6px 12px; font-size: 0.74rem; color: #1e40af; font-weight: 700; display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; max-width: 100%;">
             <span>📶 Wi-Fi: <strong id="preview-wifi-ssid">Resto_Guest</strong></span>
             <span>• Sandi: <strong id="preview-wifi-pass">kopienak123</strong></span>
           </div>
@@ -1941,8 +1941,8 @@ async function loadBatchTableQr() {
     tableList.forEach(t => {
       html += `
         <div class="batch-qr-sticker-item" style="border: 2px solid #0f172a; border-radius: 16px; padding: 14px; text-align: center; background: #fff; page-break-inside: avoid; break-inside: avoid;">
-          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 2px;">
-            <img src="${currentLogo}" alt="Logo" style="max-height: 22px; max-width: 60px; object-fit: contain;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 4px;">
+            <img src="${currentLogo}" alt="Logo" style="height: 32px; max-width: 150px; width: auto; object-fit: contain; display: block;">
           </div>
           <div style="font-size: 0.68rem; font-weight: 900; color: #0284c7; text-transform: uppercase; letter-spacing: 0.5px;">${t.businessName || 'SCANDINE'}</div>
           <div style="font-size: 0.62rem; color: #64748b; font-weight: 700;">${t.outletName || ''}</div>

@@ -619,9 +619,13 @@
     <button onclick="openOjolModal()" style="background: #f59e0b; color: #0f172a; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 900; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
       🛵 + Tes Order Ojol Masuk
     </button>
-    <a href="/admin" target="_blank" style="text-decoration: none; background: #334155; color: #fff; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.82rem;">
+    <a href="/admin" target="_blank" id="pos-backoffice-link" style="text-decoration: none; background: #334155; color: #fff; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.82rem;">
       ⚙️ Backoffice
     </a>
+    <div id="pos-user-badge" style="display: inline-flex; align-items: center; gap: 6px; background: #1e293b; border: 1px solid #334155; padding: 5px 10px; border-radius: 8px; font-size: 0.78rem; color: #e2e8f0;">
+      <span id="pos-user-name">Staff</span>
+      <button onclick="logoutPos()" style="background: #ef4444; color: #fff; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; cursor: pointer;">Keluar</button>
+    </div>
   </div>
 </header>
 
@@ -732,10 +736,67 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-// State
+// State & Auth Enforcement
 const urlParams = new URLSearchParams(window.location.search);
+let currentPosUser = null;
+(function verifyPosAuth() {
+  const raw = localStorage.getItem('scandine_user');
+  const token = localStorage.getItem('scandine_token');
+  if (!raw || !token) {
+    localStorage.removeItem('scandine_user');
+    localStorage.removeItem('scandine_token');
+    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+    throw new Error('AUTH_REQUIRED');
+  }
+  currentPosUser = JSON.parse(raw);
+  const badgeEl = document.getElementById('pos-user-name');
+  if (badgeEl) {
+    badgeEl.innerText = `${currentPosUser.avatar || '👤'} ${currentPosUser.name}`;
+  }
+  const isOwnerOrAdmin = ['OWNER', 'ADMIN'].includes(currentPosUser.role);
+  const backofficeLink = document.getElementById('pos-backoffice-link');
+  if (backofficeLink && !isOwnerOrAdmin) {
+    backofficeLink.style.display = 'none';
+  }
+})();
+
+// Automatically attach signed Bearer token to all /api/staff & /api/orders status calls
+const _origPosFetch = window.fetch.bind(window);
+window.fetch = async function(input, init = {}) {
+  const url = typeof input === 'string' ? input : (input && input.url) || '';
+  if (url.startsWith('/api/staff') || url.startsWith('/api/orders/')) {
+    const token = localStorage.getItem('scandine_token');
+    const headers = new Headers(init.headers || {});
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    init = { ...init, headers };
+  }
+  const res = await _origPosFetch(input, init);
+  if (res.status === 401 && url.startsWith('/api/staff')) {
+    localStorage.removeItem('scandine_user');
+    localStorage.removeItem('scandine_token');
+    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+  }
+  return res;
+};
+
+function logoutPos() {
+  if (confirm("Apakah Anda yakin ingin keluar dari akun POS?")) {
+    localStorage.removeItem('scandine_user');
+    localStorage.removeItem('scandine_token');
+    window.location.href = '/login.html';
+  }
+}
+
 let currentOutletSlug = urlParams.get('outlet') || 'senopati';
-let currentOutletId = 'outlet-senopati';
+if (currentPosUser && !['OWNER', 'ADMIN'].includes(currentPosUser.role) && currentPosUser.assignedOutlet) {
+  currentOutletSlug = currentPosUser.assignedOutlet.slug;
+  const sel = document.getElementById('outlet-dropdown');
+  if (sel) {
+    sel.innerHTML = `<option value="${currentOutletSlug}">🔒 ${currentPosUser.assignedOutlet.name}</option>`;
+    sel.disabled = true;
+  }
+}
+let currentOutletId = `outlet-${currentOutletSlug}`;
 let currentChannel = 'ALL';
 let currentView = 'ORDERS';
 let orders = [];
@@ -745,7 +806,7 @@ let audioEnabled = true;
 const socket = io();
 
 function joinSocketBranch(slug) {
-  currentOutletId = slug === 'kemang' ? 'outlet-kemang' : 'outlet-senopati';
+  currentOutletId = `outlet-${slug}`;
   socket.emit('join_staff', currentOutletId);
 }
 joinSocketBranch(currentOutletSlug);
@@ -1170,7 +1231,7 @@ let storeProfile = {};
 
 async function fetchStoreProfile() {
   try {
-    const res = await fetch(`/api/admin/store-profile?outlet=${currentOutletSlug}`);
+    const res = await fetch(`/api/staff/store-profile?outlet=${encodeURIComponent(currentOutletSlug)}`);
     storeProfile = await res.json();
     if (storeProfile.businessName) {
       document.title = `${storeProfile.businessName} - KDS & POS`;

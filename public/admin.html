@@ -1149,10 +1149,13 @@ let currentStoreProfile = {};
 let currentQrisSettings = {};
 let currentUser = null;
 
-// Auth & Role Rules Verification: ONLY OWNER and ADMIN can access Backoffice!
+// Auth & Role Rules Verification: ONLY OWNER and ADMIN with valid token can access Backoffice!
 function verifyAuth() {
   const raw = localStorage.getItem('scandine_user');
-  if (!raw) {
+  const token = localStorage.getItem('scandine_token');
+  if (!raw || !token) {
+    localStorage.removeItem('scandine_user');
+    localStorage.removeItem('scandine_token');
     window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
     return false;
   }
@@ -1181,9 +1184,29 @@ function verifyAuth() {
   return true;
 }
 
+// Automatically attach signed Bearer token to all /api/ calls in Admin
+const _origAdminFetch = window.fetch.bind(window);
+window.fetch = async function(input, init = {}) {
+  const url = typeof input === 'string' ? input : (input && input.url) || '';
+  if (url.startsWith('/api/admin') || url.startsWith('/api/upload') || url.startsWith('/api/auth/users')) {
+    const token = localStorage.getItem('scandine_token');
+    const headers = new Headers(init.headers || {});
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    init = { ...init, headers };
+  }
+  const res = await _origAdminFetch(input, init);
+  if (res.status === 401 && (url.startsWith('/api/admin') || url.startsWith('/api/upload'))) {
+    localStorage.removeItem('scandine_user');
+    localStorage.removeItem('scandine_token');
+    window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+  }
+  return res;
+};
+
 function logoutAdmin() {
   if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
     localStorage.removeItem('scandine_user');
+    localStorage.removeItem('scandine_token');
     window.location.href = '/login.html';
   }
 }

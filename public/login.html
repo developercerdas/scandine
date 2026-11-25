@@ -431,8 +431,11 @@ async function handleLogin(e) {
       return;
     }
 
-    // Save session
+    // Save session & signed token
     localStorage.setItem('scandine_user', JSON.stringify(data.user));
+    if (data.token) {
+      localStorage.setItem('scandine_token', data.token);
+    }
 
     // Redirect based on role rules:
     // Only OWNER and ADMIN are routed to /admin backoffice!

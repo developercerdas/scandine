@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const cors = require('cors');
 const QRCode = require('qrcode');
 const os = require('os');
@@ -11,8 +12,68 @@ const { getDb, saveDb, ensureDb } = require('./database');
 ensureDb();
 
 const app = express();
+app.disable('x-powered-by');
 app.set('trust proxy', true);
 const server = http.createServer(app);
+
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Cryptographic Session Token Helpers (HMAC-SHA256)
+const AUTH_SECRET = process.env.SESSION_SECRET || crypto.createHash('sha256').update(__dirname + '_scandine_secret_2026').digest('hex');
+const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function signToken(payload) {
+  const data = Buffer.from(JSON.stringify({ ...payload, exp: Date.now() + TOKEN_TTL_MS })).toString('base64url');
+  const sig = crypto.createHmac('sha256', AUTH_SECRET).update(data).digest('base64url');
+  return `${data}.${sig}`;
+}
+
+function verifyToken(token) {
+  if (!token || typeof token !== 'string' || !token.includes('.')) return null;
+  const [data, sig] = token.split('.');
+  if (!data || !sig) return null;
+  const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(data).digest('base64url');
+  const sigBuf = Buffer.from(sig);
+  const expBuf = Buffer.from(expectedSig);
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(data, 'base64url').toString('utf8'));
+    if (!parsed.exp || parsed.exp < Date.now()) return null;
+    return parsed;
+  } catch (e) {
+    return null;
+  }
+}
+
+function requireAuth(allowedRoles = null) {
+  return (req, res, next) => {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+    const user = verifyToken(token);
+    if (!user) {
+      return res.status(401).json({ error: "Sesi login tidak valid atau telah berakhir. Silakan login kembali." });
+    }
+    if (allowedRoles && !allowedRoles.includes((user.role || '').toUpperCase())) {
+      return res.status(403).json({ error: `Akses Ditolak: Fitur ini hanya boleh diakses oleh ${allowedRoles.join(' atau ')}.` });
+    }
+    req.authUser = user;
+    next();
+  };
+}
+
+function hasOutletAccess(user, outlet) {
+  if (!user || !outlet) return false;
+  if (['OWNER', 'ADMIN'].includes((user.role || '').toUpperCase())) return true;
+  if (!Array.isArray(user.allowedOutlets)) return false;
+  if (user.allowedOutlets.includes('*')) return true;
+  return user.allowedOutlets.includes(outlet.id) || user.allowedOutlets.includes(outlet.slug);
+}
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -27,8 +88,12 @@ app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
-// Upload Image Endpoint (Base64 to static disk file)
-app.post('/api/upload', (req, res) => {
+// Strict Role-based protection middleware for ALL /api/admin/* endpoints (registered before all admin routes)
+app.use('/api/admin', requireAuth(['OWNER', 'ADMIN']));
+
+// Upload Image Endpoint (Base64 to static disk file - ADMIN / OWNER ONLY)
+const ALLOWED_IMAGE_EXT = new Set(['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'svg+xml']);
+app.post('/api/upload', requireAuth(['OWNER', 'ADMIN']), (req, res) => {
   try {
     const { image, filename } = req.body;
     if (!image) {
@@ -37,13 +102,16 @@ app.post('/api/upload', (req, res) => {
 
     // Match data:image/...;base64,...
     const matches = image.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
-    let ext = 'png';
-    let base64Data = image;
-
-    if (matches && matches.length === 3) {
-      ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-      base64Data = matches[2];
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ error: "Format gambar tidak valid. Gunakan file gambar (PNG, JPG, WebP, SVG)." });
     }
+
+    let rawExt = matches[1].toLowerCase();
+    if (!ALLOWED_IMAGE_EXT.has(rawExt)) {
+      return res.status(400).json({ error: "Ekstensi file tidak diizinkan." });
+    }
+    let ext = rawExt === 'jpeg' ? 'jpg' : (rawExt === 'svg+xml' ? 'svg' : rawExt);
+    let base64Data = matches[2];
 
     const uploadsDir = path.join(__dirname, 'public', 'uploads');
     if (!fs.existsSync(uploadsDir)) {
@@ -475,6 +543,9 @@ app.get('/api/orders/:id', (req, res) => {
   if (!order) {
     return res.status(404).json({ error: "Pesanan tidak ditemukan." });
   }
+  if (!hasOutletAccess(req.authUser, { id: order.outletId, slug: order.outletId.replace('outlet-', '') })) {
+    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke pesanan cabang ini." });
+  }
   res.json(order);
 });
 
@@ -486,6 +557,9 @@ app.post('/api/orders/:id/pay', (req, res) => {
 
   if (!order) {
     return res.status(404).json({ error: "Pesanan tidak ditemukan." });
+  }
+  if (!hasOutletAccess(req.authUser, { id: order.outletId, slug: order.outletId.replace('outlet-', '') })) {
+    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke pesanan cabang ini." });
   }
 
   order.paymentStatus = 'PAID';
@@ -590,12 +664,46 @@ app.post('/api/webhooks/shopeefood', (req, res) => {
 });
 
 // --------------------------------------------------------------------------
+// STAFF SECURITY MIDDLEWARE & BRANCH ISOLATION
+// --------------------------------------------------------------------------
+const STAFF_ROLES = ['OWNER', 'ADMIN', 'GERAI_MANAGER', 'CASHIER', 'WAITER'];
+app.use('/api/staff', requireAuth(STAFF_ROLES));
+
+// Staff Store Profile (for POS receipt header & tax rates)
+app.get('/api/staff/store-profile', (req, res) => {
+  const { outlet: outletQuery } = req.query;
+  const db = getDb();
+  const outlet = resolveOutlet(db, outletQuery);
+  if (!hasOutletAccess(req.authUser, outlet)) {
+    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke cabang ini." });
+  }
+  const biz = db.businesses.find(b => b.id === outlet.businessId) || db.businesses[0] || {};
+  res.json({
+    businessId: biz.id,
+    businessName: biz.name || "ScanDine Restaurant",
+    tagline: biz.tagline || "",
+    outletId: outlet.id,
+    outletSlug: outlet.slug,
+    outletName: outlet.name,
+    address: outlet.address || "",
+    phone: outlet.phone || "",
+    taxRate: outlet.taxRate !== undefined ? outlet.taxRate : 10,
+    serviceRate: outlet.serviceRate !== undefined ? outlet.serviceRate : 5,
+    receiptFooter: outlet.receiptFooter || "Terima kasih atas kunjungan Anda!\nSilakan datang kembali.",
+    logoUrl: outlet.logoUrl || biz.logoUrl || "/img/logo.svg"
+  });
+});
+
+// --------------------------------------------------------------------------
 // TABLE MANAGEMENT APIS (FLOOR PLAN & STATUS)
 // --------------------------------------------------------------------------
 app.get('/api/staff/tables', (req, res) => {
   const { outlet: outletQuery } = req.query;
   const db = getDb();
   const outlet = resolveOutlet(db, outletQuery);
+  if (!hasOutletAccess(req.authUser, outlet)) {
+    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke cabang ini." });
+  }
 
   // Compute live duration for occupied tables
   const tablesWithLiveInfo = outlet.tables.map(tbl => {
@@ -622,6 +730,9 @@ app.patch('/api/staff/tables/:tableId/status', (req, res) => {
   const { status, outletId } = req.body;
   const db = getDb();
   const outlet = resolveOutlet(db, outletId);
+  if (!hasOutletAccess(req.authUser, outlet)) {
+    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke cabang ini." });
+  }
   const tbl = outlet.tables.find(t => t.id === tableId || t.number.toString() === tableId.toString());
 
   if (!tbl) return res.status(404).json({ error: "Meja tidak ditemukan." });
@@ -644,6 +755,9 @@ app.get('/api/staff/orders', (req, res) => {
   const { outlet: outletQuery, channel, status } = req.query;
   const db = getDb();
   const outlet = resolveOutlet(db, outletQuery);
+  if (!hasOutletAccess(req.authUser, outlet)) {
+    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke cabang ini." });
+  }
   
   let list = db.orders.filter(o => o.outletId === outlet.id);
 
@@ -667,6 +781,9 @@ app.patch('/api/staff/orders/:id/status', (req, res) => {
 
   if (!order) {
     return res.status(404).json({ error: "Pesanan tidak ditemukan." });
+  }
+  if (!hasOutletAccess(req.authUser, { id: order.outletId, slug: order.outletId.replace('outlet-', '') })) {
+    return res.status(403).json({ error: "Akses Ditolak: Anda tidak memiliki akses ke pesanan cabang ini." });
   }
 
   if (orderStatus) order.orderStatus = orderStatus;
@@ -699,24 +816,14 @@ app.patch('/api/staff/orders/:id/status', (req, res) => {
   res.json({ success: true, order });
 });
 
-// Alias endpoints for updating order status from POS / Staff / KDS / Test scripts
-app.patch('/api/orders/:id/status', (req, res, next) => {
+// Alias endpoints for updating order status from POS / Staff / KDS (Requires Staff Auth)
+app.patch('/api/orders/:id/status', requireAuth(STAFF_ROLES), (req, res, next) => {
   req.url = `/api/staff/orders/${req.params.id}/status`;
   app.handle(req, res, next);
 });
-app.post('/api/orders/:id/status', (req, res, next) => {
+app.post('/api/orders/:id/status', requireAuth(STAFF_ROLES), (req, res, next) => {
   req.url = `/api/staff/orders/${req.params.id}/status`;
   app.handle(req, res, next);
-});
-
-// Role-based protection middleware for admin APIs:
-// When an explicit role is supplied in header or query, only OWNER and ADMIN are allowed!
-app.use('/api/admin', (req, res, next) => {
-  const role = req.headers['x-user-role'] || req.query.role;
-  if (role && !['OWNER', 'ADMIN'].includes(role.toUpperCase())) {
-    return res.status(403).json({ error: "Akses Ditolak: Hanya Pemilik (Owner) atau Super Admin yang diizinkan mengakses pengaturan ini." });
-  }
-  next();
 });
 
 // --------------------------------------------------------------------------
@@ -1240,21 +1347,25 @@ app.post('/api/auth/login', (req, res) => {
     }
   }
 
+  const safeUser = {
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    role: user.role,
+    allowedOutlets: user.allowedOutlets,
+    avatar: user.avatar || "👤",
+    assignedOutlet
+  };
+  const token = signToken(safeUser);
+
   res.json({
     success: true,
-    user: {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      role: user.role,
-      allowedOutlets: user.allowedOutlets,
-      avatar: user.avatar || "👤",
-      assignedOutlet
-    }
+    token,
+    user: safeUser
   });
 });
 
-app.get('/api/auth/users', (req, res) => {
+app.get('/api/auth/users', requireAuth(['OWNER', 'ADMIN']), (req, res) => {
   const db = getDb();
   res.json((db.users || []).map(u => ({
     username: u.username,

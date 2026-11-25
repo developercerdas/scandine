@@ -324,6 +324,7 @@
       flex-direction: column;
       justify-content: space-between;
       position: relative;
+      min-width: 0;
     }
     .price-card.featured {
       border: 2.5px solid var(--primary);
@@ -362,7 +363,8 @@
       font-size: 0.88rem;
       color: var(--slate);
     }
-    .price-list li { display: flex; align-items: flex-start; gap: 8px; }
+    .price-list li { display: block; line-height: 1.55; word-break: break-word; }
+    .price-list code { background: #f1f5f9; padding: 2px 6px; border-radius: 6px; font-size: 0.82em; color: var(--primary-dark); word-break: break-all; }
     .btn-plan {
       display: block;
       text-align: center;
@@ -416,13 +418,14 @@
     }
 
     @media (max-width: 960px) {
-      .hero-inner { grid-template-columns: 1fr; }
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
-      .pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+      .hero-inner { grid-template-columns: minmax(0, 1fr); }
+      .features-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pricing-grid { grid-template-columns: minmax(0, 1fr); max-width: 480px; margin: 0 auto; }
     }
     @media (max-width: 640px) {
       .nav-links { display: none; }
-      .features-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: minmax(0, 1fr); }
+      .hero-badge { font-size: 0.72rem; text-align: center; }
     }
   </style>
 </head>
@@ -540,7 +543,7 @@
         <p>Upload logo resto Anda sendiri. Tercetak rapi di struk thermal 58mm &amp; 80mm lengkap dengan rincian pajak PB1 &amp; varian.</p>
       </div>
       <div class="feature-card">
-        <div class="feature-icon">🪧</div>
+        <div class="feature-icon">🏷️</div>
         <h3>Desainer Stand Akrilik Meja</h3>
         <p>Buat 10–20 meja sekaligus dalam 1 klik. Dilengkapi template Standing Akrilik A6 lengkap dengan info Wi-Fi tamu siap cetak.</p>
       </div>
@@ -661,14 +664,16 @@
   </section>
 
   <!-- Footer -->
-  <footer class="footer" style="background: #071b33; padding: 36px 20px;">
-    <div class="footer-inner">
-      <div style="max-width: 480px; width: 100%; border-radius: 18px; overflow: hidden; border: 1.5px solid rgba(251, 191, 36, 0.35); box-shadow: 0 10px 28px rgba(0,0,0,0.3);">
-        <img src="/img/istana-barcode-banner.jpg" alt="CV. ISTANA BARCODE COMPUTER" style="width: 100%; display: block;">
+  <footer class="footer" style="background: #071b33; padding: 28px 20px; border-top: 1px solid rgba(255,255,255,0.08);">
+    <div class="footer-inner" style="gap: 10px;">
+      <div style="font-weight: 900; font-size: 0.95rem; color: #fbbc05; letter-spacing: 0.4px;">
+        CV. ISTANA BARCODE COMPUTER &bull; Developer Cerdas
       </div>
-
-      <p style="font-size: 0.82rem; color: #94a3b8;">
-        &copy; 2026 ScanDine &mdash; CV. ISTANA BARCODE COMPUTER &bull; Developer Cerdas. All rights reserved.
+      <div style="font-size: 0.78rem; color: #cbd5e1;">
+        IT Consultant &diams; Aplikasi &diams; Jasa Instalasi Jaringan &diams; CCTV &amp; Security System
+      </div>
+      <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
+        &copy; 2026 ScanDine. All rights reserved.
       </p>
     </div>
   </footer>

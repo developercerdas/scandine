@@ -35,13 +35,24 @@
       gap: 6px;
       background: #0284c7;
       color: #ffffff;
-      padding: 8px 18px;
+      padding: 8px 16px;
       border-radius: 9999px;
       text-decoration: none;
       font-weight: 800;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
+      white-space: nowrap;
       box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
       transition: all 0.2s;
+    }
+    @media (max-width: 480px) {
+      .nav-login-btn {
+        padding: 7px 12px;
+        font-size: 0.76rem;
+      }
+      .hub-badge {
+        font-size: 0.7rem;
+        padding: 5px 10px;
+      }
     }
 
     .nav-login-btn:hover {
@@ -378,7 +389,7 @@
     <h3 style="font-size: 1.2rem; font-weight: 900; margin-bottom: 16px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
       ⭐ Keunggulan & Solusi Efisiensi untuk Pemilik Resto & Kafe
     </h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; font-size: 0.88rem; color: #475569; line-height: 1.5;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; font-size: 0.88rem; color: #475569; line-height: 1.5;">
       <div>
         <strong style="color: #0f172a; font-size: 0.95rem;">✓ Zero-App (Scan Langsung Pesan)</strong>
         <p style="color: #64748b; margin-top: 4px;">Pelanggan tidak perlu unduh aplikasi. Cukup buka kamera bawaan HP dan arahkan ke stiker QR meja.</p>

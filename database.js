@@ -197,7 +197,7 @@ const initialData = {
       name: "Truffle Fries with Parmesan",
       description: "Kentang goreng renyah beraroma minyak truffle asli dengan taburan keju parmesan dan dipping saus tar-tar.",
       price: 32000,
-      image: "https://images.unsplash.com/photo-1576107232684-1279f3908594?w=600&auto=format&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop&q=80",
       isAvailable: true,
       options: []
     },

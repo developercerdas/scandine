@@ -101,7 +101,7 @@ app.post('/api/upload', requireAuth(['OWNER', 'ADMIN']), (req, res) => {
     }
 
     // Match data:image/...;base64,...
-    const matches = image.match(/^data:image\/([a-zA-Z0-9+]+);base64,(.+)$/);
+    const matches = image.match(/^data:image\/([a-zA-Z0-9+.-]+);base64,(.+)$/);
     if (!matches || matches.length !== 3) {
       return res.status(400).json({ error: "Format gambar tidak valid. Gunakan file gambar (PNG, JPG, WebP, SVG)." });
     }
@@ -123,6 +123,7 @@ app.post('/api/upload', requireAuth(['OWNER', 'ADMIN']), (req, res) => {
     const filePath = path.join(uploadsDir, cleanName);
 
     fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+    try { fs.chmodSync(filePath, 0o644); } catch (e) {}
 
     const publicUrl = `/uploads/${cleanName}`;
     res.json({ success: true, url: publicUrl, filename: cleanName });

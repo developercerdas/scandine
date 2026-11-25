@@ -1418,7 +1418,7 @@ function renderMenus() {
     const tr = getTranslatedMenuItem(menu);
     html += `
       <div class="menu-card" style="${!menu.isAvailable ? 'opacity: 0.55;' : ''}">
-        <img class="menu-img" src="${menu.image || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300'}" alt="${tr.name}">
+        <img class="menu-img" src="${menu.image || '/img/logo-icon.svg'}" onerror="this.onerror=null;this.src='/img/logo-icon.svg';" alt="${tr.name}">
         <div class="menu-info">
           <div>
             <div class="menu-name">${tr.name}</div>

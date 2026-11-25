@@ -11,6 +11,7 @@ const { getDb, saveDb, ensureDb } = require('./database');
 ensureDb();
 
 const app = express();
+app.set('trust proxy', true);
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -93,6 +94,17 @@ function resolveOutlet(db, outletParam) {
   return found || db.outlets[0];
 }
 
+// Helper to resolve base URL (supports HTTPS domain behind reverse proxy, or LAN IP on localhost)
+function getBaseUrl(req) {
+  const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'http').toString().split(',')[0].trim();
+  const host = (req.headers['x-forwarded-host'] || req.get('host') || '').toString().split(',')[0].trim();
+  if (!host || host.includes('localhost') || host.includes('127.0.0.1')) {
+    const localIp = getLocalIp();
+    return `http://${localIp}:${PORT}`;
+  }
+  return `${proto}://${host}`;
+}
+
 // --------------------------------------------------------------------------
 // NETWORK INFO FOR MOBILE SCANNING
 // --------------------------------------------------------------------------
@@ -102,7 +114,8 @@ app.get('/api/network-info', async (req, res) => {
     const localIp = getLocalIp();
     const outletSlug = outlet || 'senopati';
     const tableNum = table || '1';
-    const mobileUrl = `http://${localIp}:${PORT}/order?outlet=${encodeURIComponent(outletSlug)}&table=${encodeURIComponent(tableNum)}`;
+    const baseUrl = getBaseUrl(req);
+    const mobileUrl = `${baseUrl}/order?outlet=${encodeURIComponent(outletSlug)}&table=${encodeURIComponent(tableNum)}`;
     
     const qrCodeDataUrl = await QRCode.toDataURL(mobileUrl, {
       width: 320,
@@ -913,10 +926,11 @@ app.get('/api/admin/tables/batch-qr', async (req, res) => {
     const wifiPassword = outlet.wifiPassword || "";
     const tableTentSubtitle = outlet.tableTentSubtitle || "Scan kamera HP untuk pesan & bayar langsung dari meja";
     const qrTemplate = outlet.qrTemplate || "acrylic";
+    const baseUrl = getBaseUrl(req);
 
     const results = [];
     for (const table of (outlet.tables || [])) {
-      const orderUrl = `${req.protocol}://${effectiveHost}/order?outlet=${encodeURIComponent(outlet.slug)}&table=${encodeURIComponent(table.number)}`;
+      const orderUrl = `${baseUrl}/order?outlet=${encodeURIComponent(outlet.slug)}&table=${encodeURIComponent(table.number)}`;
       const qrDataUrl = await QRCode.toDataURL(orderUrl, {
         width: 360,
         margin: 2,
@@ -966,15 +980,9 @@ app.get('/api/admin/tables/:tableNum/qr', async (req, res) => {
     const { outlet: outletQuery } = req.query;
     const db = getDb();
     const outlet = resolveOutlet(db, outletQuery);
-    const localIp = getLocalIp();
-    
-    const host = req.get('host');
-    let effectiveHost = host;
-    if (host.includes('localhost') || host.includes('127.0.0.1')) {
-      effectiveHost = `${localIp}:${PORT}`;
-    }
+    const baseUrl = getBaseUrl(req);
 
-    const orderUrl = `${req.protocol}://${effectiveHost}/order?outlet=${encodeURIComponent(outlet.slug)}&table=${encodeURIComponent(tableNum)}`;
+    const orderUrl = `${baseUrl}/order?outlet=${encodeURIComponent(outlet.slug)}&table=${encodeURIComponent(tableNum)}`;
     
     const qrImage = await QRCode.toDataURL(orderUrl, {
       width: 400,

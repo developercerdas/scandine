@@ -580,9 +580,9 @@
               <li>✅ Server Cloud Indonesia + SSL HTTPS &amp; Backup</li>
             </ul>
           </div>
-          <a href="https://wa.me/6281288997766?text=Halo%20CV%20Istana%20Barcode%20Computer,%20saya%20tertarik%20Paket%20Sewa%20Server%20Cloud%20ScanDine%20(250rb/bln)" target="_blank" class="btn-plan btn-plan-outline">
+          <button type="button" onclick="openOrderModal('Paket Cloud Server (Rp 250.000/bln)')" class="btn-plan btn-plan-outline" style="width: 100%; cursor: pointer; font-family: inherit;">
             Pilih Paket Server
-          </a>
+          </button>
         </div>
 
         <!-- Plan 2: Starter 1 iPad + Printer -->
@@ -600,9 +600,9 @@
               <li>✅ Subdomain <code>namaresto.scandine.web.id</code> + Training</li>
             </ul>
           </div>
-          <a href="https://wa.me/6281288997766?text=Halo%20CV%20Istana%20Barcode%20Computer,%20saya%20tertarik%20Paket%20Starter%201%20iPad%20Kasir%20%2B%20Printer" target="_blank" class="btn-plan btn-plan-outline">
+          <button type="button" onclick="openOrderModal('Paket Starter 1 iPad Kasir + Printer (Rp 8.950.000)')" class="btn-plan btn-plan-outline" style="width: 100%; cursor: pointer; font-family: inherit;">
             Pesan Paket Starter
-          </a>
+          </button>
         </div>
 
         <!-- Plan 3: Full Set 3 iPad + 2 Printer -->
@@ -621,9 +621,9 @@
               <li>✅ Instalasi Lengkap, Multi-Cabang &amp; Training di Lokasi</li>
             </ul>
           </div>
-          <a href="https://wa.me/6281288997766?text=Halo%20CV%20Istana%20Barcode%20Computer,%20saya%20tertarik%20Paket%20Komplit%203%20iPad%20(Kasir,%20Dapur,%20Waiter)%20%2B%20Printer" target="_blank" class="btn-plan btn-plan-primary">
+          <button type="button" onclick="openOrderModal('Paket Komplit 3 iPad (Kasir, Dapur, Waiter) + Printer (Rp 21.500.000)')" class="btn-plan btn-plan-primary" style="width: 100%; border: none; cursor: pointer; font-family: inherit;">
             Pesan Paket 3 iPad Lengkap
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -631,45 +631,48 @@
 
   <!-- Partner & Developer Showcase Section -->
   <section class="section" style="padding-top: 56px; padding-bottom: 56px;">
-    <div style="background: #0a2645; border-radius: 24px; padding: clamp(24px, 4vw, 44px); color: #ffffff; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; box-shadow: 0 20px 50px rgba(10, 38, 69, 0.2);" class="partner-grid">
+    <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 24px; padding: clamp(24px, 4vw, 44px); color: #0f172a; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; box-shadow: 0 12px 36px rgba(15, 23, 42, 0.06);" class="partner-grid">
       <div>
-        <img src="/img/istana-barcode-banner.jpg" alt="CV. ISTANA BARCODE COMPUTER - Developer Cerdas" style="width: 100%; border-radius: 16px; display: block; border: 1.5px solid rgba(251, 191, 36, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.3);">
+        <img src="/img/istana-barcode-banner.jpg" alt="CV. ISTANA BARCODE COMPUTER - Developer Cerdas" style="width: 100%; border-radius: 16px; display: block; border: 1.5px solid #e2e8f0; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);">
+        <p style="font-size: 0.78rem; color: #64748b; text-align: center; margin-top: 8px; font-weight: 600;">
+          📱 Scan QR di atas untuk terhubung langsung ke WhatsApp resmi kami
+        </p>
       </div>
       <div>
-        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(125, 211, 252, 0.4); color: #bae6fd; padding: 5px 14px; border-radius: 9999px; font-size: 0.78rem; font-weight: 800; margin-bottom: 14px;">
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: #e0f2fe; border: 1px solid #bae6fd; color: #0284c7; padding: 5px 14px; border-radius: 9999px; font-size: 0.78rem; font-weight: 800; margin-bottom: 14px;">
           ✓ Official Partner &amp; System Integrator
         </div>
-        <h2 style="font-size: clamp(1.4rem, 3vw, 1.95rem); font-weight: 900; color: #fbbc05; margin-bottom: 10px; letter-spacing: -0.4px;">
+        <h2 style="font-size: clamp(1.4rem, 3vw, 1.95rem); font-weight: 900; color: #0f172a; margin-bottom: 10px; letter-spacing: -0.4px;">
           CV. ISTANA BARCODE COMPUTER
         </h2>
-        <p style="font-size: 0.94rem; color: #cbd5e1; margin-bottom: 18px; line-height: 1.6;">
+        <p style="font-size: 0.94rem; color: #475569; margin-bottom: 18px; line-height: 1.6;">
           Didukung oleh tim teknis berpengalaman dari <strong>Developer Cerdas</strong>. Kami menyediakan solusi lengkap mulai dari pengadaan perangkat kasir/barcode, pengembangan software bisnis, instalasi jaringan kantor &amp; resto, hingga sistem keamanan CCTV terintegrasi.
         </p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.84rem; font-weight: 700; color: #f8fafc;">
-          <div style="background: rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="color: #fbbc05;">◆</span> IT Consultant
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.84rem; font-weight: 700; color: #1e293b;">
+          <div style="background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <span style="color: #0284c7;">◆</span> IT Consultant
           </div>
-          <div style="background: rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="color: #fbbc05;">◆</span> Aplikasi &amp; Software
+          <div style="background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <span style="color: #0284c7;">◆</span> Aplikasi &amp; Software
           </div>
-          <div style="background: rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="color: #fbbc05;">◆</span> Jasa Instalasi Jaringan
+          <div style="background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <span style="color: #0284c7;">◆</span> Jasa Instalasi Jaringan
           </div>
-          <div style="background: rgba(255,255,255,0.06); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="color: #fbbc05;">◆</span> CCTV &amp; Security System
+          <div style="background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+            <span style="color: #0284c7;">◆</span> CCTV &amp; Security System
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="footer" style="background: #071b33; padding: 28px 20px; border-top: 1px solid rgba(255,255,255,0.08);">
-    <div class="footer-inner" style="gap: 10px;">
-      <div style="font-weight: 900; font-size: 0.95rem; color: #fbbc05; letter-spacing: 0.4px;">
-        CV. ISTANA BARCODE COMPUTER &bull; Developer Cerdas
+  <!-- Footer (Clean Light Theme Matching Page) -->
+  <footer class="footer" style="background: #f8fafc; color: #334155; padding: 32px 20px; border-top: 1px solid #e2e8f0;">
+    <div class="footer-inner" style="gap: 8px;">
+      <div style="font-weight: 900; font-size: 0.98rem; color: #0f172a; letter-spacing: -0.2px;">
+        CV. ISTANA BARCODE COMPUTER <span style="color: #0284c7;">&bull; Developer Cerdas</span>
       </div>
-      <div style="font-size: 0.78rem; color: #cbd5e1;">
+      <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">
         IT Consultant &diams; Aplikasi &diams; Jasa Instalasi Jaringan &diams; CCTV &amp; Security System
       </div>
       <p style="font-size: 0.78rem; color: #94a3b8; margin-top: 4px;">
@@ -677,6 +680,67 @@
       </p>
     </div>
   </footer>
+
+  <!-- Modal Order Paket via WhatsApp -->
+  <div id="order-modal-backdrop" onclick="closeOrderModal()" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); z-index: 90; align-items: center; justify-content: center; padding: 16px;">
+    <div onclick="event.stopPropagation()" style="background: #ffffff; border-radius: 22px; max-width: 440px; width: 100%; padding: 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.2); border: 1px solid #e2e8f0;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 1.15rem; font-weight: 900; color: #0f172a;">🛒 Formulir Order Paket</h3>
+        <button type="button" onclick="closeOrderModal()" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-weight: 800; color: #475569;">✕</button>
+      </div>
+      <div id="modal-selected-plan" style="background: #e0f2fe; color: #0369a1; padding: 10px 14px; border-radius: 12px; font-weight: 800; font-size: 0.85rem; margin-bottom: 16px;">
+        -
+      </div>
+      <form onsubmit="submitOrderToWa(event)" style="display: flex; flex-direction: column; gap: 12px;">
+        <div>
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Nama Restoran / Cafe *</label>
+          <input type="text" id="ord-resto" required placeholder="Contoh: Kopi Selera Nusantara" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Nama Pemilik / PIC *</label>
+          <input type="text" id="ord-owner" required placeholder="Contoh: Bpk. Budi" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Kota / Lokasi *</label>
+            <input type="text" id="ord-city" required placeholder="Jakarta / Surabaya" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Jumlah Meja</label>
+            <input type="number" id="ord-tables" value="15" min="1" style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-family: inherit;">
+          </div>
+        </div>
+        <button type="submit" style="margin-top: 6px; width: 100%; padding: 13px; background: #16a34a; color: #ffffff; border: none; border-radius: 12px; font-weight: 900; font-size: 0.95rem; cursor: pointer; font-family: inherit; box-shadow: 0 6px 16px rgba(22, 163, 74, 0.25);">
+          💬 Kirim Order ke WhatsApp Sekarang
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const OFFICIAL_WA_NUMBER = "6281288997766";
+    let selectedPlanName = "";
+
+    function openOrderModal(planName) {
+      selectedPlanName = planName;
+      document.getElementById('modal-selected-plan').innerText = planName;
+      document.getElementById('order-modal-backdrop').style.display = 'flex';
+    }
+    function closeOrderModal() {
+      document.getElementById('order-modal-backdrop').style.display = 'none';
+    }
+    function submitOrderToWa(e) {
+      e.preventDefault();
+      const resto = document.getElementById('ord-resto').value.trim();
+      const owner = document.getElementById('ord-owner').value.trim();
+      const city = document.getElementById('ord-city').value.trim();
+      const tables = document.getElementById('ord-tables').value || '15';
+      const msg = `Halo CV. Istana Barcode Computer,%0ASaya ingin order *${selectedPlanName}*%0A%0A• Nama Resto: ${encodeURIComponent(resto)}%0A• Nama Pemilik: ${encodeURIComponent(owner)}%0A• Kota: ${encodeURIComponent(city)}%0A• Estimasi Meja: ${encodeURIComponent(tables)} Meja%0A%0AMohon info langkah aktivasi selanjutnya. Terima kasih!`;
+      window.open(`https://wa.me/${OFFICIAL_WA_NUMBER}?text=${msg}`, '_blank');
+      closeOrderModal();
+    }
+  </script>
+
   <style>
     @media (max-width: 820px) {
       .partner-grid { grid-template-columns: 1fr !important; }

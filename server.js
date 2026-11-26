@@ -458,11 +458,71 @@ app.post('/api/orders', async (req, res) => {
 
     // QRIS Generation according to Outlet's QRIS Settings
     let qrisDataUrl = null;
+    let gatewayMeta = null;
     const qrisConf = outlet.qrisSettings || {};
     if (isQris) {
-      if (qrisConf.mode === 'STATIC_IMAGE' && qrisConf.staticQrImage) {
+      if ((qrisConf.mode === 'STATIC_OWN' || qrisConf.mode === 'STATIC_IMAGE') && qrisConf.staticQrImage) {
         qrisDataUrl = qrisConf.staticQrImage;
-      } else {
+      } else if (qrisConf.mode === 'GATEWAY' && qrisConf.serverKey) {
+        const provider = (qrisConf.gatewayProvider || 'MIDTRANS').toUpperCase();
+        const authHeader = 'Basic ' + Buffer.from(`${qrisConf.serverKey}:`).toString('base64');
+
+        if (provider === 'MIDTRANS') {
+          const isSandbox = qrisConf.serverKey.startsWith('SB-');
+          const midUrl = isSandbox ? 'https://api.sandbox.midtrans.com/v2/charge' : 'https://api.midtrans.com/v2/charge';
+          const midRes = await fetch(midUrl, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': authHeader
+            },
+            body: JSON.stringify({
+              payment_type: 'qris',
+              transaction_details: { order_id: orderId, gross_amount: total },
+              qris: { acquirer: 'gopay' }
+            })
+          });
+          const midData = await midRes.json();
+          if (midData.qr_string) {
+            qrisDataUrl = await QRCode.toDataURL(midData.qr_string, { errorCorrectionLevel: 'H', margin: 2, width: 320, color: { dark: '#0f172a', light: '#ffffff' } });
+            gatewayMeta = { provider: 'MIDTRANS', transactionId: midData.transaction_id, expiryTime: midData.expiry_time };
+          } else {
+            const qrAction = (midData.actions || []).find(a => a.name === 'generate-qr-code');
+            if (qrAction && qrAction.url) {
+              qrisDataUrl = qrAction.url;
+              gatewayMeta = { provider: 'MIDTRANS', transactionId: midData.transaction_id };
+            } else {
+              return res.status(400).json({ error: `Gagal membuat QRIS Midtrans: ${midData.status_message || midData.error_messages?.[0] || 'Periksa Server Key Midtrans Anda.'}` });
+            }
+          }
+        } else if (provider === 'XENDIT') {
+          const xenditRes = await fetch('https://api.xendit.co/qr_codes', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': authHeader
+            },
+            body: JSON.stringify({
+              external_id: orderId,
+              type: 'DYNAMIC',
+              callback_url: `${getBaseUrl(req)}/api/webhooks/qris`,
+              amount: total,
+              currency: 'IDR'
+            })
+          });
+          const xenditData = await xenditRes.json();
+          if (xenditData.qr_string) {
+            qrisDataUrl = await QRCode.toDataURL(xenditData.qr_string, { errorCorrectionLevel: 'H', margin: 2, width: 320, color: { dark: '#0f172a', light: '#ffffff' } });
+            gatewayMeta = { provider: 'XENDIT', qrId: xenditData.id };
+          } else {
+            return res.status(400).json({ error: `Gagal membuat QRIS Xendit: ${xenditData.message || 'Periksa Secret Key Xendit Anda.'}` });
+          }
+        }
+      }
+
+      // Fallback / Demo Sandbox QRIS
+      if (!qrisDataUrl) {
         const merchantTag = (qrisConf.merchantName || biz.name).toUpperCase().replace(/[^A-Z0-9]/g, '');
         const mockQrisPayload = `00020101021226${merchantTag}520458125303360540${total}5802ID5911${qrisConf.nmid || 'ID1020030040050'}6007JAKARTA6304`;
         qrisDataUrl = await QRCode.toDataURL(mockQrisPayload, {
@@ -1271,7 +1331,8 @@ app.put('/api/admin/qris-settings', (req, res) => {
     gatewayProvider,
     serverKey,
     clientKey,
-    instructions
+    instructions,
+    gatewayConfig
   } = req.body;
 
   const db = getDb();
@@ -1283,9 +1344,12 @@ app.put('/api/admin/qris-settings', (req, res) => {
   if (merchantName !== undefined) outlet.qrisSettings.merchantName = merchantName.trim();
   if (nmid !== undefined) outlet.qrisSettings.nmid = nmid.trim();
   if (staticQrImage !== undefined) outlet.qrisSettings.staticQrImage = staticQrImage.trim();
-  if (gatewayProvider !== undefined) outlet.qrisSettings.gatewayProvider = gatewayProvider;
-  if (serverKey !== undefined) outlet.qrisSettings.serverKey = serverKey.trim();
-  if (clientKey !== undefined) outlet.qrisSettings.clientKey = clientKey.trim();
+  const effProvider = gatewayProvider !== undefined ? gatewayProvider : gatewayConfig?.provider;
+  const effServerKey = serverKey !== undefined ? serverKey : gatewayConfig?.serverKey;
+  const effClientKey = clientKey !== undefined ? clientKey : gatewayConfig?.clientKey;
+  if (effProvider !== undefined) outlet.qrisSettings.gatewayProvider = effProvider;
+  if (effServerKey !== undefined) outlet.qrisSettings.serverKey = effServerKey.trim();
+  if (effClientKey !== undefined) outlet.qrisSettings.clientKey = effClientKey.trim();
   if (instructions !== undefined) outlet.qrisSettings.instructions = instructions.trim();
 
   saveDb(db);
@@ -1296,6 +1360,35 @@ app.put('/api/admin/qris-settings', (req, res) => {
     message: "Konfigurasi QRIS Toko berhasil disimpan & disinkronkan!",
     qrisSettings: outlet.qrisSettings
   });
+});
+
+// Test QRIS Payment Gateway API Key (Midtrans / Xendit)
+app.post('/api/admin/qris-settings/test', async (req, res) => {
+  try {
+    const { gatewayProvider = 'MIDTRANS', serverKey } = req.body;
+    if (!serverKey) {
+      return res.status(400).json({ success: false, error: "Server Key / Secret Key wajib diisi untuk diuji." });
+    }
+    const authHeader = 'Basic ' + Buffer.from(`${serverKey.trim()}:`).toString('base64');
+    if (gatewayProvider === 'MIDTRANS') {
+      const isSandbox = serverKey.trim().startsWith('SB-');
+      const url = isSandbox ? 'https://api.sandbox.midtrans.com/v2/TEST-CHECK/status' : 'https://api.midtrans.com/v2/TEST-CHECK/status';
+      const r = await fetch(url, { headers: { 'Accept': 'application/json', 'Authorization': authHeader } });
+      if (r.status === 401) {
+        return res.status(400).json({ success: false, error: "Server Key Midtrans tidak valid (401 Unauthorized)." });
+      }
+      return res.json({ success: true, message: `✅ Koneksi Midtrans (${isSandbox ? 'Sandbox' : 'Production'}) Berhasil Terhubung!` });
+    } else if (gatewayProvider === 'XENDIT') {
+      const r = await fetch('https://api.xendit.co/balance', { headers: { 'Authorization': authHeader } });
+      if (r.status === 401) {
+        return res.status(400).json({ success: false, error: "Secret Key Xendit tidak valid (401 Unauthorized)." });
+      }
+      return res.json({ success: true, message: "✅ Koneksi Xendit API Berhasil Terhubung!" });
+    }
+    res.json({ success: true, message: "✅ Konfigurasi siap digunakan." });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Gagal menghubungi server gateway: " + err.message });
+  }
 });
 
 // Universal Webhook for QRIS Payment Gateways (Midtrans / Xendit)
@@ -1312,7 +1405,8 @@ app.post('/api/webhooks/qris', (req, res) => {
     const isSuccess = transaction_status === 'settlement' || transaction_status === 'capture' || status === 'COMPLETED' || status === 'PAID';
     if (isSuccess) {
       order.paymentStatus = 'PAID';
-      order.orderStatus = 'COOKING';
+      if (order.orderStatus === 'AWAITING_PAYMENT') order.orderStatus = 'RECEIVED';
+      order.paidAt = order.paidAt || new Date().toISOString();
       saveDb(db);
 
       // Notify customer and kitchen

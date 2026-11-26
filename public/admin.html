@@ -862,29 +862,65 @@
         <!-- Static QRIS Upload / URL Container -->
         <div id="qris-static-fields" style="margin-top: 10px;">
           <div class="form-group">
-            <label class="form-label">URL / File Gambar QRIS Toko Sendiri</label>
-            <input type="text" id="qris-image-url" class="form-input" placeholder="https://... atau tempel data:image/png;base64">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+              <label class="form-label" style="margin: 0;">Gambar QRIS Toko Sendiri (DANA / BCA / Mandiri)</label>
+              <div>
+                <input type="file" id="qris-static-file-input" accept="image/*" style="display: none;" onchange="handleStaticQrisUpload(this)">
+                <button type="button" onclick="document.getElementById('qris-static-file-input').click()" style="background: #0284c7; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; cursor: pointer;">
+                  📁 Unggah Gambar QRIS
+                </button>
+              </div>
+            </div>
+            <input type="text" id="qris-image-url" class="form-input" placeholder="https://... atau hasil unggahan /uploads/..." oninput="previewStaticQris(this.value)">
+            <img id="qris-static-preview" src="" style="max-width: 180px; border-radius: 12px; margin-top: 10px; display: none; border: 1.5px solid #cbd5e1; padding: 6px; background: #fff;">
             <p style="font-size: 0.75rem; color: var(--muted); margin-top: 4px;">
-              💡 Anda dapat mengunggah gambar QRIS bank Anda ke hosting atau menempelkan tautan gambarnya di sini.
+              💡 Pada mode QRIS Statis, tamu memindai barcode lalu mengetik nominal manual di HP masing-masing.
             </p>
           </div>
         </div>
 
         <!-- Gateway Container -->
         <div id="qris-gateway-fields" style="display: none; margin-top: 10px;">
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; font-size: 0.8rem; color: #1e40af; line-height: 1.5;">
+            <strong>⚡ QRIS Dinamis Otomatis:</strong> Nominal tagihan langsung muncul &amp; terkunci saat tamu scan via DANA, GoPay, OVO, ShopeePay, BCA, Mandiri, BRI. Status pesanan otomatis berubah <strong>LUNAS</strong> lewat Webhook.
+          </div>
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="grid-2col">
             <div class="form-group">
-              <label class="form-label">Penyedia Gateway</label>
-              <select id="qris-gateway-provider" class="form-input">
-                <option value="MIDTRANS">Midtrans Snap / Core API</option>
-                <option value="XENDIT">Xendit Invoice QRIS</option>
-                <option value="DOKU">DOKU Payment Gateway</option>
+              <label class="form-label">Penyedia Payment Gateway</label>
+              <select id="qris-gateway-provider" class="form-input" style="font-weight: 700;">
+                <option value="MIDTRANS">Midtrans (Core API QRIS — Sandbox / Live)</option>
+                <option value="XENDIT">Xendit (Dynamic QR Code API)</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Server Key / API Secret</label>
-              <input type="password" id="qris-gateway-key" class="form-input" placeholder="SB-Mid-server-xxxx">
+              <label class="form-label">Server Key / Secret API Key *</label>
+              <div style="display: flex; gap: 6px;">
+                <input type="password" id="qris-gateway-key" class="form-input" placeholder="SB-Mid-server-xxxx atau xnd_...">
+                <button type="button" onclick="toggleKeyVisibility()" style="background: #fff; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 0 12px; cursor: pointer; font-weight: 700; font-size: 0.8rem;">👁️</button>
+              </div>
             </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px;" class="grid-2col">
+            <div class="form-group">
+              <label class="form-label">Client Key (Opsional)</label>
+              <input type="text" id="qris-gateway-client-key" class="form-input" placeholder="SB-Mid-client-xxxx">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Webhook Notification URL (Tempel di Midtrans/Xendit)</label>
+              <div style="display: flex; gap: 6px;">
+                <input type="text" id="qris-webhook-url" class="form-input" readonly style="background: #fff; font-family: monospace; font-size: 0.8rem;">
+                <button type="button" onclick="copyWebhook('qris-webhook-url')" style="background: #1e293b; color: #fff; border: none; padding: 0 14px; border-radius: 10px; font-weight: 700; cursor: pointer;">Salin</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 10px;">
+            <button type="button" onclick="testQrisGatewayConnection()" style="background: #0f172a; color: #fff; border: none; padding: 9px 16px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; cursor: pointer;">
+              🧪 Uji Koneksi API Key Gateway
+            </button>
+            <span id="qris-test-result" style="font-size: 0.82rem; font-weight: 700; margin-left: 10px;"></span>
           </div>
         </div>
 
@@ -2111,7 +2147,7 @@ async function submitCreateOutlet() {
 // -----------------------------------------------------------------------------
 async function loadQrisSettings() {
   try {
-    const res = await fetch('/api/admin/qris-settings');
+    const res = await fetch(`/api/admin/qris-settings?outlet=${currentAdminOutlet}`);
     const data = await res.json();
     currentQrisSettings = data;
 
@@ -2120,13 +2156,87 @@ async function loadQrisSettings() {
     document.getElementById('qris-merchant-name').value = data.merchantName || "";
     document.getElementById('qris-nmid').value = data.nmid || "";
     document.getElementById('qris-image-url').value = data.staticQrImage || "";
+    previewStaticQris(data.staticQrImage || "");
     document.getElementById('qris-instructions').value = data.instructions || "";
-    if (data.gatewayConfig) {
-      document.getElementById('qris-gateway-provider').value = data.gatewayConfig.provider || "MIDTRANS";
-      document.getElementById('qris-gateway-key').value = data.gatewayConfig.serverKey || "";
+
+    const provider = data.gatewayProvider || (data.gatewayConfig && data.gatewayConfig.provider) || "MIDTRANS";
+    const sKey = data.serverKey || (data.gatewayConfig && data.gatewayConfig.serverKey) || "";
+    const cKey = data.clientKey || (data.gatewayConfig && data.gatewayConfig.clientKey) || "";
+
+    document.getElementById('qris-gateway-provider').value = provider;
+    document.getElementById('qris-gateway-key').value = sKey;
+    if (document.getElementById('qris-gateway-client-key')) {
+      document.getElementById('qris-gateway-client-key').value = cKey;
     }
+    const whEl = document.getElementById('qris-webhook-url');
+    if (whEl) whEl.value = `${window.location.origin}/api/webhooks/qris`;
   } catch (err) {
     console.error("Gagal load QRIS settings:", err);
+  }
+}
+
+function previewStaticQris(url) {
+  const img = document.getElementById('qris-static-preview');
+  if (!img) return;
+  if (url) {
+    img.src = url;
+    img.style.display = 'block';
+  } else {
+    img.style.display = 'none';
+  }
+}
+
+async function handleStaticQrisUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  try {
+    const base64Data = await compressImageForUpload(input.files[0], 700);
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64Data, filename: `qris_${currentAdminOutlet}` })
+    });
+    const data = await res.json();
+    if (data.success && data.url) {
+      document.getElementById('qris-image-url').value = data.url;
+      previewStaticQris(data.url);
+    } else {
+      alert("Gagal mengunggah gambar QRIS: " + (data.error || ""));
+    }
+  } catch (e) {
+    alert("Terjadi kesalahan saat mengunggah gambar QRIS.");
+  } finally {
+    input.value = "";
+  }
+}
+
+function toggleKeyVisibility() {
+  const el = document.getElementById('qris-gateway-key');
+  if (el) el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+async function testQrisGatewayConnection() {
+  const provider = document.getElementById('qris-gateway-provider').value;
+  const serverKey = document.getElementById('qris-gateway-key').value.trim();
+  const out = document.getElementById('qris-test-result');
+  out.style.color = '#64748b';
+  out.innerText = '⏳ Menguji koneksi...';
+  try {
+    const res = await fetch('/api/admin/qris-settings/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gatewayProvider: provider, serverKey })
+    });
+    const data = await res.json();
+    if (data.success) {
+      out.style.color = '#059669';
+      out.innerText = data.message;
+    } else {
+      out.style.color = '#dc2626';
+      out.innerText = '❌ ' + (data.error || 'Gagal terhubung');
+    }
+  } catch (e) {
+    out.style.color = '#dc2626';
+    out.innerText = '❌ Gagal menghubungi server.';
   }
 }
 
@@ -2160,14 +2270,13 @@ async function saveQrisSettings() {
     nmid: document.getElementById('qris-nmid').value.trim(),
     staticQrImage: document.getElementById('qris-image-url').value.trim(),
     instructions: document.getElementById('qris-instructions').value.trim(),
-    gatewayConfig: {
-      provider: document.getElementById('qris-gateway-provider').value,
-      serverKey: document.getElementById('qris-gateway-key').value.trim()
-    }
+    gatewayProvider: document.getElementById('qris-gateway-provider').value,
+    serverKey: document.getElementById('qris-gateway-key').value.trim(),
+    clientKey: document.getElementById('qris-gateway-client-key') ? document.getElementById('qris-gateway-client-key').value.trim() : ""
   };
 
   try {
-    const res = await fetch('/api/admin/qris-settings', {
+    const res = await fetch(`/api/admin/qris-settings?outlet=${currentAdminOutlet}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
